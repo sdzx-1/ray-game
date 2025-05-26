@@ -89,7 +89,7 @@ pub const GST = struct {
     pub fn log(self: *@This(), str: []const u8) void {
         self.notify.msg_que.append(
             self.gpa,
-            std.fmt.allocPrintZ(self.gpa, "log: {s}", .{str}) catch unreachable,
+            std.fmt.allocPrintZ(self.gpa, "{s}", .{str}) catch unreachable,
         ) catch unreachable;
     }
 

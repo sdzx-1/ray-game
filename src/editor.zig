@@ -169,7 +169,7 @@ pub fn selectedST(target: typedFsm.sdzx(Example)) type {
 
         fn genMsg(gst: *GST) ?@This() {
             const nst = comptime getTarget(target);
-            const r = @field(gst, nst).rs.items[gst.editor.selected];
+            const r = &@field(gst, nst).rs.items[gst.editor.selected];
             rl.drawRectangleLines(
                 @intFromFloat(r.rect.x - 1),
                 @intFromFloat(r.rect.y - 1),
@@ -190,37 +190,37 @@ pub fn selectedST(target: typedFsm.sdzx(Example)) type {
 
             if (rl.isMouseButtonDown(rl.MouseButton.left)) {
                 const v = rl.getMouseDelta();
-                @field(gst, nst).rs.items[gst.editor.selected].rect.x += v.x;
-                @field(gst, nst).rs.items[gst.editor.selected].rect.y += v.y;
+                r.rect.x += v.x;
+                r.rect.y += v.y;
             }
 
             if (rl.isKeyDown(rl.KeyboardKey.h)) {
                 const v = .{ .x = -deta, .y = 0 };
-                @field(gst, nst).rs.items[gst.editor.selected].rect.width += v.x;
-                @field(gst, nst).rs.items[gst.editor.selected].rect.height += v.y;
+                r.rect.width += v.x;
+                r.rect.height += v.y;
             }
 
             if (rl.isKeyDown(rl.KeyboardKey.l)) {
                 const v = .{ .x = deta, .y = 0 };
-                @field(gst, nst).rs.items[gst.editor.selected].rect.width += v.x;
-                @field(gst, nst).rs.items[gst.editor.selected].rect.height += v.y;
+                r.rect.width += v.x;
+                r.rect.height += v.y;
             }
 
             if (rl.isKeyDown(rl.KeyboardKey.j)) {
                 const v = .{ .x = 0, .y = deta };
-                @field(gst, nst).rs.items[gst.editor.selected].rect.width += v.x;
-                @field(gst, nst).rs.items[gst.editor.selected].rect.height += v.y;
+                r.rect.width += v.x;
+                r.rect.height += v.y;
             }
 
             if (rl.isKeyDown(rl.KeyboardKey.k)) {
                 const v = .{ .x = 0, .y = -deta };
-                @field(gst, nst).rs.items[gst.editor.selected].rect.width += v.x;
-                @field(gst, nst).rs.items[gst.editor.selected].rect.height += v.y;
+                r.rect.width += v.x;
+                r.rect.height += v.y;
             }
 
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
-                gst.editor.copyed_rect = @field(gst, nst).rs.items[gst.editor.selected];
+                gst.editor.copyed_rect = r.*;
             }
 
             if (rl.isKeyDown(rl.KeyboardKey.d)) {
@@ -259,7 +259,7 @@ pub fn editST(target: typedFsm.sdzx(Example)) type {
 
             _ = rg.textBox(
                 rect,
-                &@field(gst, nst).rs.items[gst.editor.selected].str_buf,
+                &ptr.str_buf,
                 20,
                 true,
             );
@@ -296,11 +296,11 @@ pub fn editST(target: typedFsm.sdzx(Example)) type {
                 _ = rg.colorPicker(
                     rect,
                     "color",
-                    &@field(gst, nst).rs.items[gst.editor.selected].color,
+                    &ptr.color,
                 );
             }
-            const size = rl.measureText(&@field(gst, nst).rs.items[gst.editor.selected].str_buf, 32);
-            @field(gst, nst).rs.items[gst.editor.selected].rect.width = @max(32, @as(f32, @floatFromInt(size)));
+            const size = rl.measureText(&ptr.str_buf, 32);
+            ptr.rect.width = @max(32, @as(f32, @floatFromInt(size)));
 
             if (rl.isKeyPressed(rl.KeyboardKey.enter) or
                 rl.isKeyPressed(rl.KeyboardKey.caps_lock) or
