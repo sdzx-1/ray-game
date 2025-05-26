@@ -35,13 +35,13 @@ pub const R = struct {
 fn animation_list_r(items: []const R, deta: f32, b: bool) void {
     for (items) |*r| {
         rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-        var rect1 = r.rect;
+        var rect = r.rect;
         if (b) {
-            rect1.x -= deta;
+            rect.x -= deta;
         } else {
-            rect1.x = rect1.x + 1000 - deta;
+            rect.x = rect.x + 1000 - deta;
         }
-        _ = rg.button(rect1, &r.str_buf);
+        _ = rg.button(rect, &r.str_buf);
         rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
     }
 }
@@ -147,7 +147,9 @@ pub const Example = enum {
 
             pub fn handler(gst: *GST) void {
                 switch (genMsg(gst)) {
-                    .End => |wit| wit.handler(gst),
+                    .End => |wit| {
+                        wit.handler(gst);
+                    },
                 }
             }
 
@@ -155,6 +157,7 @@ pub const Example = enum {
             const to_t = getTarget(to);
             fn genMsg(gst: *GST) @This() {
                 gst.animation.start_time = std.time.milliTimestamp();
+                gst.log(std.fmt.comptimePrint("animation({}, {})", .{ from, to }));
                 while (true) {
                     rl.beginDrawing();
                     defer rl.endDrawing();
@@ -163,6 +166,8 @@ pub const Example = enum {
                     gst.render_log();
 
                     const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
+                    var buf: [20]u8 = undefined;
+                    gst.log_im(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!");
                     const deta: f32 = 1000 / gst.animation.total_time * deta_time;
                     @field(gst, from_t).animation(deta, true);
                     @field(gst, to_t).animation(deta, false);
