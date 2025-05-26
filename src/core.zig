@@ -165,6 +165,11 @@ pub const Example = enum {
                     rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
                     gst.render_log();
 
+                    if (rl.isKeyPressed(rl.KeyboardKey.space)) {
+                        gst.log("skip animation");
+                        return .End;
+                    }
+
                     const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
                     var buf: [20]u8 = undefined;
                     gst.log_im(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!");
