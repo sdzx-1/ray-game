@@ -19,7 +19,7 @@ pub const Editor = struct {
     copyed_rect: ?R = null,
 };
 
-fn gui(comptime target: typedFsm.sdzx(Example), cst: type, gst: *GST) cst {
+fn gui(comptime target: SDZX, cst: type, gst: *GST) cst {
     while (true) {
         rl.beginDrawing();
         defer rl.endDrawing();
@@ -52,7 +52,7 @@ fn gui(comptime target: typedFsm.sdzx(Example), cst: type, gst: *GST) cst {
     }
 }
 
-pub fn idleST(target: typedFsm.sdzx(Example)) type {
+pub fn idleST(target: SDZX) type {
     return union(enum) {
         Exit: WitRow(target),
         InRect: struct { wit: WitRow(SDZX.C(Example.in_rect, &.{target})) = .{}, id: usize },
@@ -99,7 +99,7 @@ pub fn idleST(target: typedFsm.sdzx(Example)) type {
     };
 }
 
-pub fn in_rectST(target: typedFsm.sdzx(Example)) type {
+pub fn in_rectST(target: SDZX) type {
     return union(enum) {
         Exit: WitRow(target),
         ToIdle: WitRow(SDZX.C(Example.idle, &.{target})),
@@ -151,7 +151,7 @@ pub fn in_rectST(target: typedFsm.sdzx(Example)) type {
     };
 }
 
-pub fn selectedST(target: typedFsm.sdzx(Example)) type {
+pub fn selectedST(target: SDZX) type {
     return union(enum) {
         Exit: WitRow(target),
         ToIdle: WitRow(SDZX.C(Example.idle, &.{target})),
@@ -240,7 +240,7 @@ pub fn selectedST(target: typedFsm.sdzx(Example)) type {
     };
 }
 
-pub fn editST(target: typedFsm.sdzx(Example)) type {
+pub fn editST(target: SDZX) type {
     return union(enum) {
         ToSelected: WitRow(SDZX.C(Example.selected, &.{target})),
 

@@ -67,7 +67,7 @@ pub const Animation = struct {
     start_time: i64 = 0,
 };
 
-pub fn getTarget(comptime target: typedFsm.sdzx(Example)) []const u8 {
+pub fn getTarget(comptime target: Example.SDZX) []const u8 {
     const nst = switch (target) {
         .Term => |v| @tagName(v),
         .Fun => |val| @tagName(val.fun),
@@ -344,19 +344,19 @@ pub const Example = enum {
         };
     };
 
-    pub fn editST(target: typedFsm.sdzx(Example)) type {
+    pub fn editST(target: SDZX) type {
         return editor.editST(target);
     }
 
-    pub fn selectedST(target: typedFsm.sdzx(Example)) type {
+    pub fn selectedST(target: SDZX) type {
         return editor.selectedST(target);
     }
 
-    pub fn in_rectST(target: typedFsm.sdzx(Example)) type {
+    pub fn in_rectST(target: SDZX) type {
         return editor.in_rectST(target);
     }
 
-    pub fn idleST(target: typedFsm.sdzx(Example)) type {
+    pub fn idleST(target: SDZX) type {
         return editor.idleST(target);
     }
 
