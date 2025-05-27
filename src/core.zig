@@ -160,9 +160,7 @@ pub const Example = enum {
             pub fn conthandler(gst: *GST) ContR {
                 if (genMsg(gst)) |msg| {
                     switch (msg) {
-                        .End => |wit| {
-                            return .{ .Next = wit.conthandler() };
-                        },
+                        .End => |wit| return .{ .Next = wit.conthandler() },
                     }
                 } else return .Wait;
             }
@@ -223,19 +221,7 @@ pub const Example = enum {
                 rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
             }
 
-            var rect: rl.Rectangle = .{ .x = 0, .y = 100, .width = 100, .height = 40 };
-
-            if (rg.button(rect, "Editor")) return .ToEditor;
-
-            rect.y += 50;
-            if (rg.button(rect, "Exit")) return .Exit;
-            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
-
-            rect.y += 50;
-            if (rg.button(rect, "Menu")) return .ToMenu;
-
-            rect.y += 50;
-            if (rg.button(rect, "Play")) return .ToPlay;
+            if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 
             return null;
         }
@@ -289,25 +275,8 @@ pub const Example = enum {
                 rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
             }
 
-            var rect: rl.Rectangle = .{ .x = 0, .y = 100, .width = 100, .height = 40 };
+            if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 
-            if (rg.button(rect, "Editor")) return .ToEditor;
-
-            rect.y += 50;
-            if (rg.button(rect, "Exit")) return .Exit;
-            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
-
-            rect.y += 50;
-            if (rg.button(rect, "Play")) return .ToPlay;
-
-            rect.y += 50;
-            if (rg.button(rect, "Save")) {
-                _ = saveData(gst);
-            }
-
-            rect.y += 50;
-
-            _ = rg.slider(rect, "", "Animation duration", &gst.animation.total_time, 140, 3500);
             return null;
         }
 
