@@ -6,7 +6,8 @@ const rl = @import("raylib");
 const rg = @import("raygui");
 
 pub const Notify = struct {
-    msg_que: std.ArrayListUnmanaged([:0]const u8) = .empty,
+    msg_que: std.ArrayListUnmanaged(struct { msg: [:0]const u8, dur: i64 }) = .empty,
+    duration: i64 = 600,
     last_time: i64 = 0,
     current_msg: ?[:0]const u8 = null,
 };
@@ -87,9 +88,14 @@ pub const GST = struct {
     im_log_buf: [60:0]u8 = @splat(0),
 
     pub fn log(self: *@This(), str: []const u8) void {
+        self.log_duration(str, 600);
+    }
+
+    pub fn log_duration(self: *@This(), str: []const u8, dur: i64) void {
+        const msg = std.fmt.allocPrintZ(self.gpa, "{s}", .{str}) catch unreachable;
         self.notify.msg_que.append(
             self.gpa,
-            std.fmt.allocPrintZ(self.gpa, "{s}", .{str}) catch unreachable,
+            .{ .msg = msg, .dur = dur },
         ) catch unreachable;
     }
 
@@ -99,14 +105,15 @@ pub const GST = struct {
 
     pub fn render_log(self: *@This()) void {
         const currt = std.time.milliTimestamp();
-        if (currt - self.notify.last_time > 600) {
+        if (currt - self.notify.last_time > self.notify.duration) {
             if (self.notify.current_msg) |cmsg| {
                 self.gpa.free(cmsg);
                 self.notify.current_msg = null;
             }
 
-            if (self.notify.msg_que.pop()) |cmsg| {
-                self.notify.current_msg = cmsg;
+            if (self.notify.msg_que.pop()) |val| {
+                self.notify.current_msg = val.msg;
+                self.notify.duration = val.dur;
                 self.notify.last_time = std.time.milliTimestamp();
             }
         }
@@ -168,7 +175,7 @@ pub const Example = enum {
 
                 const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
                 var buf: [20]u8 = undefined;
-                gst.log_im(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!");
+                gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!", 10);
                 const deta: f32 = 1000 / gst.animation.total_time * deta_time;
                 @field(gst, from_t).animation(deta, true);
                 @field(gst, to_t).animation(deta, false);
