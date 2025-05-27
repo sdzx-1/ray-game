@@ -47,8 +47,10 @@ fn animation_list_r(items: []const R, deta: f32, b: bool) void {
     }
 }
 
+const RS = std.ArrayListUnmanaged(R);
+
 pub const Menu = struct {
-    rs: std.ArrayListUnmanaged(R) = .empty,
+    rs: RS = .empty,
 
     pub fn animation(self: *const @This(), deta: f32, b: bool) void {
         animation_list_r(self.rs.items, deta, b);
@@ -56,7 +58,7 @@ pub const Menu = struct {
 };
 
 pub const Play = struct {
-    rs: std.ArrayListUnmanaged(R) = .empty,
+    rs: RS = .empty,
 
     pub fn animation(self: *const @This(), deta: f32, b: bool) void {
         animation_list_r(self.rs.items, deta, b);
@@ -126,10 +128,21 @@ pub const GST = struct {
     }
 };
 
+pub fn ActionVal(cst: type) type {
+    return union(enum) {
+        Fun: *const fn (*GST) ?cst,
+        Ptr_f32: struct {
+            fun: *const fn (*GST) *f32,
+            min: f32,
+            max: f32,
+        },
+    };
+}
+
 pub fn Action(cst: type) type {
     return struct {
         name: []const u8,
-        fun: *const fn (*GST) ?cst,
+        val: ActionVal(cst),
     };
 }
 
@@ -213,11 +226,13 @@ pub const Example = enum {
         fn genMsg(gst: *GST) ?@This() {
             for (gst.play.rs.items) |*r| {
                 rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-                if (rg.button(r.rect, &r.str_buf)) {
-                    if (action_list[@intCast(r.action_id)].fun(gst)) |val| {
-                        return val;
-                    }
+                switch (action_list[@intCast(r.action_id)].val) {
+                    .Fun => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
+                    .Ptr_f32 => |val| {
+                        _ = rg.slider(r.rect, "", "", val.fun(gst), 100, 4000);
+                    },
                 }
+
                 rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
             }
 
@@ -238,11 +253,13 @@ pub const Example = enum {
             return .Exit;
         }
 
+        // zig fmt: off
         pub const action_list: []const (Action(@This())) = &.{
-            .{ .name = "Editor", .fun = toEditor },
-            .{ .name = "Exit", .fun = exit },
-            .{ .name = "Menu", .fun = toMenu },
+            .{ .name = "Editor",  .val = .{ .Fun = toEditor } },
+            .{ .name = "Menu",    .val = .{ .Fun = toMenu } },
+            .{ .name = "Exit",    .val = .{ .Fun = exit } },
         };
+        // zig fmt: on
     };
 
     pub const menuST = union(enum) {
@@ -267,10 +284,22 @@ pub const Example = enum {
         fn genMsg(gst: *GST) ?@This() {
             for (gst.menu.rs.items) |*r| {
                 rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-                if (rg.button(r.rect, &r.str_buf)) {
-                    if (action_list[@intCast(r.action_id)].fun(gst)) |val| {
-                        return val;
-                    }
+                const action_ptr = &action_list[@intCast(r.action_id)];
+                switch (action_ptr.val) {
+                    .Fun => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
+                    .Ptr_f32 => |val| {
+                        var buf: [30]u8 = undefined;
+                        const ref = val.fun(gst);
+                        const str = std.fmt.bufPrintZ(&buf, "{s} {d}", .{ action_ptr.name, ref.* }) catch unreachable;
+                        var rect = r.rect;
+                        rl.drawText(str, @intFromFloat(rect.x), @intFromFloat(rect.y), 20, r.color);
+                        rect.y += 40;
+
+                        var buf1: [30]u8 = undefined;
+                        const minVal = std.fmt.bufPrintZ(&buf, "{d}", .{val.min}) catch unreachable;
+                        const maxVal = std.fmt.bufPrintZ(&buf1, "{d}", .{val.max}) catch unreachable;
+                        _ = rg.slider(rect, minVal, maxVal, ref, val.min, val.max);
+                    },
                 }
                 rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
             }
@@ -307,13 +336,20 @@ pub const Example = enum {
             return null;
         }
 
+        fn animation_duration_ref(gst: *GST) *f32 {
+            return &gst.animation.total_time;
+        }
+
+        // zig fmt: off
         pub const action_list: []const (Action(@This())) = &.{
-            .{ .name = "Editor", .fun = toEditor },
-            .{ .name = "Exit", .fun = exit },
-            .{ .name = "Play", .fun = toPlay },
-            .{ .name = "Log hello", .fun = log_hello },
-            .{ .name = "Save data", .fun = saveData },
+            .{ .name = "Editor",    .val = .{ .Fun = toEditor  } },
+            .{ .name = "Exit",      .val = .{ .Fun = exit      } },
+            .{ .name = "Play",      .val = .{ .Fun = toPlay    } },
+            .{ .name = "Log hello", .val = .{ .Fun = log_hello } },
+            .{ .name = "Save data", .val = .{ .Fun = saveData  } },
+            .{ .name = "animation", .val = .{ .Ptr_f32 = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
         };
+        // zig fmt: on
     };
 
     pub fn editST(target: SDZX) type {
