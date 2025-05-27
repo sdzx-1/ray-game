@@ -182,28 +182,29 @@ pub const Example = enum {
     }
 
     pub const playST = union(enum) {
-        Exit: Wit(Example.exit),
+        // zig fmt: off
+        Exit:     Wit(Example.exit),
         ToEditor: Wit(.{ Example.idle, Example.play }),
-        ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
-        ToPlay: Wit(.{ Example.animation, Example.play, Example.play }),
+        ToMenu:   Wit(.{ Example.animation, Example.play, Example.menu }),
+        ToPlay:   Wit(.{ Example.animation, Example.play, Example.play }),
 
         pub fn conthandler(gst: *GST) ContR {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .Exit     => |wit| return .{ .Next = wit.conthandler() },
                     .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                    .ToMenu => |wit| {
+                    .ToMenu   => |wit| {
                         gst.animation.start_time = std.time.milliTimestamp();
                         return .{ .Next = wit.conthandler() };
                     },
-                    .ToPlay => |wit| {
+                    .ToPlay   => |wit| {
                         gst.animation.start_time = std.time.milliTimestamp();
                         return .{ .Next = wit.conthandler() };
                     },
                 }
             } else return .Wait;
         }
-
+        // zig fmt: on
         fn genMsg(gst: *GST) ?@This() {
             for (gst.play.rs.items) |*r| {
                 rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
@@ -252,23 +253,24 @@ pub const Example = enum {
     };
 
     pub const menuST = union(enum) {
-        Exit: Wit(Example.exit),
+        // zig fmt: off
+        Exit:     Wit(Example.exit),
         ToEditor: Wit(.{ Example.idle, Example.menu }),
-        ToPlay: Wit(.{ Example.animation, Example.menu, Example.play }),
+        ToPlay:   Wit(.{ Example.animation, Example.menu, Example.play }),
 
         pub fn conthandler(gst: *GST) ContR {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .Exit     => |wit| return .{ .Next = wit.conthandler() },
                     .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                    .ToPlay => |wit| {
+                    .ToPlay   => |wit| {
                         gst.animation.start_time = std.time.milliTimestamp();
                         return .{ .Next = wit.conthandler() };
                     },
                 }
             } else return .Wait;
         }
-
+        // zig fmt: on
         fn genMsg(gst: *GST) ?@This() {
             for (gst.menu.rs.items) |*r| {
                 rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());

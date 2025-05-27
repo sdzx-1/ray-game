@@ -97,27 +97,29 @@ pub fn idleST(target: SDZX) type {
 
 pub fn in_rectST(target: SDZX) type {
     return union(enum) {
-        Exit: WitRow(target),
-        ToIdle: WitRow(SDZX.C(Example.idle, &.{target})),
-        ToEdit: WitRow(SDZX.C(Example.edit, &.{target})),
+        // zig fmt: off
+        Exit      : WitRow(target),
+        ToIdle    : WitRow(SDZX.C(Example.idle, &.{target})),
+        ToEdit    : WitRow(SDZX.C(Example.edit, &.{target})),
         ToSelected: WitRow(SDZX.C(Example.selected, &.{target})),
 
         pub fn conthandler(gst: *GST) ContR {
             if (gui(target, @This(), gst)) |msg| {
                 switch (msg) {
-                    .Exit => |wit| return .{ .Next = wit.conthandler() },
-                    .ToIdle => |wit| return .{ .Next = wit.conthandler() },
+                    .Exit       => |wit| return .{ .Next = wit.conthandler() },
+                    .ToIdle     => |wit| return .{ .Next = wit.conthandler() },
                     .ToSelected => |wit| {
                         gst.editor.selected = gst.editor.in_rect;
                         return .{ .Next = wit.conthandler() };
                     },
-                    .ToEdit => |wit| {
+                    .ToEdit     => |wit| {
                         gst.editor.selected = gst.editor.in_rect;
                         return .{ .Next = wit.conthandler() };
                     },
                 }
             } else return .Wait;
         }
+        // zig fmt: on
 
         fn genMsg(gst: *GST) ?@This() {
             const nst = comptime getTarget(target);
@@ -151,21 +153,21 @@ pub fn in_rectST(target: SDZX) type {
 
 pub fn selectedST(target: SDZX) type {
     return union(enum) {
-        Exit: WitRow(target),
+        // zig fmt: off
+        Exit  : WitRow(target),
         ToIdle: WitRow(SDZX.C(Example.idle, &.{target})),
-        Edit: WitRow(SDZX.C(Example.edit, &.{target})),
+        Edit  : WitRow(SDZX.C(Example.edit, &.{target})),
 
         pub fn conthandler(gst: *GST) ContR {
             if (gui(target, @This(), gst)) |msg| {
                 switch (msg) {
-                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .Exit   => |wit| return .{ .Next = wit.conthandler() },
                     .ToIdle => |wit| return .{ .Next = wit.conthandler() },
-                    .Edit => |wit| {
-                        return .{ .Next = wit.conthandler() };
-                    },
+                    .Edit   => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
         }
+        // zig fmt: on
 
         fn genMsg(gst: *GST) ?@This() {
             const nst = comptime getTarget(target);
