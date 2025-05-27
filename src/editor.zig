@@ -19,52 +19,48 @@ pub const Editor = struct {
     copyed_rect: ?R = null,
 };
 
-fn gui(comptime target: SDZX, cst: type, gst: *GST) cst {
-    while (true) {
-        rl.beginDrawing();
-        defer rl.endDrawing();
-        rl.clearBackground(.white);
-        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
-        gst.render_log();
+fn gui(comptime target: SDZX, cst: type, gst: *GST) ?cst {
+    const nst = comptime getTarget(target);
+    for (@field(gst, nst).rs.items) |*r| {
+        rl.drawRectangleLines(
+            @intFromFloat(r.rect.x),
+            @intFromFloat(r.rect.y),
+            @intFromFloat(r.rect.width),
+            @intFromFloat(r.rect.height),
+            r.color,
+        );
 
-        const nst = comptime getTarget(target);
-        for (@field(gst, nst).rs.items) |*r| {
-            rl.drawRectangleLines(
-                @intFromFloat(r.rect.x),
-                @intFromFloat(r.rect.y),
-                @intFromFloat(r.rect.width),
-                @intFromFloat(r.rect.height),
-                r.color,
-            );
-
-            rl.drawText(
-                &r.str_buf,
-                @intFromFloat(r.rect.x),
-                @intFromFloat(r.rect.y),
-                32,
-                r.color,
-            );
-        }
-
-        if (@hasDecl(cst, "genMsg")) {
-            if (cst.genMsg(gst)) |msg| return msg;
-        }
+        rl.drawText(
+            &r.str_buf,
+            @intFromFloat(r.rect.x),
+            @intFromFloat(r.rect.y),
+            32,
+            r.color,
+        );
     }
+
+    if (@hasDecl(cst, "genMsg")) return cst.genMsg(gst);
+
+    return null;
 }
+
+const ContR = typedFsm.ContR(GST);
 
 pub fn idleST(target: SDZX) type {
     return union(enum) {
         Exit: WitRow(target),
         InRect: struct { wit: WitRow(SDZX.C(Example.in_rect, &.{target})) = .{}, id: usize },
 
-        pub fn handler(gst: *GST) void {
-            switch (gui(target, @This(), gst)) {
-                .InRect => |v| {
-                    gst.editor.in_rect = v.id;
-                    v.wit.handler(gst);
-                },
-                .Exit => |wit| wit.handler(gst),
-            }
+        pub fn conthandler(gst: *GST) ContR {
+            if (gui(target, @This(), gst)) |msg| {
+                switch (msg) {
+                    .InRect => |v| {
+                        gst.editor.in_rect = v.id;
+                        return .{ .Next = v.wit.conthandler() };
+                    },
+                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                }
+            } else return .Wait;
         }
 
         fn genMsg(gst: *GST) ?@This() {
@@ -106,19 +102,21 @@ pub fn in_rectST(target: SDZX) type {
         ToEdit: WitRow(SDZX.C(Example.edit, &.{target})),
         ToSelected: WitRow(SDZX.C(Example.selected, &.{target})),
 
-        pub fn handler(gst: *GST) void {
-            switch (gui(target, @This(), gst)) {
-                .Exit => |wit| wit.handler(gst),
-                .ToIdle => |wit| wit.handler(gst),
-                .ToSelected => |wit| {
-                    gst.editor.selected = gst.editor.in_rect;
-                    wit.handler(gst);
-                },
-                .ToEdit => |wit| {
-                    gst.editor.selected = gst.editor.in_rect;
-                    wit.handler(gst);
-                },
-            }
+        pub fn conthandler(gst: *GST) ContR {
+            if (gui(target, @This(), gst)) |msg| {
+                switch (msg) {
+                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .ToIdle => |wit| return .{ .Next = wit.conthandler() },
+                    .ToSelected => |wit| {
+                        gst.editor.selected = gst.editor.in_rect;
+                        return .{ .Next = wit.conthandler() };
+                    },
+                    .ToEdit => |wit| {
+                        gst.editor.selected = gst.editor.in_rect;
+                        return .{ .Next = wit.conthandler() };
+                    },
+                }
+            } else return .Wait;
         }
 
         fn genMsg(gst: *GST) ?@This() {
@@ -157,14 +155,16 @@ pub fn selectedST(target: SDZX) type {
         ToIdle: WitRow(SDZX.C(Example.idle, &.{target})),
         Edit: WitRow(SDZX.C(Example.edit, &.{target})),
 
-        pub fn handler(gst: *GST) void {
-            switch (gui(target, @This(), gst)) {
-                .Exit => |wit| wit.handler(gst),
-                .ToIdle => |wit| wit.handler(gst),
-                .Edit => |wit| {
-                    wit.handler(gst);
-                },
-            }
+        pub fn conthandler(gst: *GST) ContR {
+            if (gui(target, @This(), gst)) |msg| {
+                switch (msg) {
+                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .ToIdle => |wit| return .{ .Next = wit.conthandler() },
+                    .Edit => |wit| {
+                        return .{ .Next = wit.conthandler() };
+                    },
+                }
+            } else return .Wait;
         }
 
         fn genMsg(gst: *GST) ?@This() {
@@ -244,10 +244,12 @@ pub fn editST(target: SDZX) type {
     return union(enum) {
         ToSelected: WitRow(SDZX.C(Example.selected, &.{target})),
 
-        pub fn handler(gst: *GST) void {
-            switch (gui(target, @This(), gst)) {
-                .ToSelected => |wit| wit.handler(gst),
-            }
+        pub fn conthandler(gst: *GST) ContR {
+            if (gui(target, @This(), gst)) |msg| {
+                switch (msg) {
+                    .ToSelected => |wit| return .{ .Next = wit.conthandler() },
+                }
+            } else return .Wait;
         }
 
         fn genMsg(gst: *GST) ?@This() {

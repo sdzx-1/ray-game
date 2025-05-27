@@ -126,6 +126,8 @@ pub fn Action(cst: type) type {
     };
 }
 
+pub const ContR = typedFsm.ContR(GST);
+
 pub const Example = enum {
     exit,
     //
@@ -145,42 +147,36 @@ pub const Example = enum {
         return union(enum) {
             End: WitRow(to),
 
-            pub fn handler(gst: *GST) void {
-                switch (genMsg(gst)) {
-                    .End => |wit| {
-                        wit.handler(gst);
-                    },
-                }
-            }
-
             const from_t = getTarget(from);
             const to_t = getTarget(to);
-            fn genMsg(gst: *GST) @This() {
-                gst.animation.start_time = std.time.milliTimestamp();
-                gst.log(std.fmt.comptimePrint("animation({}, {})", .{ from, to }));
-                while (true) {
-                    rl.beginDrawing();
-                    defer rl.endDrawing();
-                    rl.clearBackground(.white);
-                    rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
-                    gst.render_log();
 
-                    if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-                        gst.log("skip animation");
-                        return .End;
+            pub fn conthandler(gst: *GST) ContR {
+                if (genMsg(gst)) |msg| {
+                    switch (msg) {
+                        .End => |wit| {
+                            return .{ .Next = wit.conthandler() };
+                        },
                     }
+                } else return .Wait;
+            }
 
-                    const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
-                    var buf: [20]u8 = undefined;
-                    gst.log_im(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!");
-                    const deta: f32 = 1000 / gst.animation.total_time * deta_time;
-                    @field(gst, from_t).animation(deta, true);
-                    @field(gst, to_t).animation(deta, false);
-
-                    if (deta_time > gst.animation.total_time - 1000 / 60) {
-                        return .End;
-                    }
+            fn genMsg(gst: *GST) ?@This() {
+                if (rl.isKeyPressed(rl.KeyboardKey.space)) {
+                    gst.log("skip animation");
+                    return .End;
                 }
+
+                const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
+                var buf: [20]u8 = undefined;
+                gst.log_im(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!");
+                const deta: f32 = 1000 / gst.animation.total_time * deta_time;
+                @field(gst, from_t).animation(deta, true);
+                @field(gst, to_t).animation(deta, false);
+
+                if (deta_time > gst.animation.total_time - 1000 / 60) {
+                    return .End;
+                }
+                return null;
             }
         };
     }
@@ -191,47 +187,49 @@ pub const Example = enum {
         ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
         ToPlay: Wit(.{ Example.animation, Example.play, Example.play }),
 
-        pub fn handler(gst: *GST) void {
-            switch (genMsg(gst)) {
-                .Exit => |wit| wit.handler(gst),
-                .ToEditor => |wit| wit.handler(gst),
-                .ToMenu => |wit| wit.handler(gst),
-                .ToPlay => |wit| wit.handler(gst),
-            }
+        pub fn conthandler(gst: *GST) ContR {
+            if (genMsg(gst)) |msg| {
+                switch (msg) {
+                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .ToEditor => |wit| return .{ .Next = wit.conthandler() },
+                    .ToMenu => |wit| {
+                        gst.animation.start_time = std.time.milliTimestamp();
+                        return .{ .Next = wit.conthandler() };
+                    },
+                    .ToPlay => |wit| {
+                        gst.animation.start_time = std.time.milliTimestamp();
+                        return .{ .Next = wit.conthandler() };
+                    },
+                }
+            } else return .Wait;
         }
 
-        fn genMsg(gst: *GST) @This() {
-            while (true) {
-                rl.beginDrawing();
-                defer rl.endDrawing();
-                rl.clearBackground(.white);
-                rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
-                gst.render_log();
-
-                for (gst.play.rs.items) |*r| {
-                    rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-                    if (rg.button(r.rect, &r.str_buf)) {
-                        if (action_list[@intCast(r.action_id)].fun(gst)) |val| {
-                            return val;
-                        }
+        fn genMsg(gst: *GST) ?@This() {
+            for (gst.play.rs.items) |*r| {
+                rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
+                if (rg.button(r.rect, &r.str_buf)) {
+                    if (action_list[@intCast(r.action_id)].fun(gst)) |val| {
+                        return val;
                     }
-                    rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
                 }
-
-                var rect: rl.Rectangle = .{ .x = 0, .y = 100, .width = 100, .height = 40 };
-
-                if (rg.button(rect, "Editor")) return .ToEditor;
-
-                rect.y += 50;
-                if (rg.button(rect, "Exit")) return .Exit;
-                if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
-
-                rect.y += 50;
-                if (rg.button(rect, "Menu")) return .ToMenu;
-
-                rect.y += 50;
-                if (rg.button(rect, "Play")) return .ToPlay;
+                rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
             }
+
+            var rect: rl.Rectangle = .{ .x = 0, .y = 100, .width = 100, .height = 40 };
+
+            if (rg.button(rect, "Editor")) return .ToEditor;
+
+            rect.y += 50;
+            if (rg.button(rect, "Exit")) return .Exit;
+            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
+
+            rect.y += 50;
+            if (rg.button(rect, "Menu")) return .ToMenu;
+
+            rect.y += 50;
+            if (rg.button(rect, "Play")) return .ToPlay;
+
+            return null;
         }
 
         fn toEditor(_: *GST) ?@This() {
@@ -258,59 +256,50 @@ pub const Example = enum {
         ToEditor: Wit(.{ Example.idle, Example.menu }),
         ToPlay: Wit(.{ Example.animation, Example.menu, Example.play }),
 
-        pub fn handler(gst: *GST) void {
-            switch (genMsg(gst)) {
-                .Exit => |wit| wit.handler(gst),
-                .ToEditor => |wit| wit.handler(gst),
-                .ToPlay => |wit| wit.handler(gst),
-            }
+        pub fn conthandler(gst: *GST) ContR {
+            if (genMsg(gst)) |msg| {
+                switch (msg) {
+                    .Exit => |wit| return .{ .Next = wit.conthandler() },
+                    .ToEditor => |wit| return .{ .Next = wit.conthandler() },
+                    .ToPlay => |wit| {
+                        gst.animation.start_time = std.time.milliTimestamp();
+                        return .{ .Next = wit.conthandler() };
+                    },
+                }
+            } else return .Wait;
         }
 
-        fn genMsg(gst: *GST) @This() {
-            while (true) {
-                rl.beginDrawing();
-                defer rl.endDrawing();
-                rl.clearBackground(.white);
-                rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
-                gst.render_log();
-
-                for (gst.menu.rs.items) |*r| {
-                    rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-                    if (rg.button(r.rect, &r.str_buf)) {
-                        if (action_list[@intCast(r.action_id)].fun(gst)) |val| {
-                            return val;
-                        }
+        fn genMsg(gst: *GST) ?@This() {
+            for (gst.menu.rs.items) |*r| {
+                rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
+                if (rg.button(r.rect, &r.str_buf)) {
+                    if (action_list[@intCast(r.action_id)].fun(gst)) |val| {
+                        return val;
                     }
-                    rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
                 }
-
-                var rect: rl.Rectangle = .{ .x = 0, .y = 100, .width = 100, .height = 40 };
-
-                if (rg.button(rect, "Editor")) return .ToEditor;
-
-                rect.y += 50;
-                if (rg.button(rect, "Exit")) return .Exit;
-                if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
-
-                rect.y += 50;
-                if (rg.button(rect, "Play")) return .ToPlay;
-
-                rect.y += 50;
-                if (rg.button(rect, "Save")) {
-                    _ = saveData(gst);
-                }
-
-                rect.y += 50;
-
-                _ = rg.slider(
-                    rect,
-                    "",
-                    "Animation duration",
-                    &gst.animation.total_time,
-                    140,
-                    3500,
-                );
+                rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
             }
+
+            var rect: rl.Rectangle = .{ .x = 0, .y = 100, .width = 100, .height = 40 };
+
+            if (rg.button(rect, "Editor")) return .ToEditor;
+
+            rect.y += 50;
+            if (rg.button(rect, "Exit")) return .Exit;
+            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
+
+            rect.y += 50;
+            if (rg.button(rect, "Play")) return .ToPlay;
+
+            rect.y += 50;
+            if (rg.button(rect, "Save")) {
+                _ = saveData(gst);
+            }
+
+            rect.y += 50;
+
+            _ = rg.slider(rect, "", "Animation duration", &gst.animation.total_time, 140, 3500);
+            return null;
         }
 
         fn saveData(gst: *GST) ?@This() {
@@ -366,9 +355,10 @@ pub const Example = enum {
     }
 
     pub const exitST = union(enum) {
-        pub fn handler(gst: *GST) void {
+        pub fn conthandler(gst: *GST) ContR {
             _ = gst;
             std.debug.print("exit\n", .{});
+            return .Exit;
         }
     };
 

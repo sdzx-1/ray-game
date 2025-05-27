@@ -40,5 +40,21 @@ pub fn main() anyerror!void {
     try gst.play.rs.appendSlice(gpa, save_data.play);
 
     const wit = Example.Wit(Example.menu){};
-    wit.handler_normal(&gst);
+
+    var next = wit.conthandler();
+    var exit: bool = false;
+
+    while (!exit) {
+        rl.beginDrawing();
+        defer rl.endDrawing();
+        rl.clearBackground(.white);
+        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
+        gst.render_log();
+
+        switch (next(&gst)) {
+            .Exit => exit = true,
+            .Wait => {},
+            .Next => |fun| next = fun,
+        }
+    }
 }
