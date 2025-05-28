@@ -30,7 +30,7 @@ pub const menuST = union(enum) {
     // zig fmt: off
         Exit:     Wit(Example.exit),
         ToEditor: Wit(.{ Example.idle, Example.menu }),
-        ToPlay:   Wit(.{ Example.animation, Example.menu, Example.play }),
+        ToPlay:   Wit(.{ Example.animation, Example.menu, Example.map }),
 
         pub fn conthandler(gst: *GST) ContR {
             if (genMsg(gst)) |msg| {
@@ -54,8 +54,8 @@ pub const menuST = union(enum) {
     fn saveData(gst: *GST) ?@This() {
         const save_data: SaveData = .{
             .menu = gst.menu.rs.items,
-            .play = gst.play.rs.items,
-            .maze_config = gst.play.maze_config,
+            .play = gst.map.rs.items,
+            .maze_config = gst.map.maze_config,
         };
         save_data.save();
         gst.log("save");

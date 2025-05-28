@@ -1,12 +1,12 @@
 const std = @import("std");
 const R = core.R;
 const core = @import("core.zig");
-const play = @import("play.zig");
+const map = @import("map.zig");
 
 pub const SaveData = struct {
     menu: []const R = &.{},
     play: []const R = &.{},
-    maze_config: play.MazeConfig = .{},
+    maze_config: map.MazeConfig = .{},
 
     pub fn save(self: *const @This()) void {
         const cwd = std.fs.cwd();

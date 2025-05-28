@@ -5,7 +5,7 @@ pub const MazeConfig = struct {
     probability: f32 = 0.2,
 };
 
-pub const Play = struct {
+pub const Map = struct {
     rs: RS = .empty,
     maze: ?Maze = null,
     maze_config: MazeConfig = .{},
@@ -16,12 +16,11 @@ pub const Play = struct {
     }
 };
 
-pub const playST = union(enum) {
+pub const mapST = union(enum) {
     // zig fmt: off
         Exit:     Wit(Example.exit),
-        ToEditor: Wit(.{ Example.idle, Example.play }),
-        ToMenu:   Wit(.{ Example.animation, Example.play, Example.menu }),
-        ToPlay:   Wit(.{ Example.animation, Example.play, Example.play }),
+        ToEditor: Wit(.{ Example.idle, Example.map }),
+        ToMenu:   Wit(.{ Example.animation, Example.map, Example.menu }),
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
@@ -32,23 +31,19 @@ pub const playST = union(enum) {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
-                .ToPlay   => |wit| {
-                    gst.animation.start_time = std.time.milliTimestamp();
-                    return .{ .Next = wit.conthandler() };
-                },
             }
         } else return .Wait;
     }
     // zig fmt: on
     fn genMsg(gst: *GST) ?@This() {
-        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+        for (gst.map.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
             _ = gen_maze(gst);
         }
 
-        if (gst.play.maze) |m| {
+        if (gst.map.maze) |m| {
             for (0..m.totalYSize) |y| {
                 for (0..m.totalXSize) |x| {
                     const idx = Maze.Index.from_uszie_xy(x, y);
@@ -59,7 +54,7 @@ pub const playST = union(enum) {
                         .connPoint => rl.Color.orange,
                         else => rl.Color.white,
                     };
-                    const ptr = &gst.play.maze_config;
+                    const ptr = &gst.map.maze_config;
                     const width: i32 = @intFromFloat(ptr.width);
                     const tx: i32 = @intFromFloat(ptr.x);
                     const ty: i32 = @intFromFloat(ptr.y);
@@ -81,52 +76,47 @@ pub const playST = union(enum) {
         return .ToMenu;
     }
 
-    fn toPlay(_: *GST) ?@This() {
-        return .ToPlay;
-    }
-
     fn exit(_: *GST) ?@This() {
         return .Exit;
     }
 
     fn gen_maze(gst: *GST) ?@This() {
-        if (!gst.play.generating) {
-            gst.play.generating = !gst.play.generating;
-            if (gst.play.maze) |*m| {
-                gst.play.maze = null;
+        if (!gst.map.generating) {
+            gst.map.generating = !gst.map.generating;
+            if (gst.map.maze) |*m| {
+                gst.map.maze = null;
                 m.deinit(gst.gpa);
             }
             _ = std.Thread.spawn(
                 .{},
                 generate_maze,
-                .{ gst.gpa, &gst.play.maze, gst.random.int(u64), gst.play.maze_config.probability },
+                .{ gst.gpa, &gst.map.maze, gst.random.int(u64), gst.map.maze_config.probability },
             ) catch unreachable;
-            gst.play.generating = !gst.play.generating;
+            gst.map.generating = !gst.map.generating;
         }
         return null;
     }
 
     fn mconfig_x(gst: *GST) *f32 {
-        return &gst.play.maze_config.x;
+        return &gst.map.maze_config.x;
     }
 
     fn mconfig_y(gst: *GST) *f32 {
-        return &gst.play.maze_config.y;
+        return &gst.map.maze_config.y;
     }
 
     fn mconfig_width(gst: *GST) *f32 {
-        return &gst.play.maze_config.width;
+        return &gst.map.maze_config.width;
     }
 
     fn mconfig_prob(gst: *GST) *f32 {
-        return &gst.play.maze_config.probability;
+        return &gst.map.maze_config.probability;
     }
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
         .{ .name = "Editor",   .val = .{ .Fun = toEditor } },
         .{ .name = "Menu",     .val = .{ .Fun = toMenu } },
         .{ .name = "Exit",     .val = .{ .Fun = exit } },
-        .{ .name = "Play",     .val = .{ .Fun = toPlay } },
         .{ .name = "Gen maze", .val = .{ .Fun = gen_maze } },
         .{ .name = "rmx",      .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
         .{ .name = "rmy",      .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },

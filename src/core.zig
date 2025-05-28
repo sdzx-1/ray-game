@@ -1,7 +1,7 @@
 const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const editor = @import("editor.zig");
-const play = @import("play.zig");
+const map = @import("map.zig");
 const menu = @import("menu.zig");
 const animation = @import("animation.zig");
 
@@ -75,7 +75,7 @@ pub const GST = struct {
     random: std.Random,
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
-    play: play.Play = .{},
+    map: map.Map = .{},
     animation: animation.Animation = .{},
 
     //
@@ -145,7 +145,7 @@ pub const Example = enum {
     exit,
     //
     menu,
-    play,
+    map,
 
     //
     animation,
@@ -160,7 +160,7 @@ pub const Example = enum {
         return animation.animationST(from, to);
     }
 
-    pub const playST = play.playST;
+    pub const mapST = map.mapST;
 
     pub const menuST = menu.menuST;
 
