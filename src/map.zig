@@ -34,6 +34,13 @@ pub const mapST = union(enum) {
                 },
                 .ToPlay   => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
+                    if (gst.map.maze == null) {
+                        generate_maze(gst.gpa,
+                                      &gst.map.maze,
+                                      gst.random.int(u64),
+                                      gst.map.maze_config.probability);
+                    }
+                    gst.play.maze = gst.map.maze.?;
                     return .{ .Next = wit.conthandler() };
                 },
             }
