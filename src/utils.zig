@@ -2,9 +2,11 @@ const std = @import("std");
 const R = core.R;
 const core = @import("core.zig");
 const map = @import("map.zig");
+const GST = core.GST;
 
 pub const SaveData = struct {
     menu: []const R = &.{},
+    map: []const R = &.{},
     play: []const R = &.{},
     maze_config: map.MazeConfig = .{},
 
@@ -31,6 +33,7 @@ pub const SaveData = struct {
             return .{
                 .menu = gpa.dupe(R, val.menu) catch unreachable,
                 .play = gpa.dupe(R, val.play) catch unreachable,
+                .map = gpa.dupe(R, val.map) catch unreachable,
                 .maze_config = val.maze_config,
             };
         } else |_| {
@@ -38,3 +41,14 @@ pub const SaveData = struct {
         }
     }
 };
+
+pub fn saveData(gst: *GST) void {
+    const save_data: SaveData = .{
+        .menu = gst.menu.rs.items,
+        .map = gst.map.rs.items,
+        .play = gst.play.rs.items,
+        .maze_config = gst.map.maze_config,
+    };
+    save_data.save();
+    gst.log("save");
+}

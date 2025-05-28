@@ -2,8 +2,10 @@ const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const editor = @import("editor.zig");
 const map = @import("map.zig");
+const play = @import("play.zig");
 const menu = @import("menu.zig");
 const animation = @import("animation.zig");
+const utils = @import("utils.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -76,6 +78,7 @@ pub const GST = struct {
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
     map: map.Map = .{},
+    play: play.Play = .{},
     animation: animation.Animation = .{},
 
     //
@@ -146,6 +149,7 @@ pub const Example = enum {
     //
     menu,
     map,
+    play,
 
     //
     animation,
@@ -155,6 +159,8 @@ pub const Example = enum {
     in_rect,
     selected,
     edit,
+
+    pub const playST = play.playST;
 
     pub fn animationST(from: SDZX, to: SDZX) type {
         return animation.animationST(from, to);
@@ -182,7 +188,7 @@ pub const Example = enum {
 
     pub const exitST = union(enum) {
         pub fn conthandler(gst: *GST) ContR {
-            _ = gst;
+            utils.saveData(gst);
             std.debug.print("exit\n", .{});
             return .Exit;
         }

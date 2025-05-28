@@ -261,12 +261,10 @@ pub fn editST(target: SDZX) type {
 
             rect.y += 40;
 
-            _ = rg.textBox(
-                rect,
-                &ptr.str_buf,
-                20,
-                true,
-            );
+            rg.setStyle(.default, .{ .default = .text_size }, 20);
+            _ = rg.textBox(rect, &ptr.str_buf, 20, true);
+            rg.setStyle(.default, .{ .default = .text_size }, 30);
+
             rect.y += 40;
             rect.width = 40;
             _ = rg.checkBox(rect, "enbale", &ptr.enable_action);

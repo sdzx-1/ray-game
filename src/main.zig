@@ -46,7 +46,8 @@ pub fn main() anyerror!void {
     const save_data = SaveData.load(gpa);
     gst.log("load_data");
     try gst.menu.rs.appendSlice(gpa, save_data.menu);
-    try gst.map.rs.appendSlice(gpa, save_data.play);
+    try gst.map.rs.appendSlice(gpa, save_data.map);
+    try gst.play.rs.appendSlice(gpa, save_data.play);
     gst.map.maze_config = save_data.maze_config;
 
     const wit = Example.Wit(Example.menu){};

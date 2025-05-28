@@ -52,13 +52,7 @@ pub const menuST = union(enum) {
     }
 
     fn saveData(gst: *GST) ?@This() {
-        const save_data: SaveData = .{
-            .menu = gst.menu.rs.items,
-            .play = gst.map.rs.items,
-            .maze_config = gst.map.maze_config,
-        };
-        save_data.save();
-        gst.log("save");
+        utils.saveData(gst);
         return null;
     }
 

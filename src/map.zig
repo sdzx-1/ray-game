@@ -18,9 +18,10 @@ pub const Map = struct {
 
 pub const mapST = union(enum) {
     // zig fmt: off
-        Exit:     Wit(Example.exit),
-        ToEditor: Wit(.{ Example.idle, Example.map }),
-        ToMenu:   Wit(.{ Example.animation, Example.map, Example.menu }),
+    Exit:     Wit(Example.exit),
+    ToEditor: Wit(.{ Example.idle, Example.map }),
+    ToMenu:   Wit(.{ Example.animation, Example.map, Example.menu }),
+    ToPlay:   Wit(.{ Example.animation, Example.map, Example.play }),
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
@@ -28,6 +29,10 @@ pub const mapST = union(enum) {
                 .Exit     => |wit| return .{ .Next = wit.conthandler() },
                 .ToEditor => |wit| return .{ .Next = wit.conthandler() },
                 .ToMenu   => |wit| {
+                    gst.animation.start_time = std.time.milliTimestamp();
+                    return .{ .Next = wit.conthandler() };
+                },
+                .ToPlay   => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
@@ -76,6 +81,10 @@ pub const mapST = union(enum) {
         return .ToMenu;
     }
 
+    fn toPlay(_: *GST) ?@This() {
+        return .ToPlay;
+    }
+
     fn exit(_: *GST) ?@This() {
         return .Exit;
     }
@@ -122,6 +131,7 @@ pub const mapST = union(enum) {
         .{ .name = "rmy",      .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
         .{ .name = "rmwidth",     .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 10, .max = 100}  } },
         .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
+        .{ .name = "Play", .val = .{ .Fun = toPlay } },
     };
     // zig fmt: on
 };
