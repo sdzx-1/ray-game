@@ -44,6 +44,10 @@
             .url = "git+https://github.com/sdzx-1/typed-fsm-zig.git#4652b31f70407afbbbd43555f8168ebc811d62bc",
             .hash = "typed_fsm-0.0.0-g0MC1jY7AAAZ44lHNqZK3WTZq4ek-cJYUGs_I_ZNYJ64",
         },
+        .maze = .{
+            .url = "git+https://github.com/sdzx-1/maze.git#b926f13f6f281970d687eba87894ec2d682ec125",
+            .hash = "maze-0.0.0-osQoE-V7AAC8BCuP43nQx_JTo36tsU0Afx4AgSPKZzKl",
+        },
     },
     .paths = .{
         "build.zig",

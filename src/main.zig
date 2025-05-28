@@ -5,9 +5,10 @@ const rg = @import("raygui");
 const typedFsm = @import("typed_fsm");
 
 const core = @import("core.zig");
+const utils = @import("utils.zig");
 
 const Example = core.Example;
-const SaveData = core.SaveData;
+const SaveData = utils.SaveData;
 
 pub fn main() anyerror!void {
     var gpa_instance = std.heap.DebugAllocator(.{}).init;

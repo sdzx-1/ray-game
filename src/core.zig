@@ -1,6 +1,8 @@
 const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const editor = @import("editor.zig");
+const play = @import("play.zig");
+const menu = @import("menu.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -20,7 +22,7 @@ pub const R = struct {
         break :blk tmp;
     },
     color: rl.Color = rl.Color.black,
-    enable_action: bool = true,
+    enable_action: bool = false,
     action_id: i32 = 0,
     action_select: bool = false,
 
@@ -223,124 +225,9 @@ pub const Example = enum {
         };
     }
 
-    pub const playST = union(enum) {
-        // zig fmt: off
-        Exit:     Wit(Example.exit),
-        ToEditor: Wit(.{ Example.idle, Example.play }),
-        ToMenu:   Wit(.{ Example.animation, Example.play, Example.menu }),
-        ToPlay:   Wit(.{ Example.animation, Example.play, Example.play }),
+    pub const playST = play.playST;
 
-        pub fn conthandler(gst: *GST) ContR {
-            if (genMsg(gst)) |msg| {
-                switch (msg) {
-                    .Exit     => |wit| return .{ .Next = wit.conthandler() },
-                    .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                    .ToMenu   => |wit| {
-                        gst.animation.start_time = std.time.milliTimestamp();
-                        return .{ .Next = wit.conthandler() };
-                    },
-                    .ToPlay   => |wit| {
-                        gst.animation.start_time = std.time.milliTimestamp();
-                        return .{ .Next = wit.conthandler() };
-                    },
-                }
-            } else return .Wait;
-        }
-        // zig fmt: on
-        fn genMsg(gst: *GST) ?@This() {
-            for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
-            if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-            return null;
-        }
-
-        fn toEditor(_: *GST) ?@This() {
-            return .ToEditor;
-        }
-
-        fn toMenu(_: *GST) ?@This() {
-            return .ToMenu;
-        }
-
-        fn exit(_: *GST) ?@This() {
-            return .Exit;
-        }
-
-        // zig fmt: off
-        pub const action_list: []const (Action(@This())) = &.{
-            .{ .name = "Editor",  .val = .{ .Fun = toEditor } },
-            .{ .name = "Menu",    .val = .{ .Fun = toMenu } },
-            .{ .name = "Exit",    .val = .{ .Fun = exit } },
-        };
-        // zig fmt: on
-    };
-
-    pub const menuST = union(enum) {
-        // zig fmt: off
-        Exit:     Wit(Example.exit),
-        ToEditor: Wit(.{ Example.idle, Example.menu }),
-        ToPlay:   Wit(.{ Example.animation, Example.menu, Example.play }),
-
-        pub fn conthandler(gst: *GST) ContR {
-            if (genMsg(gst)) |msg| {
-                switch (msg) {
-                    .Exit     => |wit| return .{ .Next = wit.conthandler() },
-                    .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                    .ToPlay   => |wit| {
-                        gst.animation.start_time = std.time.milliTimestamp();
-                        return .{ .Next = wit.conthandler() };
-                    },
-                }
-            } else return .Wait;
-        }
-        // zig fmt: on
-        fn genMsg(gst: *GST) ?@This() {
-            for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
-            if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-            return null;
-        }
-
-        fn saveData(gst: *GST) ?@This() {
-            const save_data: SaveData = .{
-                .menu = gst.menu.rs.items,
-                .play = gst.play.rs.items,
-            };
-            save_data.save();
-            gst.log("save");
-            return null;
-        }
-
-        fn toEditor(_: *GST) ?@This() {
-            return .ToEditor;
-        }
-
-        fn toPlay(_: *GST) ?@This() {
-            return .ToPlay;
-        }
-
-        fn exit(_: *GST) ?@This() {
-            return .Exit;
-        }
-
-        fn log_hello(gst: *GST) ?@This() {
-            gst.log("hello!!!!");
-            return null;
-        }
-
-        fn animation_duration_ref(gst: *GST) *f32 {
-            return &gst.animation.total_time;
-        }
-
-        // zig fmt: off
-        pub const action_list: []const (Action(@This())) = &.{
-            .{ .name = "Editor",    .val = .{ .Fun = toEditor  } },
-            .{ .name = "Exit",      .val = .{ .Fun = exit      } },
-            .{ .name = "Play",      .val = .{ .Fun = toPlay    } },
-            .{ .name = "Log hello", .val = .{ .Fun = log_hello } },
-            .{ .name = "Save data", .val = .{ .Fun = saveData  } },
-            .{ .name = "animation", .val = .{ .Ptr_f32 = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
-        };
-        // zig fmt: on
-    };
+    pub const menuST = menu.menuST;
 
     pub fn editST(target: SDZX) type {
         return editor.editST(target);
@@ -380,38 +267,4 @@ pub const Example = enum {
     }
 
     pub const SDZX = typedFsm.sdzx(@This());
-};
-
-pub const SaveData = struct {
-    menu: []const R = &.{},
-    play: []const R = &.{},
-
-    pub fn save(self: *const @This()) void {
-        const cwd = std.fs.cwd();
-        const file = cwd.createFile("config.txt", .{}) catch unreachable;
-        const writer = file.writer();
-        std.json.stringify(self.*, .{ .whitespace = .indent_2 }, writer) catch unreachable;
-    }
-
-    pub fn load(gpa: std.mem.Allocator) SaveData {
-        var arena_instance = std.heap.ArenaAllocator.init(gpa);
-        defer arena_instance.deinit();
-        const arena = arena_instance.allocator();
-
-        const cwd = std.fs.cwd();
-
-        if (cwd.access("config.txt", .{})) |_| {
-            const file = cwd.openFile("config.txt", .{}) catch unreachable;
-            const content = file.readToEndAlloc(arena, 5 << 20) catch unreachable;
-            const parsed = std.json.parseFromSlice(@This(), arena, content, .{ .ignore_unknown_fields = true }) catch unreachable;
-            const val = parsed.value;
-
-            return .{
-                .menu = gpa.dupe(R, val.menu) catch unreachable,
-                .play = gpa.dupe(R, val.play) catch unreachable,
-            };
-        } else |_| {
-            return .{};
-        }
-    }
 };
