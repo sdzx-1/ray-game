@@ -30,10 +30,19 @@ pub fn main() anyerror!void {
     rg.setStyle(.default, .{ .default = .text_size }, 20);
 
     //--------------------------------------------------------------------------------------
+    var prng = std.Random.DefaultPrng.init(blk: {
+        var seed: u64 = undefined;
+        try std.posix.getrandom(std.mem.asBytes(&seed));
+        break :blk seed;
+    });
+    const rand = prng.random();
 
     var gst = core.GST{
         .gpa = gpa,
+        .random = rand,
+        .pool = undefined,
     };
+    try gst.pool.init(.{ .allocator = gpa, .n_jobs = 3 });
 
     const save_data = SaveData.load(gpa);
     gst.log("load_data");

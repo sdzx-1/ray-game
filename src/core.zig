@@ -45,8 +45,8 @@ pub const R = struct {
                 .Ptr_f32 => |val| {
                     var buf: [30]u8 = undefined;
                     var buf1: [30]u8 = undefined;
-                    const minVal = std.fmt.bufPrintZ(&buf, "{d}", .{val.min}) catch unreachable;
-                    const maxVal = std.fmt.bufPrintZ(&buf1, "{d}", .{val.max}) catch unreachable;
+                    const minVal = std.fmt.bufPrintZ(&buf, "{d:.0}", .{val.min}) catch unreachable;
+                    const maxVal = std.fmt.bufPrintZ(&buf1, "{d:.0}", .{val.max}) catch unreachable;
                     const ref = val.fun(gst);
                     _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
                 },
@@ -72,6 +72,8 @@ pub fn getTarget(comptime target: Example.SDZX) []const u8 {
 
 pub const GST = struct {
     gpa: std.mem.Allocator,
+    random: std.Random,
+    pool: std.Thread.Pool,
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
     play: play.Play = .{},

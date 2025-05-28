@@ -8,6 +8,8 @@ pub fn build(b: *std.Build) void {
     // zig fmt: off
     const typed_fsm  = b.dependency("typed_fsm",  .{.target = target, .optimize = optimize});
     const raylib_dep = b.dependency("raylib_zig", .{.target = target, .optimize = optimize});
+    const maze_dep =   b.dependency("maze",       .{.target = target, .optimize = optimize});
+
     // zig fmt: on
 
     const install_content_step = b.addInstallFile(
@@ -24,6 +26,7 @@ pub fn build(b: *std.Build) void {
             .{ .name = "typed_fsm", .module = typed_fsm.module("root") },
             .{ .name = "raylib", .module = raylib_dep.module("raylib") },
             .{ .name = "raygui", .module = raylib_dep.module("raygui") },
+            .{ .name = "maze", .module = maze_dep.module("maze") },
         },
     });
 
