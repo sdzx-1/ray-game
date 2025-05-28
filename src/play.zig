@@ -1,7 +1,8 @@
 pub const MazeConfig = struct {
     x: f32 = 0,
     y: f32 = 100,
-    width: f32 = 30,
+    width: f32 = 10,
+    probability: f32 = 0.2,
 };
 
 pub const Play = struct {
@@ -94,7 +95,7 @@ pub const playST = union(enum) {
             _ = std.Thread.spawn(
                 .{},
                 generate_maze,
-                .{ gst.gpa, &gst.play.maze, gst.random.int(u64) },
+                .{ gst.gpa, &gst.play.maze, gst.random.int(u64), gst.play.maze_config.probability },
             ) catch unreachable;
             gst.play.generating = !gst.play.generating;
         }
@@ -113,6 +114,9 @@ pub const playST = union(enum) {
         return &gst.play.maze_config.width;
     }
 
+    fn mconfig_prob(gst: *GST) *f32 {
+        return &gst.play.maze_config.probability;
+    }
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
         .{ .name = "Editor",   .val = .{ .Fun = toEditor } },
@@ -123,6 +127,7 @@ pub const playST = union(enum) {
         .{ .name = "rmx", .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
         .{ .name = "rmy", .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
         .{ .name = "rmwidth", .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 10, .max = 100}  } },
+        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0.1, .max = 0.9}  } },
     };
     // zig fmt: on
 };
@@ -131,8 +136,9 @@ fn generate_maze(
     gpa: std.mem.Allocator,
     m_maze: *?Maze,
     seed: u64,
+    probability: f32,
 ) void {
-    var m = Maze.init(gpa, 17, 17, 3, 5, 0.2, seed) catch unreachable;
+    var m = Maze.init(gpa, 37, 37, 3, 7, probability, seed) catch unreachable;
     m.genMaze(gpa) catch unreachable;
     m_maze.* = m;
 }
