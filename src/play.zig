@@ -1,19 +1,10 @@
-const std = @import("std");
-const typedFsm = @import("typed_fsm");
-const core = @import("core.zig");
+pub const Play = struct {
+    rs: RS = .empty,
 
-const rl = @import("raylib");
-const rg = @import("raygui");
-
-const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
-const GST = core.GST;
-const R = core.R;
-const getTarget = core.getTarget;
-const ContR = typedFsm.ContR(GST);
-const Action = core.Action;
+    pub fn animation(self: *const @This(), deta: f32, b: bool) void {
+        anim.animation_list_r(self.rs.items, deta, b);
+    }
+};
 
 pub const playST = union(enum) {
     // zig fmt: off
@@ -65,3 +56,22 @@ pub const playST = union(enum) {
         };
         // zig fmt: on
 };
+
+const std = @import("std");
+const typedFsm = @import("typed_fsm");
+const core = @import("core.zig");
+const anim = @import("animation.zig");
+
+const rl = @import("raylib");
+const rg = @import("raygui");
+
+const Example = core.Example;
+const Wit = Example.Wit;
+const WitRow = Example.WitRow;
+const SDZX = Example.SDZX;
+const GST = core.GST;
+const R = core.R;
+const getTarget = core.getTarget;
+const ContR = typedFsm.ContR(GST);
+const Action = core.Action;
+const RS = core.RS;

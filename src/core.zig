@@ -3,6 +3,7 @@ const typedFsm = @import("typed_fsm");
 const editor = @import("editor.zig");
 const play = @import("play.zig");
 const menu = @import("menu.zig");
+const animation = @import("animation.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -59,42 +60,7 @@ pub const R = struct {
     }
 };
 
-fn animation_list_r(items: []const R, deta: f32, b: bool) void {
-    for (items) |*r| {
-        rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-        var rect = r.rect;
-        if (b) {
-            rect.x -= deta;
-        } else {
-            rect.x = rect.x + 1000 - deta;
-        }
-        _ = rg.button(rect, &r.str_buf);
-        rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
-    }
-}
-
-const RS = std.ArrayListUnmanaged(R);
-
-pub const Menu = struct {
-    rs: RS = .empty,
-
-    pub fn animation(self: *const @This(), deta: f32, b: bool) void {
-        animation_list_r(self.rs.items, deta, b);
-    }
-};
-
-pub const Play = struct {
-    rs: RS = .empty,
-
-    pub fn animation(self: *const @This(), deta: f32, b: bool) void {
-        animation_list_r(self.rs.items, deta, b);
-    }
-};
-
-pub const Animation = struct {
-    total_time: f32 = 150,
-    start_time: i64 = 0,
-};
+pub const RS = std.ArrayListUnmanaged(R);
 
 pub fn getTarget(comptime target: Example.SDZX) []const u8 {
     const nst = switch (target) {
@@ -107,9 +73,9 @@ pub fn getTarget(comptime target: Example.SDZX) []const u8 {
 pub const GST = struct {
     gpa: std.mem.Allocator,
     editor: editor.Editor = .{},
-    menu: Menu = .{},
-    play: Play = .{},
-    animation: Animation = .{},
+    menu: menu.Menu = .{},
+    play: play.Play = .{},
+    animation: animation.Animation = .{},
 
     //
     notify: Notify = .{},
@@ -190,39 +156,7 @@ pub const Example = enum {
     edit,
 
     pub fn animationST(from: SDZX, to: SDZX) type {
-        return union(enum) {
-            End: WitRow(to),
-
-            const from_t = getTarget(from);
-            const to_t = getTarget(to);
-
-            pub fn conthandler(gst: *GST) ContR {
-                if (genMsg(gst)) |msg| {
-                    switch (msg) {
-                        .End => |wit| return .{ .Next = wit.conthandler() },
-                    }
-                } else return .Wait;
-            }
-
-            fn genMsg(gst: *GST) ?@This() {
-                if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-                    gst.log("skip animation");
-                    return .End;
-                }
-
-                const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
-                var buf: [20]u8 = undefined;
-                gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!", 10);
-                const deta: f32 = 1000 / gst.animation.total_time * deta_time;
-                @field(gst, from_t).animation(deta, true);
-                @field(gst, to_t).animation(deta, false);
-
-                if (deta_time > gst.animation.total_time - 1000 / 60) {
-                    return .End;
-                }
-                return null;
-            }
-        };
+        return animation.animationST(from, to);
     }
 
     pub const playST = play.playST;

@@ -2,6 +2,7 @@ const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const core = @import("core.zig");
 const utils = @import("utils.zig");
+const anim = @import("animation.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -16,7 +17,15 @@ const getTarget = core.getTarget;
 const ContR = typedFsm.ContR(GST);
 const Action = core.Action;
 const SaveData = utils.SaveData;
+const RS = core.RS;
 
+pub const Menu = struct {
+    rs: RS = .empty,
+
+    pub fn animation(self: *const @This(), deta: f32, b: bool) void {
+        anim.animation_list_r(self.rs.items, deta, b);
+    }
+};
 pub const menuST = union(enum) {
     // zig fmt: off
         Exit:     Wit(Example.exit),
