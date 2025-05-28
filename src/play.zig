@@ -1,8 +1,8 @@
 pub const Play = struct {
     rs: RS = .empty,
 
-    pub fn animation(self: *const @This(), deta: f32, b: bool) void {
-        anim.animation_list_r(self.rs.items, deta, b);
+    pub fn animation(self: *const @This(), duration: f32, total: f32, b: bool) void {
+        anim.animation_list_r(self.rs.items, duration, total, b);
     }
 };
 
@@ -44,15 +44,20 @@ pub const playST = union(enum) {
         return .ToMenu;
     }
 
+    fn toPlay(_: *GST) ?@This() {
+        return .ToPlay;
+    }
+
     fn exit(_: *GST) ?@This() {
         return .Exit;
     }
 
     // zig fmt: off
-        pub const action_list: []const (Action(@This())) = &.{
-            .{ .name = "Editor",  .val = .{ .Fun = toEditor } },
-            .{ .name = "Menu",    .val = .{ .Fun = toMenu } },
-            .{ .name = "Exit",    .val = .{ .Fun = exit } },
+    pub const action_list: []const (Action(@This())) = &.{
+        .{ .name = "Editor",  .val = .{ .Fun = toEditor } },
+        .{ .name = "Menu",    .val = .{ .Fun = toMenu } },
+        .{ .name = "Exit",    .val = .{ .Fun = exit } },
+        .{ .name = "Play",    .val = .{ .Fun = toPlay } },
         };
         // zig fmt: on
 };

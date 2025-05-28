@@ -18,7 +18,13 @@ pub const Animation = struct {
     start_time: i64 = 0,
 };
 
-pub fn animation_list_r(items: []const R, deta: f32, b: bool) void {
+pub fn animation_list_r(
+    items: []const R,
+    duration: f32,
+    total_time: f32,
+    b: bool,
+) void {
+    const deta: f32 = 1000 / total_time * duration;
     for (items) |*r| {
         var rect = r.rect;
         if (b) {
@@ -51,14 +57,13 @@ pub fn animationST(from: SDZX, to: SDZX) type {
                 return .End;
             }
 
-            const deta_time: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
+            const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
             var buf: [20]u8 = undefined;
-            gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{deta_time}) catch "too long!", 10);
-            const deta: f32 = 1000 / gst.animation.total_time * deta_time;
-            @field(gst, from_t).animation(deta, true);
-            @field(gst, to_t).animation(deta, false);
+            gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
+            @field(gst, from_t).animation(duration, gst.animation.total_time, true);
+            @field(gst, to_t).animation(duration, gst.animation.total_time, false);
 
-            if (deta_time > gst.animation.total_time - 1000 / 60) {
+            if (duration > gst.animation.total_time - 1000 / 60) {
                 return .End;
             }
             return null;

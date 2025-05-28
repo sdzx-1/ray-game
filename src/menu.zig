@@ -22,8 +22,8 @@ const RS = core.RS;
 pub const Menu = struct {
     rs: RS = .empty,
 
-    pub fn animation(self: *const @This(), deta: f32, b: bool) void {
-        anim.animation_list_r(self.rs.items, deta, b);
+    pub fn animation(self: *const @This(), duration: f32, total: f32, b: bool) void {
+        anim.animation_list_r(self.rs.items, duration, total, b);
     }
 };
 pub const menuST = union(enum) {
