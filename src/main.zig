@@ -28,7 +28,7 @@ pub fn main() anyerror!void {
     defer rl.closeWindow(); // Close window and OpenGL context
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
-    rg.setStyle(.default, .{ .default = .text_size }, 20);
+    rg.setStyle(.default, .{ .default = .text_size }, 30);
 
     //--------------------------------------------------------------------------------------
     var prng = std.Random.DefaultPrng.init(blk: {
