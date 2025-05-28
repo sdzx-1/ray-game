@@ -256,7 +256,7 @@ pub fn editST(target: SDZX) type {
 
         fn genMsg(gst: *GST) ?@This() {
             const nst = comptime getTarget(target);
-            const ptr = &@field(gst, nst).rs.items[gst.editor.selected];
+            const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -267,8 +267,13 @@ pub fn editST(target: SDZX) type {
                 20,
                 true,
             );
+            rect.y += 40;
+            rect.width = 40;
+            _ = rg.checkBox(rect, "enbale", &ptr.enable_action);
 
-            if (@hasDecl(@field(Example, nst ++ "ST"), "action_list")) {
+            if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
+                ptr.enable_action)
+            {
                 rect.y += 40;
                 rect.width = 150;
                 rect.height = 40;

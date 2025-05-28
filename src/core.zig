@@ -20,6 +20,7 @@ pub const R = struct {
         break :blk tmp;
     },
     color: rl.Color = rl.Color.black,
+    enable_action: bool = true,
     action_id: i32 = 0,
     action_select: bool = false,
 
@@ -30,6 +31,29 @@ pub const R = struct {
             pos.y > r.y and
             pos.y < r.y + r.height) return true;
         return false;
+    }
+
+    pub fn render(r: *@This(), gst: *GST, cst: type, action_list: []const Action(cst)) ?cst {
+        if (r.enable_action) {
+            rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
+            const action_ptr = &action_list[@intCast(r.action_id)];
+            switch (action_ptr.val) {
+                .Fun => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
+                .Ptr_f32 => |val| {
+                    var buf: [30]u8 = undefined;
+                    var buf1: [30]u8 = undefined;
+                    const minVal = std.fmt.bufPrintZ(&buf, "{d}", .{val.min}) catch unreachable;
+                    const maxVal = std.fmt.bufPrintZ(&buf1, "{d}", .{val.max}) catch unreachable;
+                    const ref = val.fun(gst);
+                    _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
+                },
+            }
+            rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
+        } else {
+            _ = rl.drawText(&r.str_buf, @intFromFloat(r.rect.x), @intFromFloat(r.rect.y), 32, r.color);
+        }
+
+        return null;
     }
 };
 
@@ -224,20 +248,8 @@ pub const Example = enum {
         }
         // zig fmt: on
         fn genMsg(gst: *GST) ?@This() {
-            for (gst.play.rs.items) |*r| {
-                rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-                switch (action_list[@intCast(r.action_id)].val) {
-                    .Fun => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
-                    .Ptr_f32 => |val| {
-                        _ = rg.slider(r.rect, "", "", val.fun(gst), 100, 4000);
-                    },
-                }
-
-                rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
-            }
-
+            for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
             if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-
             return null;
         }
 
@@ -282,30 +294,8 @@ pub const Example = enum {
         }
         // zig fmt: on
         fn genMsg(gst: *GST) ?@This() {
-            for (gst.menu.rs.items) |*r| {
-                rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-                const action_ptr = &action_list[@intCast(r.action_id)];
-                switch (action_ptr.val) {
-                    .Fun => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
-                    .Ptr_f32 => |val| {
-                        var buf: [30]u8 = undefined;
-                        const ref = val.fun(gst);
-                        const str = std.fmt.bufPrintZ(&buf, "{s} {d}", .{ action_ptr.name, ref.* }) catch unreachable;
-                        var rect = r.rect;
-                        rl.drawText(str, @intFromFloat(rect.x), @intFromFloat(rect.y), 20, r.color);
-                        rect.y += 40;
-
-                        var buf1: [30]u8 = undefined;
-                        const minVal = std.fmt.bufPrintZ(&buf, "{d}", .{val.min}) catch unreachable;
-                        const maxVal = std.fmt.bufPrintZ(&buf1, "{d}", .{val.max}) catch unreachable;
-                        _ = rg.slider(rect, minVal, maxVal, ref, val.min, val.max);
-                    },
-                }
-                rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
-            }
-
+            for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
             if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-
             return null;
         }
 
