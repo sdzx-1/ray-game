@@ -55,6 +55,7 @@ pub const menuST = union(enum) {
         const save_data: SaveData = .{
             .menu = gst.menu.rs.items,
             .play = gst.play.rs.items,
+            .maze_config = gst.play.maze_config,
         };
         save_data.save();
         gst.log("save");

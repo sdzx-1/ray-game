@@ -1,10 +1,12 @@
 const std = @import("std");
 const R = core.R;
 const core = @import("core.zig");
+const play = @import("play.zig");
 
 pub const SaveData = struct {
     menu: []const R = &.{},
     play: []const R = &.{},
+    maze_config: play.MazeConfig = .{},
 
     pub fn save(self: *const @This()) void {
         const cwd = std.fs.cwd();
@@ -29,6 +31,7 @@ pub const SaveData = struct {
             return .{
                 .menu = gpa.dupe(R, val.menu) catch unreachable,
                 .play = gpa.dupe(R, val.play) catch unreachable,
+                .maze_config = val.maze_config,
             };
         } else |_| {
             return .{};

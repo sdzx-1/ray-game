@@ -92,6 +92,10 @@ pub const playST = union(enum) {
     fn gen_maze(gst: *GST) ?@This() {
         if (!gst.play.generating) {
             gst.play.generating = !gst.play.generating;
+            if (gst.play.maze) |*m| {
+                gst.play.maze = null;
+                m.deinit(gst.gpa);
+            }
             _ = std.Thread.spawn(
                 .{},
                 generate_maze,
@@ -127,7 +131,7 @@ pub const playST = union(enum) {
         .{ .name = "rmx", .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
         .{ .name = "rmy", .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
         .{ .name = "rmwidth", .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 10, .max = 100}  } },
-        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0.1, .max = 0.9}  } },
+        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0.01, .max = 0.9}  } },
     };
     // zig fmt: on
 };
