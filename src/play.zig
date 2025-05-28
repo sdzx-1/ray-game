@@ -131,7 +131,7 @@ pub const playST = union(enum) {
         .{ .name = "rmx", .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
         .{ .name = "rmy", .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
         .{ .name = "rmwidth", .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 10, .max = 100}  } },
-        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0.01, .max = 0.9}  } },
+        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
     };
     // zig fmt: on
 };
