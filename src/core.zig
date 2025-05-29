@@ -74,11 +74,14 @@ pub fn getTarget(comptime target: Example.SDZX) []const u8 {
 
 pub const GST = struct {
     gpa: std.mem.Allocator,
+    screen_width: f32 = 1000,
+    screen_height: f32 = 800,
+    hdw: f32 = 800.0 / 1000.0,
     random: std.Random,
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
     map: map.Map = .{},
-    play: play.Play = .{},
+    play: play.Play,
     animation: animation.Animation = .{},
 
     //

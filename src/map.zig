@@ -15,8 +15,8 @@ pub const Map = struct {
     maze_config: MazeConfig = .{},
     generating: bool = false,
 
-    pub fn animation(self: *const @This(), duration: f32, total: f32, b: bool) void {
-        anim.animation_list_r(self.rs.items, duration, total, b);
+    pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
+        anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
     }
 };
 
@@ -26,42 +26,51 @@ pub const mapST = union(enum) {
     ToEditor: Wit(.{ Example.idle, Example.map }),
     ToMenu:   Wit(.{ Example.animation, Example.map, Example.menu }),
     ToPlay:   Wit(.{ Example.animation, Example.map, Example.play }),
+    // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
             switch (msg) {
-                .Exit     => |wit| return .{ .Next = wit.conthandler() },
+                .Exit => |wit| return .{ .Next = wit.conthandler() },
                 .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                .ToMenu   => |wit| {
+                .ToMenu => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
-                .ToPlay   => |wit| {
+                .ToPlay => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     if (gst.map.maze == null) {
-                        generate_maze(gst.gpa,
-                                      &gst.map.maze,
-                                      gst.map.maze_config.total_x,
-                                      gst.map.maze_config.total_y,
-                                      gst.map.maze_config.room_min_width,
-                                      gst.map.maze_config.room_max_width,
-                                      gst.random.int(u64),
-                                      gst.map.maze_config.probability);
+                        generate_maze(
+                            gst.gpa,
+                            &gst.map.maze,
+                            gst.map.maze_config.total_x,
+                            gst.map.maze_config.total_y,
+                            gst.map.maze_config.room_min_width,
+                            gst.map.maze_config.room_max_width,
+                            gst.random.int(u64),
+                            gst.map.maze_config.probability,
+                        );
                     }
-                    gst.play.maze = gst.map.maze.?;
+                    const m = gst.map.maze.?;
+
+                    for (0..m.totalYSize) |y| {
+                        for (0..m.totalXSize) |x| {
+                            const idx = Maze.Index.from_uszie_xy(x, y);
+                            const val = m.readBoard(idx);
+                            gst.play.current_map[y][x] = .{ .tag = val, .building_id = null };
+                        }
+                    }
+
                     gst.play.view = .{
-                        .hdw = 800.0 / 1000.0,
                         .x = @as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0,
                         .y = @as(f32, @floatFromInt(gst.map.maze_config.total_y)) / 2.0,
-                        .width = (@as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0) / (800.0 / 1000.0),
-
+                        .width = (@as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0) / gst.hdw,
                     };
                     return .{ .Next = wit.conthandler() };
                 },
             }
         } else return .Wait;
     }
-    // zig fmt: on
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 

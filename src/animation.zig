@@ -19,18 +19,21 @@ pub const Animation = struct {
 };
 
 pub fn animation_list_r(
+    screen_width: f32,
+    screen_height: f32,
     items: []const R,
     duration: f32,
     total_time: f32,
     b: bool,
 ) void {
-    const deta: f32 = 1000 / total_time * duration;
+    _ = screen_height;
+    const deta: f32 = screen_width / total_time * duration;
     for (items) |*r| {
         var rect = r.rect;
         if (b) {
             rect.x -= deta;
         } else {
-            rect.x = rect.x + 1000 - deta;
+            rect.x = rect.x + screen_width - deta;
         }
         _ = rl.drawText(&r.str_buf, @intFromFloat(rect.x), @intFromFloat(rect.y), 32, r.color);
     }
@@ -60,8 +63,8 @@ pub fn animationST(from: SDZX, to: SDZX) type {
             const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
             var buf: [20]u8 = undefined;
             gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
-            @field(gst, from_t).animation(duration, gst.animation.total_time, true);
-            @field(gst, to_t).animation(duration, gst.animation.total_time, false);
+            @field(gst, from_t).animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, true);
+            @field(gst, to_t).animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
 
             if (duration > gst.animation.total_time - 1000 / 60) {
                 return .End;
