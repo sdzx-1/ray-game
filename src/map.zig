@@ -61,11 +61,10 @@ pub const mapST = union(enum) {
                         }
                     }
 
-                    gst.play.view = .{
-                        .x = @as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0,
-                        .y = @as(f32, @floatFromInt(gst.map.maze_config.total_y)) / 2.0,
-                        .width = (@as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0) / gst.hdw,
-                    };
+                    const sx = @as(f32, @floatFromInt(gst.map.maze_config.total_x));
+                    const sy = @as(f32, @floatFromInt(gst.map.maze_config.total_y));
+                    gst.play.view.width = 50;
+                    gst.play.view.center(gst.hdw, sx / 2, sy / 2);
                     return .{ .Next = wit.conthandler() };
                 },
             }

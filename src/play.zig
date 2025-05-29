@@ -2,11 +2,27 @@ pub const View = struct {
     x: f32,
     y: f32,
     width: f32,
-};
 
-//        CurrentMap   View     Window
-//
-// pos       usize     f32        f32
+    pub fn dwin_to_dview(self: *const View, screen_w: f32, deta_win_pos: rl.Vector2) rl.Vector2 {
+        const r = self.width / screen_w;
+        return .{ .x = deta_win_pos.x * r, .y = deta_win_pos.y * r };
+    }
+
+    pub fn win_to_view(self: *const View, screen_w: f32, win_pos: rl.Vector2) rl.Vector2 {
+        const r = self.width / screen_w;
+        return .{ .x = self.x + win_pos.x * r, .y = self.y + win_pos.y * r };
+    }
+
+    pub fn view_to_win(self: *const View, screen_w: f32, view_pos: rl.Vector2) rl.Vector2 {
+        const r = screen_w / self.width;
+        return .{ .x = (view_pos.x - self.x) * r, .y = (view_pos.y - self.y) * r };
+    }
+
+    pub fn center(self: *@This(), hdw: f32, x: f32, y: f32) void {
+        self.x = x - self.width / 2;
+        self.y = y - (self.width * hdw) / 2;
+    }
+};
 
 pub const Cell = struct {
     tag: Maze.Tag,
@@ -44,29 +60,28 @@ pub const playST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 
-        const mouse_wheel_deta = rl.getMouseWheelMove();
-
-        gst.play.view.width += (mouse_wheel_deta * 0.65) * gst.play.view.width * 0.2;
-
-        const scale: f32 = gst.screen_width / (gst.play.view.width * 2);
+        {
+            const mouse_wheel_deta = rl.getMouseWheelMove();
+            const deta = (mouse_wheel_deta * 0.65) * gst.play.view.width * 0.2;
+            gst.play.view.x -= deta / 2;
+            gst.play.view.y -= (deta * gst.hdw) / 2;
+            gst.play.view.width += deta;
+        }
 
         if (rl.isMouseButtonDown(rl.MouseButton.middle)) {
-            const mouse_deta = rl.getMouseDelta();
-            gst.play.view.x -= (gst.play.view.width * (mouse_deta.x / (gst.screen_width / 2)));
-            const height = gst.play.view.width * gst.hdw;
-            gst.play.view.y -= (height * (mouse_deta.y / (gst.screen_height / 2)));
+            const deta = gst.play.view.dwin_to_dview(gst.screen_width, rl.getMouseDelta());
+            gst.play.view.x -= deta.x;
+            gst.play.view.y -= deta.y;
         }
 
         {
             const view = gst.play.view;
             const height = view.width * gst.hdw;
-            const origin_x: f32 = view.x - view.width;
-            const origin_y: f32 = view.y - height;
 
-            const min_x: i32 = @intFromFloat(@floor(view.x - view.width));
+            const min_x: i32 = @intFromFloat(@floor(view.x));
             const max_x: i32 = @intFromFloat(@floor(view.x + view.width));
 
-            const min_y: i32 = @intFromFloat(@floor(view.y - height));
+            const min_y: i32 = @intFromFloat(@floor(view.y));
             const max_y: i32 = @intFromFloat(@floor(view.y + height));
 
             var ty = min_y;
@@ -87,12 +102,15 @@ pub const playST = union(enum) {
                         else => rl.Color.white,
                     };
 
-                    const tx1: f32 = scale * (@as(f32, @floatFromInt(tx)) - origin_x);
-                    const ty1: f32 = scale * (@as(f32, @floatFromInt(ty)) - origin_y);
+                    const win_pos = gst.play.view.view_to_win(gst.screen_width, .{
+                        .x = @floatFromInt(tx),
+                        .y = @floatFromInt(ty),
+                    });
 
+                    const scale = 1 * gst.screen_width / gst.play.view.width;
                     rl.drawRectangle(
-                        @intFromFloat(tx1),
-                        @intFromFloat(ty1),
+                        @intFromFloat(win_pos.x),
+                        @intFromFloat(win_pos.y),
                         @intFromFloat(scale + 1),
                         @intFromFloat(scale + 1),
                         color,
