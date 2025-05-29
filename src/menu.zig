@@ -46,8 +46,8 @@ pub const menuST = union(enum) {
         }
         // zig fmt: on
     fn genMsg(gst: *GST) ?@This() {
-        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
+        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return null;
     }
 

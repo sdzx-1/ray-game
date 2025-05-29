@@ -48,7 +48,6 @@ pub const mapST = union(enum) {
     }
     // zig fmt: on
     fn genMsg(gst: *GST) ?@This() {
-        for (gst.map.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
@@ -77,6 +76,7 @@ pub const mapST = union(enum) {
             }
         }
 
+        for (gst.map.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return null;
     }
 
@@ -149,7 +149,7 @@ fn generate_maze(
     seed: u64,
     probability: f32,
 ) void {
-    var m = Maze.init(gpa, 37, 37, 3, 7, probability, seed) catch unreachable;
+    var m = Maze.init(gpa, 37, 37, 3, 17, probability, seed) catch unreachable;
     m.genMaze(gpa) catch unreachable;
     m_maze.* = m;
 }

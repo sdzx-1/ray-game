@@ -34,28 +34,17 @@ pub const playST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
 
-        if (rl.isKeyDown(rl.KeyboardKey.j)) {
-            gst.play.view.y += 0.3;
-        }
+        const mouse_wheel_deta = rl.getMouseWheelMove();
 
-        if (rl.isKeyDown(rl.KeyboardKey.k)) {
-            gst.play.view.y -= 0.3;
-        }
+        gst.play.view.width += mouse_wheel_deta * 0.65;
 
-        if (rl.isKeyDown(rl.KeyboardKey.h)) {
-            gst.play.view.x -= 0.3;
-        }
+        const scale: f32 = @as(f32, 1000) / (gst.play.view.width * 2);
 
-        if (rl.isKeyDown(rl.KeyboardKey.l)) {
-            gst.play.view.x += 0.3;
-        }
-
-        if (rl.isKeyDown(rl.KeyboardKey.i)) {
-            gst.play.view.width += 0.1;
-        }
-
-        if (rl.isKeyDown(rl.KeyboardKey.o)) {
-            gst.play.view.width -= 0.1;
+        if (rl.isMouseButtonDown(rl.MouseButton.middle)) {
+            const mouse_deta = rl.getMouseDelta();
+            gst.play.view.x -= (gst.play.view.width * (mouse_deta.x / 500));
+            const height = gst.play.view.width * gst.play.view.hdw;
+            gst.play.view.y -= (height * (mouse_deta.y / 400));
         }
 
         {
@@ -70,13 +59,6 @@ pub const playST = union(enum) {
             const min_y: i32 = @intFromFloat(@floor(view.y - height));
             const max_y: i32 = @intFromFloat(@floor(view.y + height));
 
-            // std.debug.print("hdw: {d}\n", .{view.hdw});
-            // std.debug.print("width: {d}\n", .{view.width});
-            // std.debug.print("height: {d}\n", .{height});
-            // std.debug.print("min_x: {d}\n", .{min_x});
-            // std.debug.print("max_x: {d}\n", .{max_x});
-            // std.debug.print("min_y: {d}\n", .{min_y});
-            // std.debug.print("max_y: {d}\n", .{max_y});
             var ty = min_y;
             while (ty < max_y + 1) : (ty += 1) {
                 var tx = min_x;
@@ -84,7 +66,6 @@ pub const playST = union(enum) {
                     if (tx < 0 or ty < 0 or tx > 36 or ty > 36) continue;
                     const idx = Maze.Index.from_uszie_xy(@intCast(tx), @intCast(ty));
                     const val = gst.play.maze.readBoard(idx);
-                    // std.debug.print("({d}, {d}, {any}), ", .{ tx, ty, val });
                     const color = switch (val) {
                         .room => rl.Color.sky_blue,
                         .path => rl.Color.gray,
@@ -92,7 +73,6 @@ pub const playST = union(enum) {
                         else => rl.Color.white,
                     };
 
-                    const scale = @as(f32, 1000) / (gst.play.view.width * 2);
                     const tx1: f32 = scale * (@as(f32, @floatFromInt(tx)) - origin_x);
                     const ty1: f32 = scale * (@as(f32, @floatFromInt(ty)) - origin_y);
 
