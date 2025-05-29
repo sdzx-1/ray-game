@@ -19,17 +19,10 @@ pub const Play = struct {
     rs: RS = .empty,
     current_map: *CurrentMap,
     view: View = undefined,
-    building_list: std.ArrayListUnmanaged(Building) = .empty,
-    building: bool = false,
 
     pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
     }
-};
-
-pub const Building = struct {
-    width: i32 = 4,
-    height: i32 = 3,
 };
 
 pub const playST = union(enum) {
@@ -50,9 +43,6 @@ pub const playST = union(enum) {
 
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) {
-            gst.play.building = !gst.play.building;
-        }
 
         const mouse_wheel_deta = rl.getMouseWheelMove();
 
@@ -100,41 +90,15 @@ pub const playST = union(enum) {
                     const tx1: f32 = scale * (@as(f32, @floatFromInt(tx)) - origin_x);
                     const ty1: f32 = scale * (@as(f32, @floatFromInt(ty)) - origin_y);
 
-                    if (gst.play.building) {
-                        rl.drawRectangle(
-                            @intFromFloat(tx1),
-                            @intFromFloat(ty1),
-                            @intFromFloat(scale - 2),
-                            @intFromFloat(scale - 2),
-                            color,
-                        );
-                    } else {
-                        rl.drawRectangle(
-                            @intFromFloat(tx1),
-                            @intFromFloat(ty1),
-                            @intFromFloat(scale + 1),
-                            @intFromFloat(scale + 1),
-                            color,
-                        );
-                    }
+                    rl.drawRectangle(
+                        @intFromFloat(tx1),
+                        @intFromFloat(ty1),
+                        @intFromFloat(scale + 1),
+                        @intFromFloat(scale + 1),
+                        color,
+                    );
                 }
             }
-        }
-
-        if (gst.play.building) {
-            const mp = rl.getMousePosition();
-            const b: Building = .{};
-
-            const w: f32 = (@as(f32, @floatFromInt(b.width)) - 0.5) * scale;
-            const h: f32 = (@as(f32, @floatFromInt(b.height)) - 0.5) * scale;
-
-            rl.drawRectangle(
-                @intFromFloat(mp.x - w / 2),
-                @intFromFloat(mp.y - h / 2),
-                @intFromFloat(w - 3),
-                @intFromFloat(h - 3),
-                rl.Color.blue,
-            );
         }
 
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
