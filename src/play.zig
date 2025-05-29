@@ -1,14 +1,14 @@
 pub const View = struct {
-    hdw: f32 = @as(f32, 800) / @as(f32, 1000),
-    x: f32 = 18,
-    y: f32 = 18,
-    width: f32 = 5,
+    hdw: f32,
+    x: f32,
+    y: f32,
+    width: f32,
 };
 
 pub const Play = struct {
     rs: RS = .empty,
     maze: Maze = undefined,
-    view: View = .{},
+    view: View = undefined,
 
     pub fn animation(self: *const @This(), duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(self.rs.items, duration, total, b);
@@ -36,7 +36,7 @@ pub const playST = union(enum) {
 
         const mouse_wheel_deta = rl.getMouseWheelMove();
 
-        gst.play.view.width += mouse_wheel_deta * 0.65;
+        gst.play.view.width += (mouse_wheel_deta * 0.65) * gst.play.view.width * 0.2;
 
         const scale: f32 = @as(f32, 1000) / (gst.play.view.width * 2);
 
@@ -63,7 +63,10 @@ pub const playST = union(enum) {
             while (ty < max_y + 1) : (ty += 1) {
                 var tx = min_x;
                 while (tx < max_x + 1) : (tx += 1) {
-                    if (tx < 0 or ty < 0 or tx > 36 or ty > 36) continue;
+                    if (tx < 0 or
+                        ty < 0 or
+                        tx > (gst.map.maze_config.total_x - 1) or
+                        ty > (gst.map.maze_config.total_y - 1)) continue;
                     const idx = Maze.Index.from_uszie_xy(@intCast(tx), @intCast(ty));
                     const val = gst.play.maze.readBoard(idx);
                     const color = switch (val) {

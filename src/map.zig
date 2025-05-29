@@ -1,8 +1,12 @@
 pub const MazeConfig = struct {
     x: f32 = 0,
     y: f32 = 100,
-    width: f32 = 10,
+    width: f32 = 2,
     probability: f32 = 0.2,
+    total_x: u32 = 137,
+    total_y: u32 = 137,
+    room_min_width: i32 = 3,
+    room_max_width: i32 = 17,
 };
 
 pub const Map = struct {
@@ -37,10 +41,21 @@ pub const mapST = union(enum) {
                     if (gst.map.maze == null) {
                         generate_maze(gst.gpa,
                                       &gst.map.maze,
+                                      gst.map.maze_config.total_x,
+                                      gst.map.maze_config.total_y,
+                                      gst.map.maze_config.room_min_width,
+                                      gst.map.maze_config.room_max_width,
                                       gst.random.int(u64),
                                       gst.map.maze_config.probability);
                     }
                     gst.play.maze = gst.map.maze.?;
+                    gst.play.view = .{
+                        .hdw = 800.0 / 1000.0,
+                        .x = @as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0,
+                        .y = @as(f32, @floatFromInt(gst.map.maze_config.total_y)) / 2.0,
+                        .width = (@as(f32, @floatFromInt(gst.map.maze_config.total_x)) / 2.0) / (800.0 / 1000.0),
+
+                    };
                     return .{ .Next = wit.conthandler() };
                 },
             }
@@ -106,7 +121,16 @@ pub const mapST = union(enum) {
             _ = std.Thread.spawn(
                 .{},
                 generate_maze,
-                .{ gst.gpa, &gst.map.maze, gst.random.int(u64), gst.map.maze_config.probability },
+                .{
+                    gst.gpa,
+                    &gst.map.maze,
+                    gst.map.maze_config.total_x,
+                    gst.map.maze_config.total_y,
+                    gst.map.maze_config.room_min_width,
+                    gst.map.maze_config.room_max_width,
+                    gst.random.int(u64),
+                    gst.map.maze_config.probability,
+                },
             ) catch unreachable;
             gst.map.generating = !gst.map.generating;
         }
@@ -136,7 +160,7 @@ pub const mapST = union(enum) {
         .{ .name = "Gen maze", .val = .{ .Fun = gen_maze } },
         .{ .name = "rmx",      .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
         .{ .name = "rmy",      .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
-        .{ .name = "rmwidth",     .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 10, .max = 100}  } },
+        .{ .name = "rmwidth",     .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
         .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
         .{ .name = "Play", .val = .{ .Fun = toPlay } },
     };
@@ -146,10 +170,22 @@ pub const mapST = union(enum) {
 fn generate_maze(
     gpa: std.mem.Allocator,
     m_maze: *?Maze,
+    total_x: u32,
+    total_y: u32,
+    room_min_width: i32,
+    room_max_width: i32,
     seed: u64,
     probability: f32,
 ) void {
-    var m = Maze.init(gpa, 37, 37, 3, 17, probability, seed) catch unreachable;
+    var m = Maze.init(
+        gpa,
+        total_x,
+        total_y,
+        room_min_width,
+        room_max_width,
+        probability,
+        seed,
+    ) catch unreachable;
     m.genMaze(gpa) catch unreachable;
     m_maze.* = m;
 }
