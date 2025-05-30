@@ -41,6 +41,7 @@ pub fn main() anyerror!void {
     defer rl.closeWindow(); // Close window and OpenGL context
 
     rl.setWindowState(.{ .window_resizable = true });
+    rl.hideCursor();
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
@@ -67,7 +68,7 @@ pub fn main() anyerror!void {
             .Next => |fun| next = fun,
         }
 
-        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 4, rl.Color.red);
+        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
         gst.render_log();
     }
 }
