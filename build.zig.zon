@@ -41,8 +41,8 @@
             .hash = "raylib_zig-5.6.0-dev-KE8REKAqBQAQugfCOjYYVRFOi7iaEJK1EMDcRUq8AOm2",
         },
         .typed_fsm = .{
-            .url = "git+https://github.com/sdzx-1/typed-fsm-zig.git#660a3e5bfd3444d162464a906b33f0dce7133b01",
-            .hash = "typed_fsm-0.0.0-g0MC1tk6AAAbDFhEoYHQQVrenoJho9mWYU0fjWNw6OnP",
+            .url = "git+https://github.com/sdzx-1/typed-fsm-zig.git#0fb4ea0da653705af863b9290c3695d5a939a731",
+            .hash = "typed_fsm-0.0.0-g0MC1jo5AADVFHr2MT4OnZ9Ee9SK0GebqD4BWAwSKl82",
         },
         .maze = .{
             .url = "git+https://github.com/sdzx-1/maze.git#b926f13f6f281970d687eba87894ec2d682ec125",
