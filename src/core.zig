@@ -169,16 +169,16 @@ pub const Example = enum {
     inside,
     hover,
 
+    pub const menuST = menu.menuST;
+    pub const mapST = map.mapST;
     pub const playST = play.playST;
 
+    //
     pub fn animationST(from: SDZX, to: SDZX) type {
         return animation.animationST(from, to);
     }
 
-    pub const mapST = map.mapST;
-
-    pub const menuST = menu.menuST;
-
+    //
     pub fn editST(target: SDZX) type {
         return editor.editST(target);
     }
@@ -195,6 +195,20 @@ pub const Example = enum {
         return editor.idleST(target);
     }
 
+    //
+    pub fn outsideST(back: SDZX, selected: SDZX) type {
+        return select.outsideST(back, selected);
+    }
+
+    pub fn insideST(back: SDZX, selected: SDZX) type {
+        return select.insideST(back, selected);
+    }
+
+    pub fn hoverST(back: SDZX, selected: SDZX) type {
+        return select.hoverST(back, selected);
+    }
+
+    //
     pub const exitST = union(enum) {
         pub fn conthandler(gst: *GST) ContR {
             utils.saveData(gst);
@@ -204,7 +218,7 @@ pub const Example = enum {
     };
 
     fn enter_fn(cst: typedFsm.sdzx(@This()), gst: *GST) void {
-        var buf: [30]u8 = @splat(0);
+        var buf: [130]u8 = @splat(0);
         gst.log_im(std.fmt.bufPrintZ(&buf, "{}", .{cst}) catch unreachable);
     }
 

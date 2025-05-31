@@ -18,7 +18,7 @@ const ContR = typedFsm.ContR(GST);
 
 pub const CheckInsideResult = enum {
     not_in_any_rect,
-    in_someone_rect,
+    in_someone,
 };
 
 pub const Select = struct {
@@ -26,10 +26,10 @@ pub const Select = struct {
 };
 
 pub fn outsideST(back: SDZX, selected: SDZX) type {
-    const cst = typedFsm.sdzx_to_cst(selected);
+    const cst = typedFsm.sdzx_to_cst(Example, selected);
     return union(enum) {
         ToBack: WitRow(back),
-        ToInside: WitRow(SDZX.c(Example.inside, &.{ back, selected })),
+        ToInside: WitRow(SDZX.C(Example.inside, &.{ back, selected })),
 
         pub fn conthandler(gst: *GST) ContR {
             if (genMsg(gst)) |msg| {
@@ -47,7 +47,7 @@ pub fn outsideST(back: SDZX, selected: SDZX) type {
             const res: CheckInsideResult = cst.check_inside(gst);
             switch (res) {
                 .not_in_any_rect => {},
-                .in_someone_rect => return .ToInside,
+                .in_someone => return .ToInside,
             }
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
             return null;
@@ -56,12 +56,12 @@ pub fn outsideST(back: SDZX, selected: SDZX) type {
 }
 
 pub fn insideST(back: SDZX, selected: SDZX) type {
-    const cst = typedFsm.sdzx_to_cst(selected);
+    const cst = typedFsm.sdzx_to_cst(Example, selected);
     return union(enum) {
         // zig fmt: off
         ToBack    : WitRow(back),
-        ToOutside : WitRow(SDZX.c(Example.outside, &.{ back, selected })),
-        ToHover   : WitRow(SDZX.c(Example.hover,   &.{ back, selected })),
+        ToOutside : WitRow(SDZX.C(Example.outside, &.{ back, selected })),
+        ToHover   : WitRow(SDZX.C(Example.hover,   &.{ back, selected })),
         ToSelected: WitRow(selected),
         // zig fmt: on
 
@@ -79,9 +79,10 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
         fn genMsg(gst: *GST) ?@This() {
             const res: bool = cst.check_still_inside(gst);
             if (!res) return .ToOutside;
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
+            if (rl.isMouseButtonPressed(rl.MouseButton.left)) {
+                return .ToSelected;
+            }
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
-
             if (mouse_moved()) gst.select.no_move_duartion = std.time.milliTimestamp();
             const deta = std.time.milliTimestamp() - gst.select.no_move_duartion;
             if (deta > 400) return .ToHover;
@@ -91,12 +92,12 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
 }
 
 pub fn hoverST(back: SDZX, selected: SDZX) type {
-    const cst = typedFsm.sdzx_to_cst(selected);
+    const cst = typedFsm.sdzx_to_cst(Example, selected);
     return union(enum) {
         // zig fmt: off
         ToBack    : WitRow(back),
-        ToOutSide : WitRow(SDZX.c(Example.outside, &.{ back, selected })),
-        ToInside  : WitRow(SDZX.c(Example.inside, &.{ back, selected })),
+        ToOutside : WitRow(SDZX.C(Example.outside, &.{ back, selected })),
+        ToInside  : WitRow(SDZX.C(Example.inside, &.{ back, selected })),
         ToSelected: WitRow(selected),
         // zig fmt: on
 
@@ -105,7 +106,10 @@ pub fn hoverST(back: SDZX, selected: SDZX) type {
                 switch (msg) {
                     .ToBack => |wit| return .{ .Next = wit.conthandler() },
                     .ToOutside => |wit| return .{ .Next = wit.conthandler() },
-                    .ToHover => |wit| return .{ .Next = wit.conthandler() },
+                    .ToInside => |wit| {
+                        gst.select.no_move_duartion = std.time.milliTimestamp();
+                        return .{ .Next = wit.conthandler() };
+                    },
                     .ToSelected => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
