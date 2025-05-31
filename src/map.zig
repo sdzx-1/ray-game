@@ -25,7 +25,9 @@ pub const mapST = union(enum) {
     Exit:     Wit(Example.exit),
     ToEditor: Wit(.{ Example.outside, Example.map ,.{Example.selected_button, Example.map} }),
     ToMenu:   Wit(.{ Example.animation, Example.map, Example.menu }),
-    ToPlay:   Wit(.{ Example.animation, Example.map, Example.play }),
+    // ToPlay:   Wit(.{ Example.animation, Example.map, Example.play }),
+    // ToPlay:   Wit(Example.selected_cell),
+    ToPlay: Wit(.{ Example.outside, Example.map ,Example.selected_cell }),
     // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {

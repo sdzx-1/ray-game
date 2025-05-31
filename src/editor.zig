@@ -147,7 +147,7 @@ pub fn selected_button(target: SDZX) type {
                 const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
                 var tmpBuf: [100]u8 = undefined;
-                const str1 = std.fmt.bufPrintZ(&tmpBuf, "hover: {s}", .{str}) catch unreachable;
+                const str1 = std.fmt.bufPrintZ(&tmpBuf, "{s}", .{str}) catch unreachable;
                 const tsize = rl.measureText(str1, 32);
 
                 const mp = rl.getMousePosition();

@@ -156,6 +156,7 @@ pub const Example = enum {
     menu,
     map,
     play,
+    selected_cell,
 
     //
     animation,
@@ -183,6 +184,8 @@ pub const Example = enum {
     }
 
     //
+
+    pub const selected_cellST = play.selected_cellST;
 
     pub fn selected_buttonST(target: SDZX) type {
         return editor.selected_button(target);

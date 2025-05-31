@@ -91,17 +91,86 @@ pub const Cell = struct {
 
 pub const CurrentMap = [200][200]Cell;
 
+pub const selected_cellST = union(enum) {
+    ToPlay: Wit(Example.play),
+
+    pub fn conthandler(gst: *GST) ContR {
+        switch (genMsg(gst)) {
+            .ToPlay => |wit| return .{ .Next = wit.conthandler() },
+        }
+    }
+
+    pub fn genMsg(gst: *GST) @This() {
+        _ = gst;
+        return .ToPlay;
+    }
+
+    pub fn render_all(gst: *GST) void {
+        gst.play.view.mouse_wheel(gst.hdw);
+        gst.play.view.drag_view(gst.screen_width);
+        gst.play.view.draw_cells(gst);
+    }
+
+    pub fn check_inside(gst: *GST) select.CheckInsideResult {
+        render_all(gst);
+        const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
+        const rx: f32 = @floor(vp.x);
+        const ry: f32 = @floor(vp.y);
+        const x: i32 = @intFromFloat(rx);
+        const y: i32 = @intFromFloat(ry);
+
+        if (x < 0 or
+            y < 0 or
+            x > (gst.map.maze_config.total_x - 1) or
+            y > (gst.map.maze_config.total_y - 1)) return .not_in_any_rect;
+
+        gst.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
+        return .in_someone;
+    }
+
+    pub fn check_still_inside(gst: *GST) bool {
+        render_all(gst);
+        const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
+        const rx: f32 = @floor(vp.x);
+        const ry: f32 = @floor(vp.y);
+        const x: i32 = @intFromFloat(rx);
+        const y: i32 = @intFromFloat(ry);
+
+        return (x == gst.play.selected_cell_id.x and
+            y == gst.play.selected_cell_id.y);
+    }
+
+    pub fn hover(gst: *GST) void {
+        render_all(gst);
+
+        const val = gst.play.current_map[gst.play.selected_cell_id.y][gst.play.selected_cell_id.x];
+        var tmpBuf: [100]u8 = undefined;
+        const str1 = std.fmt.bufPrintZ(&tmpBuf, "{any}", .{val}) catch unreachable;
+        const tsize = rl.measureText(str1, 32);
+
+        const mp = rl.getMousePosition();
+        const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
+        const y = @as(i32, @intFromFloat(mp.y)) - 50;
+
+        rl.drawText(str1, x, y, 32, rl.Color.black);
+    }
+};
+
+pub const CellID = struct {
+    x: usize = 0,
+    y: usize = 0,
+};
+
 pub const Play = struct {
     rs: RS = .empty,
     current_map: *CurrentMap,
     view: View = undefined,
+    selected_cell_id: CellID = .{},
 
     pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
     }
 };
-
-pub const select_cellST = union(enum) {};
 
 pub const playST = union(enum) {
     ToEditor: Wit(.{ Example.outside, Example.play, .{ Example.selected_button, Example.play } }),
@@ -145,6 +214,7 @@ const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
+const select = @import("select.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
