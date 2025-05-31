@@ -22,6 +22,66 @@ pub const View = struct {
         self.x = x - self.width / 2;
         self.y = y - (self.width * hdw) / 2;
     }
+
+    pub fn mouse_wheel(self: *View, hdw: f32) void {
+        const mouse_wheel_deta = rl.getMouseWheelMove();
+        const deta = (mouse_wheel_deta * 0.65) * self.width * 0.2;
+        self.x -= deta / 2;
+        self.y -= (deta * hdw) / 2;
+        self.width += deta;
+    }
+
+    pub fn drag_view(self: *View, screen_width: f32) void {
+        if (rl.isMouseButtonDown(rl.MouseButton.middle)) {
+            const deta = self.dwin_to_dview(screen_width, rl.getMouseDelta());
+            self.x -= deta.x;
+            self.y -= deta.y;
+        }
+    }
+
+    pub fn draw_cells(view: *const View, gst: *GST) void {
+        const height = view.width * gst.hdw;
+
+        const min_x: i32 = @intFromFloat(@floor(view.x));
+        const max_x: i32 = @intFromFloat(@floor(view.x + view.width));
+
+        const min_y: i32 = @intFromFloat(@floor(view.y));
+        const max_y: i32 = @intFromFloat(@floor(view.y + height));
+
+        var ty = min_y;
+        while (ty < max_y + 1) : (ty += 1) {
+            var tx = min_x;
+            while (tx < max_x + 1) : (tx += 1) {
+                if (tx < 0 or
+                    ty < 0 or
+                    tx > (gst.map.maze_config.total_x - 1) or
+                    ty > (gst.map.maze_config.total_y - 1)) continue;
+
+                const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
+
+                const color = switch (val.tag) {
+                    .room => rl.Color.sky_blue,
+                    .path => rl.Color.gray,
+                    .connPoint => rl.Color.orange,
+                    else => rl.Color.white,
+                };
+
+                const win_pos = view.view_to_win(gst.screen_width, .{
+                    .x = @floatFromInt(tx),
+                    .y = @floatFromInt(ty),
+                });
+
+                const scale = 1 * gst.screen_width / view.width;
+                rl.drawRectangle(
+                    @intFromFloat(win_pos.x),
+                    @intFromFloat(win_pos.y),
+                    @intFromFloat(scale + 1),
+                    @intFromFloat(scale + 1),
+                    color,
+                );
+            }
+        }
+    }
 };
 
 pub const Cell = struct {
@@ -41,8 +101,9 @@ pub const Play = struct {
     }
 };
 
+pub const select_cellST = union(enum) {};
+
 pub const playST = union(enum) {
-    // ToEditor: Wit(.{ Example.idle, Example.play }),
     ToEditor: Wit(.{ Example.outside, Example.play, .{ Example.selected_button, Example.play } }),
     ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
 
@@ -60,69 +121,17 @@ pub const playST = union(enum) {
 
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-
-        {
-            const mouse_wheel_deta = rl.getMouseWheelMove();
-            const deta = (mouse_wheel_deta * 0.65) * gst.play.view.width * 0.2;
-            gst.play.view.x -= deta / 2;
-            gst.play.view.y -= (deta * gst.hdw) / 2;
-            gst.play.view.width += deta;
-        }
-
-        if (rl.isMouseButtonDown(rl.MouseButton.middle)) {
-            const deta = gst.play.view.dwin_to_dview(gst.screen_width, rl.getMouseDelta());
-            gst.play.view.x -= deta.x;
-            gst.play.view.y -= deta.y;
-        }
-
-        {
-            const view = gst.play.view;
-            const height = view.width * gst.hdw;
-
-            const min_x: i32 = @intFromFloat(@floor(view.x));
-            const max_x: i32 = @intFromFloat(@floor(view.x + view.width));
-
-            const min_y: i32 = @intFromFloat(@floor(view.y));
-            const max_y: i32 = @intFromFloat(@floor(view.y + height));
-
-            var ty = min_y;
-            while (ty < max_y + 1) : (ty += 1) {
-                var tx = min_x;
-                while (tx < max_x + 1) : (tx += 1) {
-                    if (tx < 0 or
-                        ty < 0 or
-                        tx > (gst.map.maze_config.total_x - 1) or
-                        ty > (gst.map.maze_config.total_y - 1)) continue;
-
-                    const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
-
-                    const color = switch (val.tag) {
-                        .room => rl.Color.sky_blue,
-                        .path => rl.Color.gray,
-                        .connPoint => rl.Color.orange,
-                        else => rl.Color.white,
-                    };
-
-                    const win_pos = gst.play.view.view_to_win(gst.screen_width, .{
-                        .x = @floatFromInt(tx),
-                        .y = @floatFromInt(ty),
-                    });
-
-                    const scale = 1 * gst.screen_width / gst.play.view.width;
-                    rl.drawRectangle(
-                        @intFromFloat(win_pos.x),
-                        @intFromFloat(win_pos.y),
-                        @intFromFloat(scale + 1),
-                        @intFromFloat(scale + 1),
-                        color,
-                    );
-                }
-            }
-        }
-
+        gst.play.view.mouse_wheel(gst.hdw);
+        gst.play.view.drag_view(gst.screen_width);
+        gst.play.view.draw_cells(gst);
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return null;
     }
+
+    pub const action_list: []const (Action(@This())) = &.{
+        .{ .name = "Editor", .val = .{ .Fun = toEditor } },
+        .{ .name = "Menu", .val = .{ .Fun = toMenu } },
+    };
 
     fn toEditor(_: *GST) ?@This() {
         return .ToEditor;
@@ -130,11 +139,6 @@ pub const playST = union(enum) {
     fn toMenu(_: *GST) ?@This() {
         return .ToMenu;
     }
-
-    pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor", .val = .{ .Fun = toEditor } },
-        .{ .name = "Menu", .val = .{ .Fun = toMenu } },
-    };
 };
 
 const std = @import("std");

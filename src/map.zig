@@ -145,6 +145,20 @@ pub const mapST = union(enum) {
         return null;
     }
 
+    // zig fmt: off
+    pub const action_list: []const (Action(@This())) = &.{
+        .{ .name = "Editor",   .val = .{ .Fun = toEditor } },
+        .{ .name = "Menu",     .val = .{ .Fun = toMenu } },
+        .{ .name = "Exit",     .val = .{ .Fun = exit } },
+        .{ .name = "Gen maze", .val = .{ .Fun = gen_maze } },
+        .{ .name = "rmx",      .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
+        .{ .name = "rmy",      .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
+        .{ .name = "rmwidth",     .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
+        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
+        .{ .name = "Play", .val = .{ .Fun = toPlay } },
+    };
+    // zig fmt: on
+
     fn mconfig_x(gst: *GST) *f32 {
         return &gst.map.maze_config.x;
     }
@@ -160,19 +174,6 @@ pub const mapST = union(enum) {
     fn mconfig_prob(gst: *GST) *f32 {
         return &gst.map.maze_config.probability;
     }
-    // zig fmt: off
-    pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",   .val = .{ .Fun = toEditor } },
-        .{ .name = "Menu",     .val = .{ .Fun = toMenu } },
-        .{ .name = "Exit",     .val = .{ .Fun = exit } },
-        .{ .name = "Gen maze", .val = .{ .Fun = gen_maze } },
-        .{ .name = "rmx",      .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
-        .{ .name = "rmy",      .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
-        .{ .name = "rmwidth",     .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
-        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
-        .{ .name = "Play", .val = .{ .Fun = toPlay } },
-    };
-    // zig fmt: on
 };
 
 fn generate_maze(

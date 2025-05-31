@@ -52,7 +52,17 @@ pub const menuST = union(enum) {
         return null;
     }
 
-    //
+    // zig fmt: off
+    pub const action_list: []const (Action(@This())) = &.{
+        .{ .name = "Editor",    .val = .{ .Fun = toEditor  } },
+        .{ .name = "Exit",      .val = .{ .Fun = exit      } },
+        .{ .name = "Play",      .val = .{ .Fun = toPlay    } },
+        .{ .name = "Log hello", .val = .{ .Fun = log_hello } },
+        .{ .name = "Save data", .val = .{ .Fun = saveData  } },
+        .{ .name = "animation", .val = .{ .Ptr_f32 = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
+    };
+    // zig fmt: on
+
     fn saveData(gst: *GST) ?@This() {
         utils.saveData(gst);
         return null;
@@ -78,15 +88,4 @@ pub const menuST = union(enum) {
     fn animation_duration_ref(gst: *GST) *f32 {
         return &gst.animation.total_time;
     }
-
-    // zig fmt: off
-        pub const action_list: []const (Action(@This())) = &.{
-            .{ .name = "Editor",    .val = .{ .Fun = toEditor  } },
-            .{ .name = "Exit",      .val = .{ .Fun = exit      } },
-            .{ .name = "Play",      .val = .{ .Fun = toPlay    } },
-            .{ .name = "Log hello", .val = .{ .Fun = log_hello } },
-            .{ .name = "Save data", .val = .{ .Fun = saveData  } },
-            .{ .name = "animation", .val = .{ .Ptr_f32 = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
-        };
-        // zig fmt: on
 };
