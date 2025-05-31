@@ -1,5 +1,6 @@
 const std = @import("std");
 const typedFsm = @import("typed_fsm");
+const select = @import("select.zig");
 const editor = @import("editor.zig");
 const map = @import("map.zig");
 const play = @import("play.zig");
@@ -78,6 +79,7 @@ pub const GST = struct {
     screen_height: f32 = 800,
     hdw: f32 = 800.0 / 1000.0,
     random: std.Random,
+    select: select.Select = .{},
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
     map: map.Map = .{},
@@ -162,6 +164,10 @@ pub const Example = enum {
     in_rect,
     selected,
     edit,
+    //select
+    outside,
+    inside,
+    hover,
 
     pub const playST = play.playST;
 
