@@ -80,6 +80,7 @@ pub const GST = struct {
     hdw: f32 = 800.0 / 1000.0,
     random: std.Random,
     select: select.Select = .{},
+    selected_id: usize = 0,
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
     map: map.Map = .{},
@@ -160,10 +161,13 @@ pub const Example = enum {
     animation,
 
     //editor
-    idle,
-    in_rect,
-    selected,
+    // idle,
+    // in_rect,
+    // selected,
+    selected_button,
     edit,
+    //
+
     //select
     outside,
     inside,
@@ -179,22 +183,14 @@ pub const Example = enum {
     }
 
     //
+
+    pub fn selected_buttonST(target: SDZX) type {
+        return editor.selected_button(target);
+    }
+
     pub fn editST(target: SDZX) type {
         return editor.editST(target);
     }
-
-    pub fn selectedST(target: SDZX) type {
-        return editor.selectedST(target);
-    }
-
-    pub fn in_rectST(target: SDZX) type {
-        return editor.in_rectST(target);
-    }
-
-    pub fn idleST(target: SDZX) type {
-        return editor.idleST(target);
-    }
-
     //
     pub fn outsideST(back: SDZX, selected: SDZX) type {
         return select.outsideST(back, selected);

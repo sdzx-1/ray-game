@@ -79,9 +79,7 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
         fn genMsg(gst: *GST) ?@This() {
             const res: bool = cst.check_still_inside(gst);
             if (!res) return .ToOutside;
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) {
-                return .ToSelected;
-            }
+            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
             if (mouse_moved()) gst.select.no_move_duartion = std.time.milliTimestamp();
             const deta = std.time.milliTimestamp() - gst.select.no_move_duartion;

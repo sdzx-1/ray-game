@@ -1,6 +1,7 @@
 const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const core = @import("core.zig");
+const select = @import("select.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -14,8 +15,6 @@ const R = core.R;
 const getTarget = core.getTarget;
 
 pub const Editor = struct {
-    in_rect: usize = 0,
-    selected: usize = 0,
     copyed_rect: ?R = null,
 };
 
@@ -46,26 +45,45 @@ fn gui(comptime target: SDZX, cst: type, gst: *GST) ?cst {
 
 const ContR = typedFsm.ContR(GST);
 
-pub fn idleST(target: SDZX) type {
+pub fn selected_button(target: SDZX) type {
     return union(enum) {
-        Exit: WitRow(target),
-        InRect: struct { wit: WitRow(SDZX.C(Example.in_rect, &.{target})) = .{}, id: usize },
+        ToEdit: WitRow(SDZX.C(Example.edit, &.{target})),
 
         pub fn conthandler(gst: *GST) ContR {
-            if (gui(target, @This(), gst)) |msg| {
-                switch (msg) {
-                    .InRect => |v| {
-                        gst.editor.in_rect = v.id;
-                        return .{ .Next = v.wit.conthandler() };
-                    },
-                    .Exit => |wit| return .{ .Next = wit.conthandler() },
-                }
-            } else return .Wait;
+            switch (genMsg(gst)) {
+                .ToEdit => |wit| return .{ .Next = wit.conthandler() },
+            }
         }
 
-        fn genMsg(gst: *GST) ?@This() {
-            const nst = comptime getTarget(target);
-            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
+        pub fn genMsg(gst: *GST) @This() {
+            _ = gst;
+            return .ToEdit;
+        }
+
+        const nst = getTarget(target);
+
+        fn render_all(gst: *GST) void {
+            for (@field(gst, nst).rs.items) |*r| {
+                rl.drawRectangleLines(
+                    @intFromFloat(r.rect.x),
+                    @intFromFloat(r.rect.y),
+                    @intFromFloat(r.rect.width),
+                    @intFromFloat(r.rect.height),
+                    r.color,
+                );
+
+                rl.drawText(
+                    &r.str_buf,
+                    @intFromFloat(r.rect.x),
+                    @intFromFloat(r.rect.y),
+                    32,
+                    r.color,
+                );
+            }
+        }
+
+        pub fn check_inside(gst: *GST) select.CheckInsideResult {
+            render_all(gst);
 
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                 const mp = rl.getMousePosition();
@@ -86,44 +104,28 @@ pub fn idleST(target: SDZX) type {
 
             for (@field(gst, nst).rs.items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
-                    return .{ .InRect = .{ .id = i } };
+                    gst.selected_id = i;
+                    return .in_someone;
                 }
             }
-
-            return null;
+            return .not_in_any_rect;
         }
-    };
-}
 
-pub fn in_rectST(target: SDZX) type {
-    return union(enum) {
-        // zig fmt: off
-        Exit      : WitRow(target),
-        ToIdle    : WitRow(SDZX.C(Example.idle, &.{target})),
-        ToEdit    : WitRow(SDZX.C(Example.edit, &.{target})),
-        ToSelected: WitRow(SDZX.C(Example.selected, &.{target})),
+        pub fn check_still_inside(gst: *GST) bool {
+            render_all(gst);
 
-        pub fn conthandler(gst: *GST) ContR {
-            if (gui(target, @This(), gst)) |msg| {
-                switch (msg) {
-                    .Exit       => |wit| return .{ .Next = wit.conthandler() },
-                    .ToIdle     => |wit| return .{ .Next = wit.conthandler() },
-                    .ToSelected => |wit| {
-                        gst.editor.selected = gst.editor.in_rect;
-                        return .{ .Next = wit.conthandler() };
-                    },
-                    .ToEdit     => |wit| {
-                        gst.editor.selected = gst.editor.in_rect;
-                        return .{ .Next = wit.conthandler() };
-                    },
-                }
-            } else return .Wait;
-        }
-        // zig fmt: on
+            const r = @field(gst, nst).rs.items[gst.selected_id];
 
-        fn genMsg(gst: *GST) ?@This() {
-            const nst = comptime getTarget(target);
-            const r = @field(gst, nst).rs.items[gst.editor.in_rect];
+            if (rl.isKeyDown(rl.KeyboardKey.c)) {
+                gst.log("Copy!");
+                gst.editor.copyed_rect = r;
+            }
+
+            if (rl.isKeyDown(rl.KeyboardKey.d)) {
+                gst.log("Delete!");
+                _ = @field(gst, nst).rs.swapRemove(gst.selected_id);
+                return false;
+            }
 
             rl.drawRectangleLines(
                 @intFromFloat(r.rect.x - 1),
@@ -133,130 +135,49 @@ pub fn in_rectST(target: SDZX) type {
                 rl.Color.blue,
             );
 
-            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
-
-            if (!r.inR(rl.getMousePosition())) {
-                return .ToIdle;
-            }
-
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) {
-                return .ToSelected;
-            }
-
-            if (rl.isMouseButtonPressed(rl.MouseButton.right)) {
-                return .ToEdit;
-            }
-            return null;
+            return r.inR(rl.getMousePosition());
         }
-    };
-}
 
-pub fn selectedST(target: SDZX) type {
-    return union(enum) {
-        // zig fmt: off
-        Exit  : WitRow(target),
-        ToIdle: WitRow(SDZX.C(Example.idle, &.{target})),
-        Edit  : WitRow(SDZX.C(Example.edit, &.{target})),
-
-        pub fn conthandler(gst: *GST) ContR {
-            if (gui(target, @This(), gst)) |msg| {
-                switch (msg) {
-                    .Exit   => |wit| return .{ .Next = wit.conthandler() },
-                    .ToIdle => |wit| return .{ .Next = wit.conthandler() },
-                    .Edit   => |wit| return .{ .Next = wit.conthandler() },
-                }
-            } else return .Wait;
-        }
-        // zig fmt: on
-
-        fn genMsg(gst: *GST) ?@This() {
-            const nst = comptime getTarget(target);
-            const r = &@field(gst, nst).rs.items[gst.editor.selected];
-            rl.drawRectangleLines(
-                @intFromFloat(r.rect.x - 1),
-                @intFromFloat(r.rect.y - 1),
-                @intFromFloat(r.rect.width + 2),
-                @intFromFloat(r.rect.height + 2),
-                rl.Color.red,
-            );
-
-            if (rl.isKeyPressed(rl.KeyboardKey.q)) return .Exit;
-
-            const deta: f32 = 1.4;
-
-            if (!r.inR(rl.getMousePosition()) and
-                rl.isMouseButtonPressed(rl.MouseButton.left))
+        pub fn hover(gst: *GST) void {
+            const ptr: *R = &@field(gst, nst).rs.items[gst.selected_id];
+            if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
+                ptr.enable_action)
             {
-                return .ToIdle;
-            }
+                const action_list = @field(@field(Example, nst ++ "ST"), "action_list");
+                const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
-            if (rl.isMouseButtonDown(rl.MouseButton.left)) {
-                const v = rl.getMouseDelta();
-                r.rect.x += v.x;
-                r.rect.y += v.y;
-            }
+                var tmpBuf: [100]u8 = undefined;
+                const str1 = std.fmt.bufPrintZ(&tmpBuf, "hover: {s}", .{str}) catch unreachable;
+                const tsize = rl.measureText(str1, 32);
 
-            if (rl.isKeyDown(rl.KeyboardKey.h)) {
-                const v = .{ .x = -deta, .y = 0 };
-                r.rect.width += v.x;
-                r.rect.height += v.y;
-            }
+                const mp = rl.getMousePosition();
+                const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
+                const y = @as(i32, @intFromFloat(mp.y)) - 50;
 
-            if (rl.isKeyDown(rl.KeyboardKey.l)) {
-                const v = .{ .x = deta, .y = 0 };
-                r.rect.width += v.x;
-                r.rect.height += v.y;
+                rl.drawText(str1, x, y, 52, rl.Color.black);
             }
-
-            if (rl.isKeyDown(rl.KeyboardKey.j)) {
-                const v = .{ .x = 0, .y = deta };
-                r.rect.width += v.x;
-                r.rect.height += v.y;
-            }
-
-            if (rl.isKeyDown(rl.KeyboardKey.k)) {
-                const v = .{ .x = 0, .y = -deta };
-                r.rect.width += v.x;
-                r.rect.height += v.y;
-            }
-
-            if (rl.isKeyDown(rl.KeyboardKey.c)) {
-                gst.log("Copy!");
-                gst.editor.copyed_rect = r.*;
-            }
-
-            if (rl.isKeyDown(rl.KeyboardKey.d)) {
-                gst.log("Delete!");
-                _ = @field(gst, nst).rs.swapRemove(gst.editor.selected);
-                return .ToIdle;
-            }
-
-            if (rl.isMouseButtonPressed(rl.MouseButton.right) or
-                rl.isKeyPressed(rl.KeyboardKey.enter))
-            {
-                return .Edit;
-            }
-
-            return null;
         }
     };
 }
 
 pub fn editST(target: SDZX) type {
     return union(enum) {
-        ToSelected: WitRow(SDZX.C(Example.selected, &.{target})),
+        Finish: WitRow(target),
+        ToOutside: WitRow(SDZX.C(Example.outside, &.{ target, SDZX.C(Example.selected_button, &.{target}) })),
 
         pub fn conthandler(gst: *GST) ContR {
             if (gui(target, @This(), gst)) |msg| {
                 switch (msg) {
-                    .ToSelected => |wit| return .{ .Next = wit.conthandler() },
+                    .Finish => |wit| return .{ .Next = wit.conthandler() },
+                    .ToOutside => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
         }
 
+        const nst = getTarget(target);
+
         fn genMsg(gst: *GST) ?@This() {
-            const nst = comptime getTarget(target);
-            const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected];
+            const ptr: *R = &@field(gst, nst).rs.items[gst.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -309,13 +230,42 @@ pub fn editST(target: SDZX) type {
             const size = rl.measureText(&ptr.str_buf, 32);
             ptr.rect.width = @max(32, @as(f32, @floatFromInt(size)));
 
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .Finish;
             if (rl.isKeyPressed(rl.KeyboardKey.enter) or
-                rl.isKeyPressed(rl.KeyboardKey.caps_lock) or
-                rl.isKeyPressed(rl.KeyboardKey.escape))
-            {
-                return .ToSelected;
+                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .ToOutside;
+
+            if (rl.isMouseButtonDown(rl.MouseButton.left)) {
+                const v = rl.getMouseDelta();
+                ptr.rect.x += v.x;
+                ptr.rect.y += v.y;
             }
+
             return null;
         }
     };
 }
+
+// const deta: f32 = 1.4;
+//             if (rl.isKeyDown(rl.KeyboardKey.h)) {
+//                 const v = .{ .x = -deta, .y = 0 };
+//                 r.rect.width += v.x;
+//                 r.rect.height += v.y;
+//             }
+
+//             if (rl.isKeyDown(rl.KeyboardKey.l)) {
+//                 const v = .{ .x = deta, .y = 0 };
+//                 r.rect.width += v.x;
+//                 r.rect.height += v.y;
+//             }
+
+//             if (rl.isKeyDown(rl.KeyboardKey.j)) {
+//                 const v = .{ .x = 0, .y = deta };
+//                 r.rect.width += v.x;
+//                 r.rect.height += v.y;
+//             }
+
+//             if (rl.isKeyDown(rl.KeyboardKey.k)) {
+//                 const v = .{ .x = 0, .y = -deta };
+//                 r.rect.width += v.x;
+//                 r.rect.height += v.y;
+//             }

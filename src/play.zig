@@ -42,7 +42,8 @@ pub const Play = struct {
 };
 
 pub const playST = union(enum) {
-    ToEditor: Wit(.{ Example.idle, Example.play }),
+    // ToEditor: Wit(.{ Example.idle, Example.play }),
+    ToEditor: Wit(.{ Example.outside, Example.play, .{ Example.selected_button, Example.play } }),
     ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
 
     pub fn conthandler(gst: *GST) ContR {
