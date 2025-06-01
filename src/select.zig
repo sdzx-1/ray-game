@@ -58,6 +58,18 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
         pub const check_inside2 = cst.check_inside3;
         pub const check_inside3 = cst.check_inside4;
         pub const check_inside4 = cst.check_inside5;
+
+        pub const check_still_inside = cst.check_still_inside1;
+        pub const check_still_inside1 = cst.check_still_inside2;
+        pub const check_still_inside2 = cst.check_still_inside3;
+        pub const check_still_inside3 = cst.check_still_inside4;
+        pub const check_still_inside4 = cst.check_still_inside5;
+
+        pub const hover = cst.hover1;
+        pub const hover1 = cst.hover2;
+        pub const hover2 = cst.hover3;
+        pub const hover3 = cst.hover4;
+        pub const hover4 = cst.hover5;
     };
 }
 
@@ -92,12 +104,6 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
             if (deta > 400) return .ToHover;
             return null;
         }
-
-        pub const check_still_inside = cst.check_still_inside1;
-        pub const check_still_inside1 = cst.check_still_inside2;
-        pub const check_still_inside2 = cst.check_still_inside3;
-        pub const check_still_inside3 = cst.check_still_inside4;
-        pub const check_still_inside4 = cst.check_still_inside5;
     };
 }
 
@@ -132,12 +138,6 @@ pub fn hoverST(back: SDZX, selected: SDZX) type {
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
             return null;
         }
-
-        pub const hover = cst.hover1;
-        pub const hover1 = cst.hover2;
-        pub const hover2 = cst.hover3;
-        pub const hover3 = cst.hover4;
-        pub const hover4 = cst.hover5;
     };
 }
 

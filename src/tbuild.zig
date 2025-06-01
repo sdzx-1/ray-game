@@ -83,8 +83,8 @@ pub const Tbuild = struct {
 pub const Building = struct {
     x: f32,
     y: f32,
-    width: u32,
-    height: u32,
+    width: i32,
+    height: i32,
 
     pub fn inBuilding(self: *const Building, gst: *const GST, pos: rl.Vector2) bool {
         const r = gst.screen_width / gst.play.view.width;
@@ -104,6 +104,22 @@ pub const Building = struct {
         const w: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
         const h: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
         rl.drawRectangle(x, y, w, h, rl.Color.orange);
+        var tmpBuf: [20]u8 = undefined;
+        const str = std.fmt.bufPrintZ(
+            &tmpBuf,
+            "{d}, {d}",
+            .{ self.width, self.height },
+        ) catch unreachable;
+        rl.drawText(str, x, y, 32, rl.Color.red);
+    }
+
+    pub fn draw_with_pos(self: *const Building, gst: *const GST, pos: rl.Vector2) void {
+        const x: i32 = @intFromFloat(pos.x);
+        const y: i32 = @intFromFloat(pos.y);
+        const r = gst.screen_width / gst.play.view.width;
+        const w: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
+        const h: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
+        rl.drawRectangle(x, y, w, h, rl.Color.green);
         var tmpBuf: [20]u8 = undefined;
         const str = std.fmt.bufPrintZ(
             &tmpBuf,

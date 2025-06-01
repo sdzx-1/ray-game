@@ -158,6 +158,7 @@ pub const Example = enum {
     map,
     play,
     build,
+    place,
 
     //
     animation,
@@ -174,6 +175,7 @@ pub const Example = enum {
     pub const menuST = menu.menuST;
     pub const mapST = map.mapST;
     pub const playST = play.playST;
+    pub const placeST = play.placeST;
 
     //
     pub fn animationST(from: SDZX, to: SDZX) type {
