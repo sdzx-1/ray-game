@@ -16,6 +16,7 @@ const getTarget = core.getTarget;
 
 pub const Editor = struct {
     copyed_rect: ?R = null,
+    selected_id: usize = 0,
 };
 
 const ContR = typedFsm.ContR(GST);
@@ -55,7 +56,7 @@ pub fn editST(target: SDZX) type {
                 );
             }
 
-            const ptr: *R = &@field(gst, nst).rs.items[gst.selected_id];
+            const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -163,7 +164,7 @@ pub fn editST(target: SDZX) type {
 
             for (@field(gst, nst).rs.items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
-                    gst.selected_id = i;
+                    gst.editor.selected_id = i;
                     return .in_someone;
                 }
             }
@@ -173,7 +174,7 @@ pub fn editST(target: SDZX) type {
         pub fn check_still_inside(gst: *GST) bool {
             render_all(gst);
 
-            const r = @field(gst, nst).rs.items[gst.selected_id];
+            const r = @field(gst, nst).rs.items[gst.editor.selected_id];
 
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
@@ -182,7 +183,7 @@ pub fn editST(target: SDZX) type {
 
             if (rl.isKeyDown(rl.KeyboardKey.d)) {
                 gst.log("Delete!");
-                _ = @field(gst, nst).rs.swapRemove(gst.selected_id);
+                _ = @field(gst, nst).rs.swapRemove(gst.editor.selected_id);
                 return false;
             }
 
@@ -199,7 +200,7 @@ pub fn editST(target: SDZX) type {
 
         pub fn hover(gst: *GST) void {
             render_all(gst);
-            const ptr: *R = &@field(gst, nst).rs.items[gst.selected_id];
+            const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected_id];
             if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
                 ptr.enable_action)
             {

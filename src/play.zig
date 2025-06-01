@@ -22,16 +22,46 @@ pub const Cell = struct {
 
 pub const CurrentMap = [200][200]Cell;
 
-pub const Building = struct {
-    width: i32,
-    height: i32,
-};
+pub const placeST = union(enum) {
+    ToPlay: Wit(Example.play),
 
-pub const AllBuilding = [_]Building{
-    .{ .width = 2, .height = 3 },
-    .{ .width = 2, .height = 2 },
-    .{ .width = 3, .height = 3 },
-    .{ .width = 4, .height = 3 },
+    pub fn conthandler(gst: *GST) ContR {
+        switch (genMsg(gst)) {
+            .ToPlay => |wit| {
+                return .{ .Next = wit.conthandler() };
+            },
+        }
+    }
+
+    pub fn genMsg(gst: *GST) @This() {
+        _ = gst;
+        return .ToPlay;
+    }
+    //select build
+    pub fn check_inside1(gst: *GST) select.CheckInsideResult {
+        _ = gst;
+    }
+
+    pub fn check_still_inside1(gst: *GST) bool {
+        _ = gst;
+    }
+
+    pub fn hover1(gst: *GST) void {
+        _ = gst;
+    }
+
+    //select position
+    pub fn check_inside(gst: *GST) select.CheckInsideResult {
+        _ = gst;
+    }
+
+    pub fn check_still_inside(gst: *GST) bool {
+        _ = gst;
+    }
+
+    pub fn hover(gst: *GST) void {
+        _ = gst;
+    }
 };
 
 pub const selected_cellST = union(enum) {
@@ -107,6 +137,7 @@ pub const selected_cellST = union(enum) {
 pub const playST = union(enum) {
     ToEditor: Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
     ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
+    ToBuild: Wit(.{ Example.select, Example.play, Example.build }),
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
@@ -116,12 +147,14 @@ pub const playST = union(enum) {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
+                .ToBuild => |wit| return .{ .Next = wit.conthandler() },
             }
         } else return .Wait;
     }
 
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .ToBuild;
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         gst.play.view.draw_cells(gst, 1);

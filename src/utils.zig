@@ -1,6 +1,7 @@
 const std = @import("std");
 const R = core.R;
 const core = @import("core.zig");
+const tbuild = @import("tbuild.zig");
 const map = @import("map.zig");
 const GST = core.GST;
 
@@ -11,6 +12,7 @@ pub const SaveData = struct {
     menu: []const R = &.{},
     map: []const R = &.{},
     play: []const R = &.{},
+    tbuild: []const tbuild.Building = &.{},
     maze_config: map.MazeConfig = .{},
 
     pub fn save(self: *const @This()) void {
@@ -36,6 +38,7 @@ pub const SaveData = struct {
             val.menu = gpa.dupe(R, val.menu) catch unreachable;
             val.play = gpa.dupe(R, val.play) catch unreachable;
             val.map = gpa.dupe(R, val.map) catch unreachable;
+            val.tbuild = gpa.dupe(tbuild.Building, val.tbuild) catch unreachable;
             return val;
         } else |_| {
             return .{};
@@ -48,6 +51,7 @@ pub fn saveData(gst: *GST) void {
         .menu = gst.menu.rs.items,
         .map = gst.map.rs.items,
         .play = gst.play.rs.items,
+        .tbuild = gst.tbuild.list.items,
         .maze_config = gst.map.maze_config,
         .screen_width = gst.screen_width,
         .screen_height = gst.screen_height,
@@ -62,6 +66,7 @@ pub fn loadData(gpa: std.mem.Allocator, gst: *GST) !void {
     try gst.menu.rs.appendSlice(gpa, save_data.menu);
     try gst.map.rs.appendSlice(gpa, save_data.map);
     try gst.play.rs.appendSlice(gpa, save_data.play);
+    try gst.tbuild.list.appendSlice(gpa, save_data.tbuild);
     gst.map.maze_config = save_data.maze_config;
     gst.screen_width = save_data.screen_width;
     gst.screen_height = save_data.screen_height;

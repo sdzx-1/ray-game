@@ -5,6 +5,7 @@ const editor = @import("editor.zig");
 const map = @import("map.zig");
 const play = @import("play.zig");
 const menu = @import("menu.zig");
+const tbuild = @import("tbuild.zig");
 const animation = @import("animation.zig");
 const utils = @import("utils.zig");
 
@@ -80,11 +81,11 @@ pub const GST = struct {
     hdw: f32 = 800.0 / 1000.0,
     random: std.Random,
     select: select.Select = .{},
-    selected_id: usize = 0,
     editor: editor.Editor = .{},
     menu: menu.Menu = .{},
     map: map.Map = .{},
     play: play.Play,
+    tbuild: tbuild.Tbuild = .{},
     animation: animation.Animation = .{},
 
     //
@@ -156,7 +157,7 @@ pub const Example = enum {
     menu,
     map,
     play,
-    selected_cell,
+    build,
 
     //
     animation,
@@ -169,6 +170,7 @@ pub const Example = enum {
     inside,
     hover,
 
+    pub const buildST = tbuild.buildST;
     pub const menuST = menu.menuST;
     pub const mapST = map.mapST;
     pub const playST = play.playST;
@@ -179,8 +181,6 @@ pub const Example = enum {
     }
 
     //
-
-    pub const selected_cellST = play.selected_cellST;
 
     pub fn editST(target: SDZX) type {
         return editor.editST(target);
