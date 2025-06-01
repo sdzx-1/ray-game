@@ -25,7 +25,7 @@ pub const Select = struct {
     no_move_duartion: i64 = 0,
 };
 
-pub fn outsideST(back: SDZX, selected: SDZX) type {
+pub fn selectST(back: SDZX, selected: SDZX) type {
     const cst = typedFsm.sdzx_to_cst(Example, selected);
     return union(enum) {
         ToBack: WitRow(back),
@@ -60,7 +60,7 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
     return union(enum) {
         // zig fmt: off
         ToBack    : WitRow(back),
-        ToOutside : WitRow(SDZX.C(Example.outside, &.{ back, selected })),
+        ToOutside : WitRow(SDZX.C(Example.select, &.{ back, selected })),
         ToHover   : WitRow(SDZX.C(Example.hover,   &.{ back, selected })),
         ToSelected: WitRow(selected),
         // zig fmt: on
@@ -94,7 +94,7 @@ pub fn hoverST(back: SDZX, selected: SDZX) type {
     return union(enum) {
         // zig fmt: off
         ToBack    : WitRow(back),
-        ToOutside : WitRow(SDZX.C(Example.outside, &.{ back, selected })),
+        ToOutside : WitRow(SDZX.C(Example.select, &.{ back, selected })),
         ToInside  : WitRow(SDZX.C(Example.inside, &.{ back, selected })),
         ToSelected: WitRow(selected),
         // zig fmt: on

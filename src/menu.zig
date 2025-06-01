@@ -30,7 +30,7 @@ pub const Menu = struct {
 pub const menuST = union(enum) {
     // zig fmt: off
     Exit:     Wit(Example.exit),
-    ToEditor: Wit(.{Example.outside, Example.menu,  .{Example.selected_button, Example.menu}}),
+    ToEditor: Wit(.{Example.select, Example.menu,  .{Example.selected_button, Example.menu}}),
     ToPlay:   Wit(.{ Example.animation, Example.menu, Example.map }),
     // zig fmt: on
 

@@ -163,7 +163,7 @@ pub fn selected_button(target: SDZX) type {
 pub fn editST(target: SDZX) type {
     return union(enum) {
         Finish: WitRow(target),
-        ToOutside: WitRow(SDZX.C(Example.outside, &.{ target, SDZX.C(Example.selected_button, &.{target}) })),
+        ToOutside: WitRow(SDZX.C(Example.select, &.{ target, SDZX.C(Example.selected_button, &.{target}) })),
 
         pub fn conthandler(gst: *GST) ContR {
             if (gui(target, @This(), gst)) |msg| {

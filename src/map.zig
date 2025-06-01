@@ -22,12 +22,10 @@ pub const Map = struct {
 
 pub const mapST = union(enum) {
     // zig fmt: off
-    Exit:     Wit(Example.exit),
-    ToEditor: Wit(.{ Example.outside, Example.map ,.{Example.selected_button, Example.map} }),
-    ToMenu:   Wit(.{ Example.animation, Example.map, Example.menu }),
-    // ToPlay:   Wit(.{ Example.animation, Example.map, Example.play }),
-    // ToPlay:   Wit(Example.selected_cell),
-    ToPlay: Wit(.{ Example.outside, Example.map ,Example.selected_cell }),
+    Exit    : Wit(Example.exit),
+    ToEditor: Wit(.{ Example.select, Example.map ,.{Example.selected_button, Example.map} }),
+    ToMenu  : Wit(.{ Example.animation, Example.map, Example.menu }),
+    ToPlay  : Wit(.{ Example.select, Example.map ,Example.selected_cell }),
     // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {

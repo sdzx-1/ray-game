@@ -161,16 +161,12 @@ pub const Example = enum {
     //
     animation,
 
-    //editor
-    // idle,
-    // in_rect,
-    // selected,
+    //
     selected_button,
     edit,
-    //
 
-    //select
-    outside,
+    //
+    select,
     inside,
     hover,
 
@@ -195,8 +191,8 @@ pub const Example = enum {
         return editor.editST(target);
     }
     //
-    pub fn outsideST(back: SDZX, selected: SDZX) type {
-        return select.outsideST(back, selected);
+    pub fn selectST(back: SDZX, selected: SDZX) type {
+        return select.selectST(back, selected);
     }
 
     pub fn insideST(back: SDZX, selected: SDZX) type {
