@@ -23,7 +23,7 @@ pub const Map = struct {
 pub const mapST = union(enum) {
     // zig fmt: off
     Exit    : Wit(Example.exit),
-    ToEditor: Wit(.{ Example.select, Example.map ,.{Example.selected_button, Example.map} }),
+    ToEditor: Wit(.{ Example.select, Example.map ,.{Example.edit, Example.map} }),
     ToMenu  : Wit(.{ Example.animation, Example.map, Example.menu }),
     ToPlay  : Wit(.{ Example.select, Example.map ,Example.selected_cell }),
     // zig fmt: on

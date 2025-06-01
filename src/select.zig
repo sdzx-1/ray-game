@@ -126,10 +126,10 @@ pub fn hoverST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
+            cst.hover(gst);
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
             if (mouse_moved()) return .ToInside;
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
-            cst.hover(gst);
             return null;
         }
 

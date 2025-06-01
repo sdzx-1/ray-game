@@ -162,7 +162,6 @@ pub const Example = enum {
     animation,
 
     //
-    selected_button,
     edit,
 
     //
@@ -182,10 +181,6 @@ pub const Example = enum {
     //
 
     pub const selected_cellST = play.selected_cellST;
-
-    pub fn selected_buttonST(target: SDZX) type {
-        return editor.selected_button(target);
-    }
 
     pub fn editST(target: SDZX) type {
         return editor.editST(target);

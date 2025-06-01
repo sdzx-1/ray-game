@@ -34,80 +34,17 @@ pub const AllBuilding = [_]Building{
     .{ .width = 4, .height = 3 },
 };
 
-pub const selected_buildST = union(enum) {
-    ToSelected_cell: Wit(.{
-        Example.outside,
-        Example.selected_build,
-    }),
-
-    pub fn conthandler(gst: *GST) ContR {
-        switch (genMsg(gst)) {
-            .ToSelected_cell => |wit| return .{ .Next = wit.conthandler() },
-        }
-    }
-
-    pub fn genMsg(gst: *GST) @This() {
-        _ = gst;
-        return .ToSelected_cell;
-    }
-
-    pub fn render_all(gst: *GST) void {
-        gst.play.view.mouse_wheel(gst.hdw);
-        gst.play.view.drag_view(gst.screen_width);
-        gst.play.view.draw_cells(gst);
-    }
-
-    pub fn check_inside(gst: *GST) select.CheckInsideResult {
-        render_all(gst);
-        const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        const rx: f32 = @floor(vp.x);
-        const ry: f32 = @floor(vp.y);
-        const x: i32 = @intFromFloat(rx);
-        const y: i32 = @intFromFloat(ry);
-
-        if (x < 0 or
-            y < 0 or
-            x > (gst.map.maze_config.total_x - 1) or
-            y > (gst.map.maze_config.total_y - 1)) return .not_in_any_rect;
-
-        gst.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
-        return .in_someone;
-    }
-
-    pub fn check_still_inside(gst: *GST) bool {
-        render_all(gst);
-        const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        const rx: f32 = @floor(vp.x);
-        const ry: f32 = @floor(vp.y);
-        const x: i32 = @intFromFloat(rx);
-        const y: i32 = @intFromFloat(ry);
-
-        return (x == gst.play.selected_cell_id.x and
-            y == gst.play.selected_cell_id.y);
-    }
-
-    pub fn hover(gst: *GST) void {
-        render_all(gst);
-
-        const val = gst.play.current_map[gst.play.selected_cell_id.y][gst.play.selected_cell_id.x];
-        var tmpBuf: [100]u8 = undefined;
-        const str1 = std.fmt.bufPrintZ(&tmpBuf, "{any}", .{val}) catch unreachable;
-        const tsize = rl.measureText(str1, 32);
-
-        const mp = rl.getMousePosition();
-        const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
-        const y = @as(i32, @intFromFloat(mp.y)) - 50;
-
-        rl.drawText(str1, x, y, 32, rl.Color.black);
-    }
-};
-
 pub const selected_cellST = union(enum) {
     ToPlay: Wit(Example.play),
 
     pub fn conthandler(gst: *GST) ContR {
         switch (genMsg(gst)) {
-            .ToPlay => |wit| return .{ .Next = wit.conthandler() },
+            .ToPlay => |wit| {
+                const x = @as(f32, @floatFromInt(gst.play.selected_cell_id.x)) + 0.5;
+                const y = @as(f32, @floatFromInt(gst.play.selected_cell_id.y)) + 0.5;
+                gst.play.view.center(gst.hdw, x, y);
+                return .{ .Next = wit.conthandler() };
+            },
         }
     }
 
@@ -119,7 +56,7 @@ pub const selected_cellST = union(enum) {
     pub fn render_all(gst: *GST) void {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        gst.play.view.draw_cells(gst);
+        gst.play.view.draw_cells(gst, -1);
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
@@ -168,7 +105,7 @@ pub const selected_cellST = union(enum) {
 };
 
 pub const playST = union(enum) {
-    ToEditor: Wit(.{ Example.select, Example.play, .{ Example.selected_button, Example.play } }),
+    ToEditor: Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
     ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
 
     pub fn conthandler(gst: *GST) ContR {
@@ -187,7 +124,7 @@ pub const playST = union(enum) {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        gst.play.view.draw_cells(gst);
+        gst.play.view.draw_cells(gst, 1);
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return null;
     }
@@ -246,7 +183,7 @@ pub const View = struct {
         }
     }
 
-    pub fn draw_cells(view: *const View, gst: *GST) void {
+    pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
         const height = view.width * gst.hdw;
 
         const min_x: i32 = @intFromFloat(@floor(view.x));
@@ -282,8 +219,8 @@ pub const View = struct {
                 rl.drawRectangle(
                     @intFromFloat(win_pos.x),
                     @intFromFloat(win_pos.y),
-                    @intFromFloat(scale + 1),
-                    @intFromFloat(scale + 1),
+                    @intFromFloat(scale + inc),
+                    @intFromFloat(scale + inc),
                     color,
                 );
             }
