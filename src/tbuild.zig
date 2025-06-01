@@ -113,20 +113,20 @@ pub const Building = struct {
         rl.drawText(str, x, y, 32, rl.Color.red);
     }
 
-    pub fn draw_with_pos(self: *const Building, gst: *const GST, pos: rl.Vector2) void {
+    pub fn draw_with_pos(self: *const Building, gst: *const GST, pos: rl.Vector2, color: rl.Color) void {
         const x: i32 = @intFromFloat(pos.x);
         const y: i32 = @intFromFloat(pos.y);
         const r = gst.screen_width / gst.play.view.width;
         const w: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
         const h: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
-        rl.drawRectangle(x, y, w, h, rl.Color.green);
+        rl.drawRectangle(x, y, w, h, color);
         var tmpBuf: [20]u8 = undefined;
         const str = std.fmt.bufPrintZ(
             &tmpBuf,
             "{d}, {d}",
             .{ self.width, self.height },
         ) catch unreachable;
-        rl.drawText(str, x, y, 32, rl.Color.red);
+        rl.drawText(str, x, y, 32, rl.Color.black);
     }
 };
 

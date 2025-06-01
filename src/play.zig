@@ -42,7 +42,7 @@ pub const placeST = union(enum) {
                         cell.building_id = build_id;
                     }
                 }
-                return .{ .Next = wit.conthandler() };
+                return wit.conthandler()(gst);
             },
         }
     }
@@ -82,6 +82,7 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
+        const b = gst.tbuild.list.items[gst.play.selected_build_id];
         render_all(gst);
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const rx: f32 = @floor(vp.x);
@@ -94,20 +95,19 @@ pub const placeST = union(enum) {
             x > (gst.map.maze_config.total_x - 1) or
             y > (gst.map.maze_config.total_y - 1)) return .not_in_any_rect;
 
-        const b = gst.tbuild.list.items[gst.play.selected_build_id];
-
         var ty = y;
         while (ty < y + b.height) : (ty += 1) {
             var tx = x;
             while (tx < x + b.width) : (tx += 1) {
                 const cell = gst.play.current_map[@intCast(ty)][@intCast(tx)];
                 if (cell.tag != .room or cell.building_id != null) {
+                    b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.red);
                     return .not_in_any_rect;
                 }
             }
         }
 
-        b.draw_with_pos(gst, rl.getMousePosition());
+        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green);
         gst.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
         return .in_someone;
     }
@@ -120,7 +120,7 @@ pub const placeST = union(enum) {
         const x: i32 = @intFromFloat(rx);
         const y: i32 = @intFromFloat(ry);
         const b = gst.tbuild.list.items[gst.play.selected_build_id];
-        b.draw_with_pos(gst, rl.getMousePosition());
+        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green);
 
         return (x == gst.play.selected_cell_id.x and
             y == gst.play.selected_cell_id.y);
@@ -135,7 +135,7 @@ pub const placeST = union(enum) {
         const tsize = rl.measureText(str1, 32);
 
         const b = gst.tbuild.list.items[gst.play.selected_build_id];
-        b.draw_with_pos(gst, rl.getMousePosition());
+        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green);
 
         const mp = rl.getMousePosition();
         const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
@@ -166,13 +166,14 @@ pub const playST = union(enum) {
     }
 
     fn genMsg(gst: *GST) ?@This() {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .ToBuild;
-        if (rl.isKeyPressed(rl.KeyboardKey.p)) return .ToPlace;
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         gst.play.view.draw_cells(gst, 1);
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .ToBuild;
+        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .ToPlace;
         return null;
     }
 
