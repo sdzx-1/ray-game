@@ -139,6 +139,7 @@ pub fn selected_button(target: SDZX) type {
         }
 
         pub fn hover(gst: *GST) void {
+            render_all(gst);
             const ptr: *R = &@field(gst, nst).rs.items[gst.selected_id];
             if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
                 ptr.enable_action)
