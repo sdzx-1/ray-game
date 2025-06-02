@@ -17,9 +17,12 @@ pub const buildST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        const deta = rl.getMouseDelta();
-        ptr.x += deta.x;
-        ptr.y += deta.y;
+        ptr.draw_color_picker();
+        if (rl.isMouseButtonDown(rl.MouseButton.left)) {
+            const deta = rl.getMouseDelta();
+            ptr.x += deta.x;
+            ptr.y += deta.y;
+        }
         if (rl.isKeyPressed(rl.KeyboardKey.j)) {
             ptr.height = ptr.height + 1;
         }
@@ -58,7 +61,13 @@ pub const buildST = union(enum) {
             const mp = rl.getMousePosition();
             gst.tbuild.list.append(
                 gst.gpa,
-                .{ .x = mp.x, .y = mp.y, .width = 2, .height = 2 },
+                .{
+                    .x = mp.x,
+                    .y = mp.y,
+                    .width = 1,
+                    .height = 1,
+                    .color = rl.Color.orange,
+                },
             ) catch unreachable;
         }
         return .not_in_any_rect;
@@ -85,6 +94,7 @@ pub const Building = struct {
     y: f32,
     width: i32,
     height: i32,
+    color: rl.Color = .orange,
 
     pub fn inBuilding(self: *const Building, gst: *const GST, pos: rl.Vector2) bool {
         const r = gst.screen_width / gst.play.view.width;
@@ -97,29 +107,32 @@ pub const Building = struct {
         return false;
     }
 
-    pub fn draw(self: *const Building, gst: *const GST) void {
-        const x: i32 = @intFromFloat(self.x);
-        const y: i32 = @intFromFloat(self.y);
-        const r = gst.screen_width / gst.play.view.width;
-        const w: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
-        const h: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
-        rl.drawRectangle(x, y, w, h, rl.Color.orange);
-        var tmpBuf: [20]u8 = undefined;
-        const str = std.fmt.bufPrintZ(
-            &tmpBuf,
-            "{d}, {d}",
-            .{ self.width, self.height },
-        ) catch unreachable;
-        rl.drawText(str, x, y, 32, rl.Color.red);
+    pub fn draw(self: *Building, gst: *const GST) void {
+        self.draw_with_pos(gst, .{ .x = self.x, .y = self.y }, null, false);
     }
 
-    pub fn draw_with_pos(self: *const Building, gst: *const GST, pos: rl.Vector2, color: rl.Color) void {
+    pub fn draw_with_pos(
+        self: *Building,
+        gst: *const GST,
+        pos: rl.Vector2,
+        color: ?rl.Color,
+        scale: bool,
+    ) void {
         const x: i32 = @intFromFloat(pos.x);
         const y: i32 = @intFromFloat(pos.y);
-        const r = gst.screen_width / gst.play.view.width;
-        const w: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
-        const h: i32 = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
-        rl.drawRectangle(x, y, w, h, color);
+        var w: i32 = undefined;
+        var h: i32 = undefined;
+
+        if (scale) {
+            const r = gst.screen_width / gst.play.view.width;
+            w = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
+            h = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
+        } else {
+            w = 50 * self.width;
+            h = 50 * self.height;
+        }
+
+        if (color) |col| rl.drawRectangle(x, y, w, h, col) else rl.drawRectangle(x, y, w, h, self.color);
         var tmpBuf: [20]u8 = undefined;
         const str = std.fmt.bufPrintZ(
             &tmpBuf,
@@ -127,6 +140,14 @@ pub const Building = struct {
             .{ self.width, self.height },
         ) catch unreachable;
         rl.drawText(str, x, y, 32, rl.Color.black);
+    }
+
+    pub fn draw_color_picker(self: *Building) void {
+        _ = rg.colorPicker(
+            .{ .x = self.x, .y = self.y + @as(f32, @floatFromInt(self.height)) * 50 + 3, .width = 300, .height = 400 },
+            "picker",
+            &self.color,
+        );
     }
 };
 

@@ -82,7 +82,7 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
-        const b = gst.tbuild.list.items[gst.play.selected_build_id];
+        const b = &gst.tbuild.list.items[gst.play.selected_build_id];
         render_all(gst);
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const rx: f32 = @floor(vp.x);
@@ -101,13 +101,13 @@ pub const placeST = union(enum) {
             while (tx < x + b.width) : (tx += 1) {
                 const cell = gst.play.current_map[@intCast(ty)][@intCast(tx)];
                 if (cell.tag != .room or cell.building_id != null) {
-                    b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.red);
+                    b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.red, true);
                     return .not_in_any_rect;
                 }
             }
         }
 
-        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green);
+        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
         gst.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
         return .in_someone;
     }
@@ -119,8 +119,8 @@ pub const placeST = union(enum) {
         const ry: f32 = @floor(vp.y);
         const x: i32 = @intFromFloat(rx);
         const y: i32 = @intFromFloat(ry);
-        const b = gst.tbuild.list.items[gst.play.selected_build_id];
-        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green);
+        const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
 
         return (x == gst.play.selected_cell_id.x and
             y == gst.play.selected_cell_id.y);
@@ -134,8 +134,8 @@ pub const placeST = union(enum) {
         const str1 = std.fmt.bufPrintZ(&tmpBuf, "{any}", .{val}) catch unreachable;
         const tsize = rl.measureText(str1, 32);
 
-        const b = gst.tbuild.list.items[gst.play.selected_build_id];
-        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green);
+        const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
 
         const mp = rl.getMousePosition();
         const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
@@ -251,13 +251,18 @@ pub const View = struct {
 
                 const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
 
-                const color =
-                    if (val.building_id != null) rl.Color.green else switch (val.tag) {
-                        .room => rl.Color.sky_blue,
-                        .path => rl.Color.gray,
-                        .connPoint => rl.Color.orange,
-                        else => rl.Color.white,
-                    };
+                const color = blk: {
+                    if (val.building_id != null) {
+                        break :blk gst.tbuild.list.items[val.building_id.?].color;
+                    } else {
+                        break :blk switch (val.tag) {
+                            .room => rl.Color.sky_blue,
+                            .path => rl.Color.gray,
+                            .connPoint => rl.Color.orange,
+                            else => rl.Color.white,
+                        };
+                    }
+                };
 
                 const win_pos = view.view_to_win(gst.screen_width, .{
                     .x = @floatFromInt(tx),
