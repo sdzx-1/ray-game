@@ -25,6 +25,9 @@ pub const Select = struct {
     no_move_duartion: i64 = 0,
 };
 
+pub const SelectRender = fn (*GST, SelectState) void;
+pub const SelectState = enum { outside, inside, hover };
+
 pub fn selectST(back: SDZX, selected: SDZX) type {
     const cst = typedFsm.sdzx_to_cst(Example, selected);
     return union(enum) {
@@ -44,6 +47,8 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
+            const render: SelectRender = cst.select_render;
+            render(gst, .outside);
             const res: CheckInsideResult = cst.check_inside(gst);
             switch (res) {
                 .not_in_any_rect => {},
@@ -52,6 +57,12 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
             return null;
         }
+
+        pub const select_render = cst.select_render1;
+        pub const select_render1 = cst.select_render2;
+        pub const select_render2 = cst.select_render3;
+        pub const select_render3 = cst.select_render4;
+        pub const select_render4 = cst.select_render5;
 
         pub const check_inside = cst.check_inside1;
         pub const check_inside1 = cst.check_inside2;
@@ -64,12 +75,6 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
         pub const check_still_inside2 = cst.check_still_inside3;
         pub const check_still_inside3 = cst.check_still_inside4;
         pub const check_still_inside4 = cst.check_still_inside5;
-
-        pub const hover = cst.hover1;
-        pub const hover1 = cst.hover2;
-        pub const hover2 = cst.hover3;
-        pub const hover3 = cst.hover4;
-        pub const hover4 = cst.hover5;
     };
 }
 
@@ -95,6 +100,8 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
+            const render: SelectRender = cst.select_render;
+            render(gst, .inside);
             const res: bool = cst.check_still_inside(gst);
             if (!res) return .ToOutside;
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
@@ -132,7 +139,8 @@ pub fn hoverST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
-            cst.hover(gst);
+            const render: SelectRender = cst.select_render;
+            render(gst, .hover);
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
             if (mouse_moved()) return .ToInside;
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;

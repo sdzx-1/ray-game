@@ -48,8 +48,12 @@ pub const buildST = union(enum) {
     }
 
     //select
-    pub fn check_inside(gst: *GST) select.CheckInsideResult {
+    pub fn select_render(gst: *GST, sst: select.SelectState) void {
+        _ = sst;
         for (gst.tbuild.list.items) |*b| b.draw(gst);
+    }
+
+    pub fn check_inside(gst: *GST) select.CheckInsideResult {
         for (gst.tbuild.list.items, 0..) |*b, i| {
             if (b.inBuilding(rl.getMousePosition())) {
                 gst.tbuild.selected_id = i;
@@ -74,13 +78,8 @@ pub const buildST = union(enum) {
     }
 
     pub fn check_still_inside(gst: *GST) bool {
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
         const b = gst.tbuild.list.items[gst.tbuild.selected_id];
         return b.inBuilding(rl.getMousePosition());
-    }
-
-    pub fn hover(gst: *GST) void {
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
     }
 };
 

@@ -52,8 +52,12 @@ pub const placeST = union(enum) {
         return .ToPlay;
     }
 
-    pub fn check_inside1(gst: *GST) select.CheckInsideResult {
+    pub fn select_render1(gst: *GST, sst: select.SelectState) void {
+        _ = sst;
         for (gst.tbuild.list.items) |*b| b.draw(gst);
+    }
+
+    pub fn check_inside1(gst: *GST) select.CheckInsideResult {
         for (gst.tbuild.list.items, 0..) |*b, i| {
             if (b.inBuilding(rl.getMousePosition())) {
                 gst.play.selected_build_id = i;
@@ -64,31 +68,35 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_still_inside1(gst: *GST) bool {
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
         const b = gst.tbuild.list.items[gst.play.selected_build_id];
         return b.inBuilding(rl.getMousePosition());
     }
 
-    pub fn hover1(gst: *GST) void {
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
-    }
-
     //select position
 
-    pub fn render_all(gst: *GST) void {
+    pub fn select_render(gst: *GST, sst: select.SelectState) void {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         gst.play.view.draw_cells(gst, -1);
+
+        switch (sst) {
+            .hover => {
+                const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+                b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
+            },
+            .inside => {
+                const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+                b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
+            },
+            else => {},
+        }
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
         const b = &gst.tbuild.list.items[gst.play.selected_build_id];
-        render_all(gst);
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        const rx: f32 = @floor(vp.x);
-        const ry: f32 = @floor(vp.y);
-        const x: i32 = @intFromFloat(rx);
-        const y: i32 = @intFromFloat(ry);
+        const x: i32 = @intFromFloat(@floor(vp.x));
+        const y: i32 = @intFromFloat(@floor(vp.y));
 
         if (x < 0 or
             y < 0 or
@@ -113,35 +121,11 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_still_inside(gst: *GST) bool {
-        render_all(gst);
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        const rx: f32 = @floor(vp.x);
-        const ry: f32 = @floor(vp.y);
-        const x: i32 = @intFromFloat(rx);
-        const y: i32 = @intFromFloat(ry);
-        const b = &gst.tbuild.list.items[gst.play.selected_build_id];
-        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
-
+        const x: i32 = @intFromFloat(@floor(vp.x));
+        const y: i32 = @intFromFloat(@floor(vp.y));
         return (x == gst.play.selected_cell_id.x and
             y == gst.play.selected_cell_id.y);
-    }
-
-    pub fn hover(gst: *GST) void {
-        render_all(gst);
-
-        const val = gst.play.current_map[gst.play.selected_cell_id.y][gst.play.selected_cell_id.x];
-        var tmpBuf: [100]u8 = undefined;
-        const str1 = std.fmt.bufPrintZ(&tmpBuf, "{any}", .{val}) catch unreachable;
-        const tsize = rl.measureText(str1, 32);
-
-        const b = &gst.tbuild.list.items[gst.play.selected_build_id];
-        b.draw_with_pos(gst, rl.getMousePosition(), rl.Color.green, true);
-
-        const mp = rl.getMousePosition();
-        const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
-        const y = @as(i32, @intFromFloat(mp.y)) - 50;
-
-        rl.drawText(str1, x, y, 32, rl.Color.black);
     }
 };
 

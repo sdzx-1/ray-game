@@ -122,7 +122,7 @@ pub fn editST(target: SDZX) type {
             return null;
         }
 
-        fn render_all(gst: *GST) void {
+        pub fn select_render(gst: *GST, sst: select.SelectState) void {
             for (@field(gst, nst).rs.items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
@@ -140,25 +140,51 @@ pub fn editST(target: SDZX) type {
                     r.color,
                 );
             }
+
+            switch (sst) {
+                .outside => {},
+                .inside => {
+                    const r = @field(gst, nst).rs.items[gst.editor.selected_id];
+                    rl.drawRectangleLines(
+                        @intFromFloat(r.rect.x - 1),
+                        @intFromFloat(r.rect.y - 1),
+                        @intFromFloat(r.rect.width + 2),
+                        @intFromFloat(r.rect.height + 2),
+                        rl.Color.blue,
+                    );
+                },
+                .hover => {
+                    const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected_id];
+                    if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
+                        ptr.enable_action)
+                    {
+                        const action_list = @field(@field(Example, nst ++ "ST"), "action_list");
+                        const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
+
+                        var tmpBuf: [100]u8 = undefined;
+                        const str1 = std.fmt.bufPrintZ(&tmpBuf, "{s}", .{str}) catch unreachable;
+                        const tsize = rl.measureText(str1, 32);
+
+                        const mp = rl.getMousePosition();
+                        const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
+                        const y = @as(i32, @intFromFloat(mp.y)) - 50;
+
+                        rl.drawText(str1, x, y, 52, rl.Color.black);
+                    }
+                },
+            }
         }
 
         pub fn check_inside(gst: *GST) select.CheckInsideResult {
-            render_all(gst);
-
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                 const mp = rl.getMousePosition();
-
                 var r: R = .{};
                 if (gst.editor.copyed_rect) |cr| r = cr;
-
                 r.rect.x = mp.x;
                 r.rect.y = mp.y;
                 const size = rl.measureText(&r.str_buf, 32);
-
                 r.rect.width = @floatFromInt(size);
-
                 @field(gst, nst).rs.append(gst.gpa, r) catch unreachable;
-
                 gst.log("Add button");
             }
 
@@ -172,51 +198,17 @@ pub fn editST(target: SDZX) type {
         }
 
         pub fn check_still_inside(gst: *GST) bool {
-            render_all(gst);
-
             const r = @field(gst, nst).rs.items[gst.editor.selected_id];
-
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
                 gst.editor.copyed_rect = r;
             }
-
             if (rl.isKeyDown(rl.KeyboardKey.d)) {
                 gst.log("Delete!");
                 _ = @field(gst, nst).rs.swapRemove(gst.editor.selected_id);
                 return false;
             }
-
-            rl.drawRectangleLines(
-                @intFromFloat(r.rect.x - 1),
-                @intFromFloat(r.rect.y - 1),
-                @intFromFloat(r.rect.width + 2),
-                @intFromFloat(r.rect.height + 2),
-                rl.Color.blue,
-            );
-
             return r.inR(rl.getMousePosition());
-        }
-
-        pub fn hover(gst: *GST) void {
-            render_all(gst);
-            const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected_id];
-            if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
-                ptr.enable_action)
-            {
-                const action_list = @field(@field(Example, nst ++ "ST"), "action_list");
-                const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
-
-                var tmpBuf: [100]u8 = undefined;
-                const str1 = std.fmt.bufPrintZ(&tmpBuf, "{s}", .{str}) catch unreachable;
-                const tsize = rl.measureText(str1, 32);
-
-                const mp = rl.getMousePosition();
-                const x = @as(i32, @intFromFloat(mp.x)) - @divTrunc(tsize, 2);
-                const y = @as(i32, @intFromFloat(mp.y)) - 50;
-
-                rl.drawText(str1, x, y, 52, rl.Color.black);
-            }
         }
     };
 }
