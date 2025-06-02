@@ -55,7 +55,7 @@ pub const placeST = union(enum) {
     pub fn check_inside1(gst: *GST) select.CheckInsideResult {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         for (gst.tbuild.list.items, 0..) |*b, i| {
-            if (b.inBuilding(gst, rl.getMousePosition())) {
+            if (b.inBuilding(rl.getMousePosition())) {
                 gst.play.selected_build_id = i;
                 return .in_someone;
             }
@@ -66,7 +66,7 @@ pub const placeST = union(enum) {
     pub fn check_still_inside1(gst: *GST) bool {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const b = gst.tbuild.list.items[gst.play.selected_build_id];
-        return b.inBuilding(gst, rl.getMousePosition());
+        return b.inBuilding(rl.getMousePosition());
     }
 
     pub fn hover1(gst: *GST) void {

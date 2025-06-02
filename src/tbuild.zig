@@ -51,7 +51,7 @@ pub const buildST = union(enum) {
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         for (gst.tbuild.list.items, 0..) |*b, i| {
-            if (b.inBuilding(gst, rl.getMousePosition())) {
+            if (b.inBuilding(rl.getMousePosition())) {
                 gst.tbuild.selected_id = i;
                 return .in_someone;
             }
@@ -76,7 +76,7 @@ pub const buildST = union(enum) {
     pub fn check_still_inside(gst: *GST) bool {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const b = gst.tbuild.list.items[gst.tbuild.selected_id];
-        return b.inBuilding(gst, rl.getMousePosition());
+        return b.inBuilding(rl.getMousePosition());
     }
 
     pub fn hover(gst: *GST) void {
@@ -96,10 +96,9 @@ pub const Building = struct {
     height: i32,
     color: rl.Color = .orange,
 
-    pub fn inBuilding(self: *const Building, gst: *const GST, pos: rl.Vector2) bool {
-        const r = gst.screen_width / gst.play.view.width;
-        const w: f32 = r * @as(f32, @floatFromInt(self.width));
-        const h: f32 = r * @as(f32, @floatFromInt(self.height));
+    pub fn inBuilding(self: *const Building, pos: rl.Vector2) bool {
+        const w: f32 = 50 * @as(f32, @floatFromInt(self.width));
+        const h: f32 = 50 * @as(f32, @floatFromInt(self.height));
         if (pos.x > self.x and
             pos.x < self.x + w and
             pos.y > self.y and
