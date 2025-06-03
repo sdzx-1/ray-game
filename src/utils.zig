@@ -5,6 +5,8 @@ const tbuild = @import("tbuild.zig");
 const map = @import("map.zig");
 const GST = core.GST;
 
+const save_path = "config.json";
+
 pub const SaveData = struct {
     screen_width: f32 = 1000,
     screen_height: f32 = 800,
@@ -17,7 +19,7 @@ pub const SaveData = struct {
 
     pub fn save(self: *const @This()) void {
         const cwd = std.fs.cwd();
-        const file = cwd.createFile("config.txt", .{}) catch unreachable;
+        const file = cwd.createFile(save_path, .{}) catch unreachable;
         const writer = file.writer();
         std.json.stringify(self.*, .{ .whitespace = .indent_2 }, writer) catch unreachable;
     }
@@ -29,8 +31,8 @@ pub const SaveData = struct {
 
         const cwd = std.fs.cwd();
 
-        if (cwd.access("config.txt", .{})) |_| {
-            const file = cwd.openFile("config.txt", .{}) catch unreachable;
+        if (cwd.access(save_path, .{})) |_| {
+            const file = cwd.openFile(save_path, .{}) catch unreachable;
             const content = file.readToEndAlloc(arena, 5 << 20) catch unreachable;
             const parsed = std.json.parseFromSlice(@This(), arena, content, .{ .ignore_unknown_fields = true }) catch unreachable;
 
