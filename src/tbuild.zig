@@ -17,9 +17,15 @@ pub const buildST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        ptr.draw_color_picker();
+        ptr.draw_color_picker(gst);
+
+        {
+            gst.tbuild.view.mouse_wheel(gst.hdw);
+            gst.tbuild.view.drag_view(gst.screen_width);
+        }
+
         if (rl.isMouseButtonDown(rl.MouseButton.left)) {
-            const deta = rl.getMouseDelta();
+            const deta = gst.tbuild.view.dwin_to_dview(gst.screen_width, rl.getMouseDelta());
             ptr.x += deta.x;
             ptr.y += deta.y;
         }
@@ -50,19 +56,24 @@ pub const buildST = union(enum) {
     //select
     pub fn select_render(gst: *GST, sst: select.SelectState) void {
         _ = sst;
+        {
+            gst.tbuild.view.mouse_wheel(gst.hdw);
+            gst.tbuild.view.drag_view(gst.screen_width);
+        }
+
         for (gst.tbuild.list.items) |*b| b.draw(gst);
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
+        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         for (gst.tbuild.list.items, 0..) |*b, i| {
-            if (b.inBuilding(rl.getMousePosition())) {
+            if (b.inBuilding(mp)) {
                 gst.tbuild.selected_id = i;
                 return .in_someone;
             }
         }
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-            const mp = rl.getMousePosition();
             gst.tbuild.list.append(
                 gst.gpa,
                 .{
@@ -78,66 +89,74 @@ pub const buildST = union(enum) {
     }
 
     pub fn check_still_inside(gst: *GST) bool {
+        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const b = gst.tbuild.list.items[gst.tbuild.selected_id];
-        return b.inBuilding(rl.getMousePosition());
+        return b.inBuilding(mp);
     }
 };
 
 pub const Tbuild = struct {
     list: std.ArrayListUnmanaged(Building) = .empty,
     selected_id: usize = 0,
+    view: View = .{ .x = 0, .y = 0, .width = 25 },
 };
 
 pub const Building = struct {
     x: f32,
     y: f32,
-    width: i32,
-    height: i32,
+    width: f32,
+    height: f32,
     color: rl.Color = .orange,
 
-    pub fn inBuilding(self: *const Building, pos: rl.Vector2) bool {
-        const w: f32 = 50 * @as(f32, @floatFromInt(self.width));
-        const h: f32 = 50 * @as(f32, @floatFromInt(self.height));
-        if (pos.x > self.x and
-            pos.x < self.x + w and
-            pos.y > self.y and
-            pos.y < self.y + h) return true;
+    pub fn inBuilding(self: *const Building, view_pos: rl.Vector2) bool {
+        if (view_pos.x > self.x and
+            view_pos.x < self.x + self.width and
+            view_pos.y > self.y and
+            view_pos.y < self.y + self.height) return true;
         return false;
     }
 
     pub fn draw(self: *Building, gst: *GST) void {
-        self.draw_with_pos(gst, .{ .x = self.x, .y = self.y }, null, false);
+        self.draw_with_pos(gst, .{ .x = self.x, .y = self.y }, null);
     }
 
     pub fn draw_with_pos(
         self: *Building,
         gst: *GST,
-        pos: rl.Vector2,
+        view_pos: rl.Vector2,
         color: ?rl.Color,
-        scale: bool,
     ) void {
-        const x: i32 = @intFromFloat(pos.x);
-        const y: i32 = @intFromFloat(pos.y);
-        var w: i32 = undefined;
-        var h: i32 = undefined;
+        self.draw_with_pos_and_view(gst, view_pos, &gst.tbuild.view, color);
+    }
 
-        if (scale) {
-            const r = gst.screen_width / gst.play.view.width;
-            w = @intFromFloat(r * @as(f32, @floatFromInt(self.width)));
-            h = @intFromFloat(r * @as(f32, @floatFromInt(self.height)));
-        } else {
-            w = 50 * self.width;
-            h = 50 * self.height;
-        }
-
+    pub fn draw_with_pos_and_view(
+        self: *Building,
+        gst: *GST,
+        view_pos: rl.Vector2,
+        view: *const View,
+        color: ?rl.Color,
+    ) void {
+        const win_pos = view.view_to_win(gst.screen_width, view_pos);
+        const r = gst.screen_width / view.width;
+        const x: i32 = @intFromFloat(win_pos.x);
+        const y: i32 = @intFromFloat(win_pos.y);
+        const w: i32 = @intFromFloat(r * self.width);
+        const h: i32 = @intFromFloat(r * self.height);
         if (color) |col| rl.drawRectangle(x, y, w, h, col) else rl.drawRectangle(x, y, w, h, self.color);
         const str = gst.printZ("{d}, {d}", .{ self.width, self.height });
         rl.drawText(str, x, y, 32, rl.Color.black);
     }
 
-    pub fn draw_color_picker(self: *Building) void {
+    pub fn draw_color_picker(self: *Building, gst: *GST) void {
+        const win_pos = gst.tbuild.view.view_to_win(gst.screen_width, .{ .x = self.x, .y = self.y });
+        const r = gst.screen_width / gst.tbuild.view.width;
         _ = rg.colorPicker(
-            .{ .x = self.x, .y = self.y + @as(f32, @floatFromInt(self.height)) * 50 + 3, .width = 300, .height = 400 },
+            .{
+                .x = win_pos.x,
+                .y = win_pos.y + self.height * r + 3,
+                .width = 200,
+                .height = 300,
+            },
             "picker",
             &self.color,
         );
@@ -148,6 +167,7 @@ const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const core = @import("core.zig");
 const select = @import("select.zig");
+const utils = @import("utils.zig");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -160,3 +180,4 @@ const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
 const ContR = typedFsm.ContR(GST);
+const View = utils.View;

@@ -4,6 +4,7 @@ const core = @import("core.zig");
 const tbuild = @import("tbuild.zig");
 const map = @import("map.zig");
 const GST = core.GST;
+const rl = @import("raylib");
 
 const save_path = "config.json";
 
@@ -15,6 +16,7 @@ pub const SaveData = struct {
     map: []const R = &.{},
     play: []const R = &.{},
     tbuild: []const tbuild.Building = &.{},
+    tbuild_view: View = .{},
     maze_config: map.MazeConfig = .{},
 
     pub fn save(self: *const @This()) void {
@@ -58,6 +60,7 @@ pub fn saveData(gst: *GST) void {
         .screen_width = gst.screen_width,
         .screen_height = gst.screen_height,
         .hdw = gst.hdw,
+        .tbuild_view = gst.tbuild.view,
     };
     save_data.save();
     gst.log("save");
@@ -73,6 +76,49 @@ pub fn loadData(gpa: std.mem.Allocator, gst: *GST) !void {
     gst.screen_width = save_data.screen_width;
     gst.screen_height = save_data.screen_height;
     gst.hdw = save_data.hdw;
+    gst.tbuild.view = save_data.tbuild_view;
 
     gst.log("load_data");
 }
+
+pub const View = struct {
+    x: f32 = 0,
+    y: f32 = 0,
+    width: f32 = 50,
+
+    pub fn dwin_to_dview(self: *const View, screen_w: f32, deta_win_pos: rl.Vector2) rl.Vector2 {
+        const r = self.width / screen_w;
+        return .{ .x = deta_win_pos.x * r, .y = deta_win_pos.y * r };
+    }
+
+    pub fn win_to_view(self: *const View, screen_w: f32, win_pos: rl.Vector2) rl.Vector2 {
+        const r = self.width / screen_w;
+        return .{ .x = self.x + win_pos.x * r, .y = self.y + win_pos.y * r };
+    }
+
+    pub fn view_to_win(self: *const View, screen_w: f32, view_pos: rl.Vector2) rl.Vector2 {
+        const r = screen_w / self.width;
+        return .{ .x = (view_pos.x - self.x) * r, .y = (view_pos.y - self.y) * r };
+    }
+
+    pub fn center(self: *@This(), hdw: f32, x: f32, y: f32) void {
+        self.x = x - self.width / 2;
+        self.y = y - (self.width * hdw) / 2;
+    }
+
+    pub fn mouse_wheel(self: *View, hdw: f32) void {
+        const mouse_wheel_deta = rl.getMouseWheelMove();
+        const deta = (mouse_wheel_deta * 0.65) * self.width * 0.2;
+        self.x -= deta / 2;
+        self.y -= (deta * hdw) / 2;
+        self.width += deta;
+    }
+
+    pub fn drag_view(self: *View, screen_width: f32) void {
+        if (rl.isMouseButtonDown(rl.MouseButton.middle)) {
+            const deta = self.dwin_to_dview(screen_width, rl.getMouseDelta());
+            self.x -= deta.x;
+            self.y -= deta.y;
+        }
+    }
+};
