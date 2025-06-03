@@ -105,13 +105,13 @@ pub const Building = struct {
         return false;
     }
 
-    pub fn draw(self: *Building, gst: *const GST) void {
+    pub fn draw(self: *Building, gst: *GST) void {
         self.draw_with_pos(gst, .{ .x = self.x, .y = self.y }, null, false);
     }
 
     pub fn draw_with_pos(
         self: *Building,
-        gst: *const GST,
+        gst: *GST,
         pos: rl.Vector2,
         color: ?rl.Color,
         scale: bool,
@@ -131,12 +131,7 @@ pub const Building = struct {
         }
 
         if (color) |col| rl.drawRectangle(x, y, w, h, col) else rl.drawRectangle(x, y, w, h, self.color);
-        var tmpBuf: [20]u8 = undefined;
-        const str = std.fmt.bufPrintZ(
-            &tmpBuf,
-            "{d}, {d}",
-            .{ self.width, self.height },
-        ) catch unreachable;
+        const str = gst.printZ("{d}, {d}", .{ self.width, self.height });
         rl.drawText(str, x, y, 32, rl.Color.black);
     }
 

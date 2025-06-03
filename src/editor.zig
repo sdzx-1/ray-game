@@ -161,8 +161,7 @@ pub fn editST(target: SDZX) type {
                         const action_list = @field(@field(Example, nst ++ "ST"), "action_list");
                         const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
-                        var tmpBuf: [100]u8 = undefined;
-                        const str1 = std.fmt.bufPrintZ(&tmpBuf, "{s}", .{str}) catch unreachable;
+                        const str1 = gst.printZ("{s}", .{str});
                         const tsize = rl.measureText(str1, 32);
 
                         const mp = rl.getMousePosition();

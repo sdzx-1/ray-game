@@ -28,11 +28,13 @@ pub fn main() anyerror!void {
     const rand = prng.random();
 
     const current_map = try gpa.create(play.CurrentMap);
+    const tmp_buf = try gpa.alloc(u8, 10 << 10);
 
     var gst = core.GST{
         .gpa = gpa,
         .random = rand,
         .play = .{ .current_map = current_map },
+        .tmp_buf = tmp_buf,
     };
 
     try utils.loadData(gpa, &gst);

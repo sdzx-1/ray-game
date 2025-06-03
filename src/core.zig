@@ -91,9 +91,14 @@ pub const GST = struct {
     //
     notify: Notify = .{},
     im_log_buf: [60:0]u8 = @splat(0),
+    tmp_buf: []u8,
 
     pub fn log(self: *@This(), str: []const u8) void {
         self.log_duration(str, 600);
+    }
+
+    pub fn printZ(self: *@This(), comptime fmt: []const u8, args: anytype) [:0]u8 {
+        return std.fmt.bufPrintZ(self.tmp_buf, fmt, args) catch unreachable;
     }
 
     pub fn log_duration(self: *@This(), str: []const u8, dur: i64) void {
