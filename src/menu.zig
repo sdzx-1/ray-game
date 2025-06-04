@@ -32,6 +32,7 @@ pub const menuST = union(enum) {
     Exit:     Wit(Example.exit),
     ToEditor: Wit(.{Example.select, Example.menu,  .{Example.edit, Example.menu}}),
     ToPlay:   Wit(.{ Example.animation, Example.menu, Example.map }),
+    ToTextures: Wit(Example.textures),
     // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {
@@ -39,6 +40,7 @@ pub const menuST = union(enum) {
             switch (msg) {
                 .Exit => |wit| return .{ .Next = wit.conthandler() },
                 .ToEditor => |wit| return .{ .Next = wit.conthandler() },
+                .ToTextures => |wit| return .{ .Next = wit.conthandler() },
                 .ToPlay => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
@@ -48,6 +50,7 @@ pub const menuST = union(enum) {
     }
     fn genMsg(gst: *GST) ?@This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
+        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .ToTextures;
         for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return null;
     }

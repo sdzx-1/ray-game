@@ -7,6 +7,7 @@ const typedFsm = @import("typed_fsm");
 const core = @import("core.zig");
 const utils = @import("utils.zig");
 const play = @import("play.zig");
+const textures = @import("textures.zig");
 
 const Example = core.Example;
 const SaveData = utils.SaveData;
@@ -30,11 +31,15 @@ pub fn main() anyerror!void {
     const current_map = try gpa.create(play.CurrentMap);
     const tmp_buf = try gpa.alloc(u8, 10 << 10);
 
+    const text_arr = try gpa.create(textures.TextArr);
+    textures.arr_set_blank(text_arr);
+
     var gst = core.GST{
         .gpa = gpa,
         .random = rand,
         .play = .{ .current_map = current_map },
         .tmp_buf = tmp_buf,
+        .textures = .{ .text_arr = text_arr },
         .path_texture = undefined,
         .room_texture = undefined,
         .blank_texture = undefined,
@@ -61,6 +66,38 @@ pub fn main() anyerror!void {
     const connect_texture = try rl.loadTexture("data/resouces/Tiles/Tiles Pattern/Tiles_Pattern_1_Red_1.png");
     defer connect_texture.unload();
     gst.connect_texture = connect_texture;
+
+    const cwd = std.fs.cwd();
+    const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
+    var walker = try res_dir.walk(gpa);
+
+    var x: usize = 0;
+    var y: usize = 0;
+    while (try walker.next()) |entry| {
+        switch (entry.kind) {
+            .file => {
+                const ext = std.fs.path.extension(entry.basename);
+                if (std.mem.eql(u8, ext, ".png")) {
+                    const path = try std.fs.path.joinZ(gpa, &.{ "data/resouces", entry.path });
+                    // std.debug.print("load: {s}\n", .{path});
+                    const loaded_texture = try rl.loadTexture(path);
+                    gst.textures.text_arr[y][x] = .{ .texture = .{ .name = entry.basename, .tex2d = loaded_texture } };
+                    x += 1;
+                    if (x >= textures.Width) {
+                        y += 1;
+                        x = 0;
+                    }
+                }
+            },
+            else => {
+                x = 1;
+                y += 1;
+                const str = try gpa.dupeZ(u8, entry.basename);
+                gst.textures.text_arr[y][0] = .{ .text_dir_name = str };
+            },
+        }
+    }
+    std.debug.print("y: {d}, x: {d}\n", .{ y, x });
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);

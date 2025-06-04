@@ -6,6 +6,7 @@ const map = @import("map.zig");
 const play = @import("play.zig");
 const menu = @import("menu.zig");
 const tbuild = @import("tbuild.zig");
+const textures = @import("textures.zig");
 const animation = @import("animation.zig");
 const utils = @import("utils.zig");
 
@@ -87,6 +88,7 @@ pub const GST = struct {
     play: play.Play,
     tbuild: tbuild.Tbuild = .{},
     animation: animation.Animation = .{},
+    textures: textures.Textures,
     path_texture: rl.Texture2D,
     room_texture: rl.Texture2D,
     blank_texture: rl.Texture2D,
@@ -167,6 +169,7 @@ pub const Example = enum {
     map,
     play,
     build,
+    textures,
     place,
 
     //
@@ -180,6 +183,7 @@ pub const Example = enum {
     inside,
     hover,
 
+    pub const texturesST = textures.texturesST;
     pub const buildST = tbuild.buildST;
     pub const menuST = menu.menuST;
     pub const mapST = map.mapST;
