@@ -57,7 +57,7 @@ pub const mapST = union(enum) {
                         for (0..m.totalXSize) |x| {
                             const idx = Maze.Index.from_uszie_xy(x, y);
                             const val = m.readBoard(idx);
-                            gst.play.current_map[y][x] = .{ .tag = val, .building_id = null };
+                            gst.play.current_map[y][x] = .{ .tag = val, .building = null };
                         }
                     }
 

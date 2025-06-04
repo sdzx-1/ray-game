@@ -3,7 +3,7 @@ pub const Play = struct {
     current_map: *CurrentMap,
     view: View = undefined,
     selected_cell_id: CellID = .{},
-    selected_build_id: usize = 0,
+    selected_build: tbuild.Building = undefined,
 
     pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
@@ -17,7 +17,7 @@ pub const CellID = struct {
 
 pub const Cell = struct {
     tag: Maze.Tag,
-    building_id: ?usize,
+    building: ?tbuild.Building,
 };
 
 pub const CurrentMap = [200][200]Cell;
@@ -28,9 +28,7 @@ pub const placeST = union(enum) {
     pub fn conthandler(gst: *GST) ContR {
         switch (genMsg(gst)) {
             .ToPlay => |wit| {
-                const build_id = gst.play.selected_build_id;
-                const b = gst.tbuild.list.items[build_id];
-
+                const b = gst.play.selected_build;
                 const cell_id = gst.play.selected_cell_id;
                 const y: i32 = @intCast(cell_id.y);
                 const x: i32 = @intCast(cell_id.x);
@@ -41,7 +39,7 @@ pub const placeST = union(enum) {
                     var tx = x;
                     while (tx < x + w) : (tx += 1) {
                         const cell = &gst.play.current_map[@intCast(ty)][@intCast(tx)];
-                        cell.building_id = build_id;
+                        cell.building = b;
                     }
                 }
                 return wit.conthandler()(gst);
@@ -64,9 +62,9 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_inside1(gst: *GST) select.CheckInsideResult {
-        for (gst.tbuild.list.items, 0..) |*b, i| {
+        for (gst.tbuild.list.items) |*b| {
             if (b.inBuilding(gst, rl.getMousePosition())) {
-                gst.play.selected_build_id = i;
+                gst.play.selected_build = b.*;
                 return .in_someone;
             }
         }
@@ -74,7 +72,7 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_still_inside1(gst: *GST) bool {
-        const b = gst.tbuild.list.items[gst.play.selected_build_id];
+        const b = &gst.play.selected_build;
         return b.inBuilding(gst, rl.getMousePosition());
     }
 
@@ -83,11 +81,11 @@ pub const placeST = union(enum) {
     pub fn select_render(gst: *GST, sst: select.SelectState) void {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, -1);
+        draw_cells(&gst.play.view, gst, -2);
 
         switch (sst) {
             .hover => {
-                const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+                const b = &gst.play.selected_build;
                 b.draw_with_win_pos_and_view(
                     gst,
                     rl.getMousePosition(),
@@ -96,7 +94,7 @@ pub const placeST = union(enum) {
                 );
             },
             .inside => {
-                const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+                const b = &gst.play.selected_build;
                 b.draw_with_win_pos_and_view(
                     gst,
                     rl.getMousePosition(),
@@ -109,7 +107,7 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
-        const b = &gst.tbuild.list.items[gst.play.selected_build_id];
+        const b = &gst.play.selected_build;
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const x: i32 = @intFromFloat(@floor(vp.x));
         const y: i32 = @intFromFloat(@floor(vp.y));
@@ -126,7 +124,7 @@ pub const placeST = union(enum) {
             var tx = x;
             while (tx < x + w) : (tx += 1) {
                 const cell = gst.play.current_map[@intCast(ty)][@intCast(tx)];
-                if (cell.tag != .room or cell.building_id != null) {
+                if (cell.tag != .room or cell.building != null) {
                     b.draw_with_win_pos_and_view(gst, rl.getMousePosition(), &gst.play.view, rl.Color.red);
                     return .not_in_any_rect;
                 }
@@ -170,7 +168,7 @@ pub const playST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, 1);
+        draw_cells(&gst.play.view, gst, 2);
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
@@ -213,8 +211,8 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
             const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
 
             const color = blk: {
-                if (val.building_id != null) {
-                    break :blk gst.tbuild.list.items[val.building_id.?].color;
+                if (val.building != null) {
+                    break :blk val.building.?.color;
                 } else {
                     break :blk switch (val.tag) {
                         .room => rl.Color.sky_blue,
