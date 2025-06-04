@@ -87,6 +87,10 @@ pub const GST = struct {
     play: play.Play,
     tbuild: tbuild.Tbuild = .{},
     animation: animation.Animation = .{},
+    path_texture: rl.Texture2D,
+    room_texture: rl.Texture2D,
+    blank_texture: rl.Texture2D,
+    connect_texture: rl.Texture2D,
 
     //
     notify: Notify = .{},

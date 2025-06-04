@@ -174,7 +174,7 @@ pub const playST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, 2);
+        draw_cells(&gst.play.view, gst, 0);
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
@@ -216,32 +216,61 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
 
             const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
 
-            const color = blk: {
-                if (val.building != null) {
-                    break :blk val.building.?.color;
-                } else {
-                    break :blk switch (val.tag) {
-                        .room => rl.Color.sky_blue,
-                        .path => rl.Color.gray,
-                        .connPoint => rl.Color.orange,
-                        else => rl.Color.white,
-                    };
-                }
-            };
-
             const win_pos = view.view_to_win(gst.screen_width, .{
                 .x = @floatFromInt(tx),
                 .y = @floatFromInt(ty),
             });
 
             const scale = 1 * gst.screen_width / view.width;
-            rl.drawRectangle(
-                @intFromFloat(win_pos.x),
-                @intFromFloat(win_pos.y),
-                @intFromFloat(scale + inc),
-                @intFromFloat(scale + inc),
-                color,
-            );
+
+            if (val.building == null) {
+                switch (val.tag) {
+                    .path => {
+                        gst.path_texture.drawPro(
+                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                            .{ .x = 0, .y = 0 },
+                            0,
+                            rl.Color.white,
+                        );
+                    },
+                    .room => {
+                        gst.room_texture.drawPro(
+                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                            .{ .x = 0, .y = 0 },
+                            0,
+                            rl.Color.white,
+                        );
+                    },
+                    .blank => {
+                        gst.blank_texture.drawPro(
+                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                            .{ .x = 0, .y = 0 },
+                            0,
+                            rl.Color.white,
+                        );
+                    },
+                    .connPoint => {
+                        gst.connect_texture.drawPro(
+                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                            .{ .x = 0, .y = 0 },
+                            0,
+                            rl.Color.white,
+                        );
+                    },
+                }
+            } else {
+                rl.drawRectangle(
+                    @intFromFloat(win_pos.x),
+                    @intFromFloat(win_pos.y),
+                    @intFromFloat(scale + 2),
+                    @intFromFloat(scale + 2),
+                    val.building.?.color,
+                );
+            }
         }
     }
 }
