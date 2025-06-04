@@ -52,13 +52,14 @@ pub const placeST = union(enum) {
         return .ToPlay;
     }
 
-    pub fn select_render1(gst: *GST, sst: select.SelectState) void {
+    pub fn select_render1(gst: *GST, sst: select.SelectState) bool {
         _ = sst;
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
             gst.tbuild.view.drag_view(gst.screen_width);
         }
         for (gst.tbuild.list.items) |*b| b.draw(gst);
+        return false;
     }
 
     pub fn check_inside1(gst: *GST) select.CheckInsideResult {
@@ -78,10 +79,14 @@ pub const placeST = union(enum) {
 
     //select position
 
-    pub fn select_render(gst: *GST, sst: select.SelectState) void {
+    pub fn select_render(gst: *GST, sst: select.SelectState) bool {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         draw_cells(&gst.play.view, gst, -2);
+        if (rl.isKeyPressed(rl.KeyboardKey.r)) {
+            gst.play.selected_build.rotate();
+            return true;
+        }
 
         switch (sst) {
             .hover => {
@@ -104,6 +109,7 @@ pub const placeST = union(enum) {
             },
             else => {},
         }
+        return false;
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {

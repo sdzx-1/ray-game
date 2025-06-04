@@ -122,7 +122,7 @@ pub fn editST(target: SDZX) type {
             return null;
         }
 
-        pub fn select_render(gst: *GST, sst: select.SelectState) void {
+        pub fn select_render(gst: *GST, sst: select.SelectState) bool {
             for (@field(gst, nst).rs.items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
@@ -172,6 +172,7 @@ pub fn editST(target: SDZX) type {
                     }
                 },
             }
+            return false;
         }
 
         pub fn check_inside(gst: *GST) select.CheckInsideResult {

@@ -54,14 +54,14 @@ pub const buildST = union(enum) {
     }
 
     //select
-    pub fn select_render(gst: *GST, sst: select.SelectState) void {
+    pub fn select_render(gst: *GST, sst: select.SelectState) bool {
         _ = sst;
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
             gst.tbuild.view.drag_view(gst.screen_width);
         }
-
         for (gst.tbuild.list.items) |*b| b.draw(gst);
+        return false;
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
@@ -107,6 +107,12 @@ pub const Building = struct {
     width: f32,
     height: f32,
     color: rl.Color = .orange,
+
+    pub fn rotate(self: *@This()) void {
+        const t = self.width;
+        self.width = self.height;
+        self.height = t;
+    }
 
     pub fn inBuilding(self: *const Building, gst: *const GST, win_pos: rl.Vector2) bool {
         const view_pos = gst.tbuild.view.win_to_view(gst.screen_width, win_pos);
