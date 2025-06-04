@@ -65,14 +65,14 @@ pub const buildST = union(enum) {
     }
 
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
-        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         for (gst.tbuild.list.items, 0..) |*b, i| {
-            if (b.inBuilding(mp)) {
+            if (b.inBuilding(gst, rl.getMousePosition())) {
                 gst.tbuild.selected_id = i;
                 return .in_someone;
             }
         }
 
+        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         if (rl.isKeyPressed(rl.KeyboardKey.space)) {
             gst.tbuild.list.append(
                 gst.gpa,
@@ -89,9 +89,8 @@ pub const buildST = union(enum) {
     }
 
     pub fn check_still_inside(gst: *GST) bool {
-        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const b = gst.tbuild.list.items[gst.tbuild.selected_id];
-        return b.inBuilding(mp);
+        return b.inBuilding(gst, rl.getMousePosition());
     }
 };
 
@@ -108,7 +107,8 @@ pub const Building = struct {
     height: f32,
     color: rl.Color = .orange,
 
-    pub fn inBuilding(self: *const Building, view_pos: rl.Vector2) bool {
+    pub fn inBuilding(self: *const Building, gst: *const GST, win_pos: rl.Vector2) bool {
+        const view_pos = gst.tbuild.view.win_to_view(gst.screen_width, win_pos);
         if (view_pos.x > self.x and
             view_pos.x < self.x + self.width and
             view_pos.y > self.y and
@@ -117,26 +117,34 @@ pub const Building = struct {
     }
 
     pub fn draw(self: *Building, gst: *GST) void {
-        self.draw_with_pos(gst, .{ .x = self.x, .y = self.y }, null);
+        const win_pos = gst.tbuild.view.view_to_win(
+            gst.screen_width,
+            .{ .x = self.x, .y = self.y },
+        );
+        self.draw_with_pos(gst, win_pos, null);
     }
 
     pub fn draw_with_pos(
         self: *Building,
         gst: *GST,
-        view_pos: rl.Vector2,
+        win_pos: rl.Vector2,
         color: ?rl.Color,
     ) void {
-        self.draw_with_pos_and_view(gst, view_pos, &gst.tbuild.view, color);
+        self.draw_with_win_pos_and_view(
+            gst,
+            win_pos,
+            &gst.tbuild.view,
+            color,
+        );
     }
 
-    pub fn draw_with_pos_and_view(
+    pub fn draw_with_win_pos_and_view(
         self: *Building,
         gst: *GST,
-        view_pos: rl.Vector2,
+        win_pos: rl.Vector2,
         view: *const View,
         color: ?rl.Color,
     ) void {
-        const win_pos = view.view_to_win(gst.screen_width, view_pos);
         const r = gst.screen_width / view.width;
         const x: i32 = @intFromFloat(win_pos.x);
         const y: i32 = @intFromFloat(win_pos.y);

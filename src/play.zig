@@ -64,9 +64,8 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_inside1(gst: *GST) select.CheckInsideResult {
-        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         for (gst.tbuild.list.items, 0..) |*b, i| {
-            if (b.inBuilding(mp)) {
+            if (b.inBuilding(gst, rl.getMousePosition())) {
                 gst.play.selected_build_id = i;
                 return .in_someone;
             }
@@ -75,9 +74,8 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_still_inside1(gst: *GST) bool {
-        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const b = gst.tbuild.list.items[gst.play.selected_build_id];
-        return b.inBuilding(mp);
+        return b.inBuilding(gst, rl.getMousePosition());
     }
 
     //select position
@@ -90,13 +88,21 @@ pub const placeST = union(enum) {
         switch (sst) {
             .hover => {
                 const b = &gst.tbuild.list.items[gst.play.selected_build_id];
-                const mp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-                b.draw_with_pos_and_view(gst, mp, &gst.play.view, rl.Color.green);
+                b.draw_with_win_pos_and_view(
+                    gst,
+                    rl.getMousePosition(),
+                    &gst.play.view,
+                    rl.Color.green,
+                );
             },
             .inside => {
                 const b = &gst.tbuild.list.items[gst.play.selected_build_id];
-                const mp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-                b.draw_with_pos_and_view(gst, mp, &gst.play.view, rl.Color.green);
+                b.draw_with_win_pos_and_view(
+                    gst,
+                    rl.getMousePosition(),
+                    &gst.play.view,
+                    rl.Color.green,
+                );
             },
             else => {},
         }
@@ -121,15 +127,13 @@ pub const placeST = union(enum) {
             while (tx < x + w) : (tx += 1) {
                 const cell = gst.play.current_map[@intCast(ty)][@intCast(tx)];
                 if (cell.tag != .room or cell.building_id != null) {
-                    const mp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-                    b.draw_with_pos_and_view(gst, mp, &gst.play.view, rl.Color.red);
+                    b.draw_with_win_pos_and_view(gst, rl.getMousePosition(), &gst.play.view, rl.Color.red);
                     return .not_in_any_rect;
                 }
             }
         }
 
-        const mp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        b.draw_with_pos_and_view(gst, mp, &gst.play.view, rl.Color.green);
+        b.draw_with_win_pos_and_view(gst, rl.getMousePosition(), &gst.play.view, rl.Color.green);
         gst.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
         return .in_someone;
     }
