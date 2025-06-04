@@ -17,7 +17,7 @@ pub const buildST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        ptr.draw_color_picker(gst);
+        ptr.draw_gui(gst);
 
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
@@ -101,6 +101,7 @@ pub const Tbuild = struct {
 };
 
 pub const Building = struct {
+    name: [30:0]u8 = @splat(0),
     x: f32,
     y: f32,
     width: f32,
@@ -151,13 +152,25 @@ pub const Building = struct {
         const w: i32 = @intFromFloat(r * self.width);
         const h: i32 = @intFromFloat(r * self.height);
         if (color) |col| rl.drawRectangle(x, y, w, h, col) else rl.drawRectangle(x, y, w, h, self.color);
-        const str = gst.printZ("{d}, {d}", .{ self.width, self.height });
+        const idx = blk: {
+            for (0..self.name.len) |i| {
+                if (self.name[i] == 0) break :blk i;
+            }
+            break :blk 0;
+        };
+        const str = gst.printZ("{s}\n{d}, {d}", .{ self.name[0..idx], self.width, self.height });
         rl.drawText(str, x, y, 32, rl.Color.black);
     }
 
-    pub fn draw_color_picker(self: *Building, gst: *GST) void {
+    pub fn draw_gui(self: *Building, gst: *GST) void {
         const win_pos = gst.tbuild.view.view_to_win(gst.screen_width, .{ .x = self.x, .y = self.y });
         const r = gst.screen_width / gst.tbuild.view.width;
+        _ = rg.textBox(.{
+            .x = win_pos.x,
+            .y = win_pos.y,
+            .width = 340,
+            .height = 30,
+        }, &self.name, 30, true);
         _ = rg.colorPicker(
             .{
                 .x = win_pos.x,
