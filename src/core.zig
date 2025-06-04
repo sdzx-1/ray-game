@@ -89,6 +89,7 @@ pub const GST = struct {
     tbuild: tbuild.Tbuild = .{},
     animation: animation.Animation = .{},
     textures: textures.Textures,
+    sel_texture: textures.SelTexture = .{},
     path_texture: rl.Texture2D,
     room_texture: rl.Texture2D,
     blank_texture: rl.Texture2D,
@@ -170,6 +171,7 @@ pub const Example = enum {
     play,
     build,
     textures,
+    sel_texture,
     place,
 
     //
@@ -183,6 +185,7 @@ pub const Example = enum {
     inside,
     hover,
 
+    pub const sel_textureST = textures.sel_textureST;
     pub const texturesST = textures.texturesST;
     pub const buildST = tbuild.buildST;
     pub const menuST = menu.menuST;

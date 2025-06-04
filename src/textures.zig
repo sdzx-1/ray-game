@@ -33,6 +33,11 @@ pub const Height = 90;
 
 pub const TextArr = [Height][Width]Cell;
 
+pub const TextID = struct {
+    x: usize,
+    y: usize,
+};
+
 pub fn arr_set_blank(ta: *TextArr) void {
     for (0..Height) |y| {
         for (0..Width) |x| {
@@ -44,27 +49,12 @@ pub fn arr_set_blank(ta: *TextArr) void {
 pub const Textures = struct {
     text_arr: *TextArr,
     view: View = .{ .x = 0, .y = 0, .width = 25 },
-};
 
-pub const texturesST = union(enum) {
-    ToMenu: Wit(Example.menu),
-    ToExit: Wit(Example.exit),
-
-    pub fn conthandler(gst: *GST) ContR {
-        if (genMsg(gst)) |msg| {
-            switch (msg) {
-                .ToExit => |wit| return .{ .Next = wit.conthandler() },
-                .ToMenu => |wit| return .{ .Next = wit.conthandler() },
-            }
-        } else return .Wait;
+    pub fn read(self: *const @This(), id: TextID) Cell {
+        return self.text_arr[id.y][id.x];
     }
 
-    fn genMsg(gst: *GST) ?@This() {
-        {
-            gst.textures.view.mouse_wheel(gst.hdw);
-            gst.textures.view.drag_view(gst.screen_width);
-        }
-
+    pub fn render(_: @This(), gst: *GST) void {
         for (0..Height) |y| {
             for (0..Width) |x| {
                 const val = gst.textures.text_arr[y][x];
@@ -94,10 +84,27 @@ pub const texturesST = union(enum) {
                 }
             }
         }
+    }
+};
 
-        if (rl.isKeyPressed(rl.KeyboardKey.q)) {
-            return .ToExit;
+pub const texturesST = union(enum) {
+    ToMenu: Wit(Example.menu),
+
+    pub fn conthandler(gst: *GST) ContR {
+        if (genMsg(gst)) |msg| {
+            switch (msg) {
+                .ToMenu => |wit| return .{ .Next = wit.conthandler() },
+            }
+        } else return .Wait;
+    }
+
+    fn genMsg(gst: *GST) ?@This() {
+        {
+            gst.textures.view.mouse_wheel(gst.hdw);
+            gst.textures.view.drag_view(gst.screen_width);
         }
+
+        gst.textures.render(gst);
 
         if (rl.isKeyPressed(rl.KeyboardKey.m)) {
             return .ToMenu;
@@ -105,3 +112,81 @@ pub const texturesST = union(enum) {
         return null;
     }
 };
+
+pub const SelTexture = struct {
+    text_id: TextID = .{ .x = 0, .y = 0 },
+    address: *TextID = undefined,
+};
+
+pub fn sel_textureST(target: SDZX) type {
+    return union(enum) {
+        ToTarget: WitRow(target),
+
+        pub fn conthandler(gst: *GST) ContR {
+            switch (genMsg(gst)) {
+                .ToTarget => |wit| {
+                    gst.sel_texture.address.* = gst.sel_texture.text_id;
+                    return wit.conthandler()(gst);
+                },
+            }
+        }
+
+        fn genMsg(gst: *GST) @This() {
+            _ = gst;
+            return .ToTarget;
+        }
+
+        pub fn select_render(gst: *GST, sst: select.SelectState) bool {
+            {
+                gst.textures.view.mouse_wheel(gst.hdw);
+                gst.textures.view.drag_view(gst.screen_width);
+            }
+            gst.textures.render(gst);
+            switch (sst) {
+                .hover => {
+                    const val = gst.textures.read(gst.sel_texture.text_id);
+                    const name = val.texture.name;
+                    const mp = rl.getMousePosition();
+                    const mwid = rl.measureText(name, 32);
+                    rl.drawText(
+                        name,
+                        @as(i32, @intFromFloat(mp.x)) - @divTrunc(mwid, 2),
+                        @as(i32, @intFromFloat(mp.y)) - 40,
+                        32,
+                        rl.Color.green,
+                    );
+                },
+                else => {},
+            }
+            return false;
+        }
+
+        pub fn check_inside(gst: *GST) select.CheckInsideResult {
+            const view_pos = gst.textures.view.win_to_view(gst.screen_width, rl.getMousePosition());
+            const x: i32 = @intFromFloat(@floor(view_pos.x));
+            const y: i32 = @intFromFloat(@floor(view_pos.y));
+
+            if (x < 0 or y < 0 or x >= Width or y >= Height) return .not_in_any_rect;
+            const xi: usize = @intCast(x);
+            const yi: usize = @intCast(y);
+
+            switch (gst.textures.text_arr[yi][xi]) {
+                .blank => return .not_in_any_rect,
+                .text_dir_name => return .not_in_any_rect,
+                .texture => {
+                    gst.sel_texture.text_id = .{ .x = xi, .y = yi };
+                    return .in_someone;
+                },
+            }
+        }
+
+        pub fn check_still_inside(gst: *GST) bool {
+            const view_pos = gst.textures.view.win_to_view(gst.screen_width, rl.getMousePosition());
+            const x: i32 = @intFromFloat(@floor(view_pos.x));
+            const y: i32 = @intFromFloat(@floor(view_pos.y));
+
+            return (x == @as(i32, @intCast(gst.sel_texture.text_id.x)) and
+                y == @as(i32, @intCast(gst.sel_texture.text_id.y)));
+        }
+    };
+}
