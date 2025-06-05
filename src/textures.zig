@@ -54,6 +54,20 @@ pub const Textures = struct {
         return self.text_arr[id.y][id.x];
     }
 
+    pub fn deinit(self: *const @This()) void {
+        for (0..Height) |y| {
+            for (0..Width) |x| {
+                const val = self.text_arr[y][x];
+                switch (val) {
+                    .texture => |text| {
+                        text.tex2d.unload();
+                    },
+                    else => {},
+                }
+            }
+        }
+    }
+
     pub fn render(_: @This(), gst: *GST) void {
         for (0..Height) |y| {
             for (0..Width) |x| {

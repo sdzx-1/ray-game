@@ -604,31 +604,31 @@
     }
   ],
   "tbuild_view": {
-    "x": 4.909555435180664e1,
-    "y": 5.942778778076172e1,
-    "width": 1.3290428161621094e1
+    "x": 4.8108455657958984e1,
+    "y": 5.6740684509277344e1,
+    "width": 2.8880258560180664e1
   },
   "maze_config": {
     "x": 9.45273666381836e1,
     "y": 1.5422885131835938e2,
     "width": 6.388059616088867e0,
-    "probability": 3.6616915464401245e-1,
+    "probability": 0e0,
     "total_x": 137,
     "total_y": 137,
     "room_min_width": 3,
     "room_max_width": 17
   },
   "room_texture_id": {
-    "x": 0,
-    "y": 35
+    "x": 4,
+    "y": 36
   },
   "path_texture_id": {
     "x": 1,
-    "y": 17
+    "y": 18
   },
   "conn_texture_id": {
     "x": 1,
-    "y": 17
+    "y": 18
   },
   "blank_texture_id": {
     "x": 6,
