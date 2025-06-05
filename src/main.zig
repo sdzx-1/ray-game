@@ -40,10 +40,6 @@ pub fn main() anyerror!void {
         .play = .{ .current_map = current_map },
         .tmp_buf = tmp_buf,
         .textures = .{ .text_arr = text_arr },
-        .path_texture = undefined,
-        .room_texture = undefined,
-        .blank_texture = undefined,
-        .connect_texture = undefined,
     };
 
     try utils.loadData(gpa, &gst);
@@ -53,19 +49,6 @@ pub fn main() anyerror!void {
 
     rl.setWindowState(.{ .window_resizable = true });
     rl.hideCursor();
-
-    const path_texture = try rl.loadTexture("data/resouces/Tiles/Tiles Pattern/Tiles_Pattern_1_Blue_1.png");
-    defer path_texture.unload();
-    gst.path_texture = path_texture;
-    const room_texture = try rl.loadTexture("data/resouces/Cobble Stone/Cobblestones_01_Black_1.png");
-    defer room_texture.unload();
-    gst.room_texture = room_texture;
-    const black_texture = try rl.loadTexture("data/resouces/Water/Water_01_Blue_2.png");
-    defer black_texture.unload();
-    gst.blank_texture = black_texture;
-    const connect_texture = try rl.loadTexture("data/resouces/Tiles/Tiles Pattern/Tiles_Pattern_1_Red_1.png");
-    defer connect_texture.unload();
-    gst.connect_texture = connect_texture;
 
     const cwd = std.fs.cwd();
     const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });

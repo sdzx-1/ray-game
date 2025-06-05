@@ -90,10 +90,6 @@ pub const GST = struct {
     animation: animation.Animation = .{},
     textures: textures.Textures,
     sel_texture: textures.SelTexture = .{},
-    path_texture: rl.Texture2D,
-    room_texture: rl.Texture2D,
-    blank_texture: rl.Texture2D,
-    connect_texture: rl.Texture2D,
 
     //
     notify: Notify = .{},
