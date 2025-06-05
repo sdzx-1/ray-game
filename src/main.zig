@@ -82,6 +82,7 @@ pub fn main() anyerror!void {
     }
     std.debug.print("y: {d}, x: {d}\n", .{ y, x });
     defer gst.textures.deinit();
+    errdefer gst.textures.deinit();
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
