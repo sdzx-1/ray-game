@@ -1,15 +1,18 @@
 pub const buildST = union(enum) {
     ToPlay: Wit(Example.play),
-    ToSelect: WitRow(SDZX.C(
-        Example.select,
-        &.{ SDZX.V(Example.play), SDZX.V(Example.build) },
-    )),
+    ToSelect: WitRow(SDZX.C(Example.select, &.{ SDZX.V(Example.play), SDZX.V(Example.build) })),
+    SetTextId: Wit(.{ Example.select, Example.build, .{ Example.sel_texture, Example.build } }),
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
             switch (msg) {
                 .ToPlay => |wit| return .{ .Next = wit.conthandler() },
                 .ToSelect => |wit| return .{ .Next = wit.conthandler() },
+                .SetTextId => |wit| {
+                    const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
+                    gst.sel_texture.address = &ptr.text_id;
+                    return .{ .Next = wit.conthandler() };
+                },
             }
         } else return .Wait;
     }
@@ -17,7 +20,7 @@ pub const buildST = union(enum) {
     fn genMsg(gst: *GST) ?@This() {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        ptr.draw_gui(gst);
+        if (ptr.draw_gui(gst)) |msg| return msg;
 
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
@@ -106,7 +109,8 @@ pub const Building = struct {
     y: f32,
     width: f32,
     height: f32,
-    color: rl.Color = .orange,
+    color: rl.Color = .white,
+    text_id: textures.TextID = .{ .x = 0, .y = 0 },
 
     pub fn rotate(self: *@This()) void {
         const t = self.width;
@@ -157,7 +161,25 @@ pub const Building = struct {
         const y: i32 = @intFromFloat(win_pos.y);
         const w: i32 = @intFromFloat(r * self.width);
         const h: i32 = @intFromFloat(r * self.height);
-        if (color) |col| rl.drawRectangle(x, y, w, h, col) else rl.drawRectangle(x, y, w, h, self.color);
+        if (color) |col| rl.drawRectangle(x, y, w, h, col) else {
+            for (0..@intFromFloat(self.height)) |dy| {
+                for (0..@intFromFloat(self.width)) |dx| {
+                    const texture = gst.textures.read(self.text_id).texture.tex2d;
+                    texture.drawPro(
+                        .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                        .{
+                            .x = win_pos.x + @as(f32, @floatFromInt(dx)) * r,
+                            .y = win_pos.y + @as(f32, @floatFromInt(dy)) * r,
+                            .width = r,
+                            .height = r,
+                        },
+                        .{ .x = 0, .y = 0 },
+                        0,
+                        self.color,
+                    );
+                }
+            }
+        }
         const idx = blk: {
             for (0..self.name.len) |i| {
                 if (self.name[i] == 0) break :blk i;
@@ -165,28 +187,22 @@ pub const Building = struct {
             break :blk 0;
         };
         const str = gst.printZ("{s}\n{d}, {d}", .{ self.name[0..idx], self.width, self.height });
-        rl.drawText(str, x, y, 32, rl.Color.black);
+        rl.drawText(str, x, y, 32, rl.Color.green);
     }
 
-    pub fn draw_gui(self: *Building, gst: *GST) void {
+    pub fn draw_gui(self: *Building, gst: *GST) ?buildST {
         const win_pos = gst.tbuild.view.view_to_win(gst.screen_width, .{ .x = self.x, .y = self.y });
         const r = gst.screen_width / gst.tbuild.view.width;
-        _ = rg.textBox(.{
-            .x = win_pos.x,
-            .y = win_pos.y,
-            .width = 340,
-            .height = 30,
-        }, &self.name, 30, true);
-        _ = rg.colorPicker(
-            .{
-                .x = win_pos.x,
-                .y = win_pos.y + self.height * r + 3,
-                .width = 200,
-                .height = 300,
-            },
-            "picker",
-            &self.color,
-        );
+        var rect: rl.Rectangle = .{ .x = win_pos.x, .y = win_pos.y, .width = 250, .height = 30 };
+        _ = rg.textBox(rect, &self.name, 30, true);
+        rect.y -= 33;
+        rect.width = 240;
+        if (rg.button(rect, "select texture")) return .SetTextId;
+        rect.y = win_pos.y + self.height * r + 3;
+        rect.width = 200;
+        rect.height = 300;
+        _ = rg.colorPicker(rect, "picker", &self.color);
+        return null;
     }
 };
 
@@ -194,6 +210,7 @@ const std = @import("std");
 const typedFsm = @import("typed_fsm");
 const core = @import("core.zig");
 const select = @import("select.zig");
+const textures = @import("textures.zig");
 const utils = @import("utils.zig");
 
 const rl = @import("raylib");

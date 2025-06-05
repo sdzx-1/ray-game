@@ -283,11 +283,12 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
                     rl.Color.white,
                 );
             } else {
-                rl.drawRectangle(
-                    @intFromFloat(win_pos.x),
-                    @intFromFloat(win_pos.y),
-                    @intFromFloat(scale + 2),
-                    @intFromFloat(scale + 2),
+                const texture = gst.textures.read(val.building.?.text_id).texture.tex2d;
+                texture.drawPro(
+                    .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                    .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                    .{ .x = 0, .y = 0 },
+                    0,
                     val.building.?.color,
                 );
             }
