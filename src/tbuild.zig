@@ -58,12 +58,22 @@ pub const buildST = union(enum) {
 
     //select
     pub fn select_render(gst: *GST, sst: select.SelectState) bool {
-        _ = sst;
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
             gst.tbuild.view.drag_view(gst.screen_width);
         }
         for (gst.tbuild.list.items) |*b| b.draw(gst);
+
+        switch (sst) {
+            .outside => {},
+            else => {
+                if (rl.isKeyPressed(rl.KeyboardKey.d)) {
+                    _ = gst.tbuild.list.swapRemove(gst.tbuild.selected_id);
+                    return true;
+                }
+            },
+        }
+
         return false;
     }
 
@@ -79,15 +89,10 @@ pub const buildST = union(enum) {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) {
             gst.tbuild.list.append(
                 gst.gpa,
-                .{
-                    .x = mp.x,
-                    .y = mp.y,
-                    .width = 1,
-                    .height = 1,
-                    .color = rl.Color.orange,
-                },
+                .{ .x = mp.x, .y = mp.y, .width = 1, .height = 1, .color = rl.Color.white },
             ) catch unreachable;
         }
+
         return .not_in_any_rect;
     }
 
@@ -110,7 +115,7 @@ pub const Building = struct {
     width: f32,
     height: f32,
     color: rl.Color = .white,
-    text_id: textures.TextID = .{ .x = 0, .y = 0 },
+    text_id: textures.TextID = .{ .x = 8, .y = 8 },
 
     pub fn rotate(self: *@This()) void {
         const t = self.width;
@@ -194,7 +199,7 @@ pub const Building = struct {
         const win_pos = gst.tbuild.view.view_to_win(gst.screen_width, .{ .x = self.x, .y = self.y });
         const r = gst.screen_width / gst.tbuild.view.width;
         var rect: rl.Rectangle = .{ .x = win_pos.x, .y = win_pos.y, .width = 250, .height = 30 };
-        _ = rg.textBox(rect, &self.name, 30, true);
+        _ = rg.textBox(rect, &self.name, 30, false);
         rect.y -= 33;
         rect.width = 240;
         if (rg.button(rect, "select texture")) return .SetTextId;
