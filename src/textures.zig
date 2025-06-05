@@ -142,6 +142,15 @@ pub fn sel_textureST(target: SDZX) type {
                 gst.textures.view.drag_view(gst.screen_width);
             }
             gst.textures.render(gst);
+            const selected = gst.sel_texture.address.*;
+            const smp = gst.textures.view.view_to_win(gst.screen_width, .{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
+            const wh: f32 = gst.screen_width / gst.textures.view.width;
+            rl.drawRectangleLinesEx(.{
+                .x = smp.x,
+                .y = smp.y,
+                .width = wh,
+                .height = wh,
+            }, 10, rl.Color.green);
             switch (sst) {
                 .hover => {
                     const val = gst.textures.read(gst.sel_texture.text_id);
