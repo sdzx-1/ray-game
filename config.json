@@ -619,19 +619,19 @@
     "room_max_width": 17
   },
   "room_texture_id": {
-    "x": 8,
-    "y": 8
+    "x": 0,
+    "y": 35
   },
   "path_texture_id": {
-    "x": 5,
-    "y": 9
+    "x": 1,
+    "y": 17
   },
   "conn_texture_id": {
-    "x": 5,
-    "y": 2
+    "x": 1,
+    "y": 17
   },
   "blank_texture_id": {
     "x": 6,
-    "y": 2
+    "y": 67
   }
 }
