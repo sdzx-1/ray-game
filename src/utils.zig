@@ -129,7 +129,9 @@ pub const View = struct {
     }
 
     pub fn drag_view(self: *View, screen_width: f32) void {
-        if (rl.isMouseButtonDown(rl.MouseButton.middle)) {
+        if (rl.isMouseButtonDown(rl.MouseButton.middle) or
+            (rl.isKeyDown(rl.KeyboardKey.left_alt)))
+        {
             const deta = self.dwin_to_dview(screen_width, rl.getMouseDelta());
             self.x -= deta.x;
             self.y -= deta.y;
