@@ -18,7 +18,7 @@ pub fn main() anyerror!void {
 
     var graph = typedFsm.Graph.init;
     defer graph.deinit(gpa) catch unreachable;
-    try typedFsm.generate_graph(gpa, Example, &graph);
+    try graph.generate(gpa, Example);
     std.debug.print("{}\n", .{graph});
 
     var prng = std.Random.DefaultPrng.init(blk: {
