@@ -63,9 +63,11 @@ pub fn main() anyerror!void {
                 const ext = std.fs.path.extension(entry.basename);
                 if (std.mem.eql(u8, ext, ".png")) {
                     const path = try std.fs.path.joinZ(gpa, &.{ "data/resouces", entry.path });
-                    // std.debug.print("load: {s}\n", .{path});
                     const loaded_texture = try rl.loadTexture(path);
-                    gst.textures.text_arr[y][x] = .{ .texture = .{ .name = entry.basename, .tex2d = loaded_texture } };
+                    gst.textures.text_arr[y][x] = .{ .texture = .{
+                        .name = try gpa.dupeZ(u8, entry.basename),
+                        .tex2d = loaded_texture,
+                    } };
                     x += 1;
                     if (x >= textures.Width) {
                         y += 1;
