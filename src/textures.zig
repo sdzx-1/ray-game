@@ -78,25 +78,25 @@ pub const Textures = struct {
                 );
                 const worh = gst.screen_width / gst.textures.view.width;
 
-                if (win_pos.x < 0 or
-                    win_pos.y < 0 or
-                    win_pos.x + worh > gst.screen_width or
-                    win_pos.y + worh > gst.screen_height) continue;
-
-                switch (val) {
-                    .blank => {},
-                    .texture => |text| {
-                        text.tex2d.drawPro(
-                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                            .{ .x = win_pos.x, .y = win_pos.y, .width = worh, .height = worh },
-                            .{ .x = 0, .y = 0 },
-                            0,
-                            rl.Color.white,
-                        );
-                    },
-                    .text_dir_name => |name| {
-                        rl.drawText(name, @intFromFloat(win_pos.x), @intFromFloat(win_pos.y), 20, rl.Color.green);
-                    },
+                const view = gst.textures.view;
+                const r1: rl.Rectangle = .{ .x = view.x, .y = view.y, .width = view.width, .height = view.width * gst.hdw };
+                const r2: rl.Rectangle = .{ .x = @floatFromInt(x), .y = @floatFromInt(y), .width = 1, .height = 1 };
+                if (r1.checkCollision(r2)) {
+                    switch (val) {
+                        .blank => {},
+                        .texture => |text| {
+                            text.tex2d.drawPro(
+                                .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                                .{ .x = win_pos.x, .y = win_pos.y, .width = worh, .height = worh },
+                                .{ .x = 0, .y = 0 },
+                                0,
+                                rl.Color.white,
+                            );
+                        },
+                        .text_dir_name => |name| {
+                            rl.drawText(name, @intFromFloat(win_pos.x), @intFromFloat(win_pos.y), 20, rl.Color.green);
+                        },
+                    }
                 }
             }
         }
