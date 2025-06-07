@@ -72,14 +72,20 @@ pub const Textures = struct {
         for (0..Height) |y| {
             for (0..Width) |x| {
                 const val = gst.textures.text_arr[y][x];
+                const win_pos = gst.textures.view.view_to_win(
+                    gst.screen_width,
+                    .{ .x = @floatFromInt(x), .y = @floatFromInt(y) },
+                );
+                const worh = gst.screen_width / gst.textures.view.width;
+
+                if (win_pos.x < 0 or
+                    win_pos.y < 0 or
+                    win_pos.x + worh > gst.screen_width or
+                    win_pos.y + worh > gst.screen_height) continue;
+
                 switch (val) {
                     .blank => {},
                     .texture => |text| {
-                        const win_pos = gst.textures.view.view_to_win(
-                            gst.screen_width,
-                            .{ .x = @floatFromInt(x), .y = @floatFromInt(y) },
-                        );
-                        const worh = gst.screen_width / gst.textures.view.width;
                         text.tex2d.drawPro(
                             .{ .x = 0, .y = 0, .width = 256, .height = 256 },
                             .{ .x = win_pos.x, .y = win_pos.y, .width = worh, .height = worh },
@@ -89,10 +95,6 @@ pub const Textures = struct {
                         );
                     },
                     .text_dir_name => |name| {
-                        const win_pos = gst.textures.view.view_to_win(
-                            gst.screen_width,
-                            .{ .x = @floatFromInt(x), .y = @floatFromInt(y) },
-                        );
                         rl.drawText(name, @intFromFloat(win_pos.x), @intFromFloat(win_pos.y), 20, rl.Color.green);
                     },
                 }

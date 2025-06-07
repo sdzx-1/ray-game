@@ -19,7 +19,9 @@ pub fn main() anyerror!void {
     var graph = typedFsm.Graph.init;
     defer graph.deinit(gpa) catch unreachable;
     try graph.generate(gpa, Example);
-    std.debug.print("{}\n", .{graph});
+    const cwd = std.fs.cwd();
+    const t_dot_path = try cwd.createFile("t.dot", .{});
+    try t_dot_path.writeAll(try std.fmt.allocPrint(gpa, "{}", .{graph}));
 
     var prng = std.Random.DefaultPrng.init(blk: {
         var seed: u64 = undefined;
@@ -50,7 +52,6 @@ pub fn main() anyerror!void {
     rl.setWindowState(.{ .window_resizable = true });
     rl.hideCursor();
 
-    const cwd = std.fs.cwd();
     const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
     var walker = try res_dir.walk(gpa);
 

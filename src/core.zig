@@ -93,7 +93,7 @@ pub const GST = struct {
 
     //
     notify: Notify = .{},
-    im_log_buf: [60:0]u8 = @splat(0),
+    im_log_buf: [260:0]u8 = @splat(0),
     tmp_buf: []u8,
 
     pub fn log(self: *@This(), str: []const u8) void {
