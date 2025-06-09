@@ -188,31 +188,12 @@ pub const Example = enum {
     pub const mapST = map.mapST;
     pub const playST = play.playST;
     pub const placeST = play.placeST;
+    pub const animationST = animation.animationST;
+    pub const editST = editor.editST;
+    pub const selectST = select.selectST;
+    pub const insideST = select.insideST;
+    pub const hoverST = select.hoverST;
 
-    //
-    pub fn animationST(from: SDZX, to: SDZX) type {
-        return animation.animationST(from, to);
-    }
-
-    //
-
-    pub fn editST(target: SDZX) type {
-        return editor.editST(target);
-    }
-    //
-    pub fn selectST(back: SDZX, selected: SDZX) type {
-        return select.selectST(back, selected);
-    }
-
-    pub fn insideST(back: SDZX, selected: SDZX) type {
-        return select.insideST(back, selected);
-    }
-
-    pub fn hoverST(back: SDZX, selected: SDZX) type {
-        return select.hoverST(back, selected);
-    }
-
-    //
     pub const exitST = union(enum) {
         pub fn conthandler(gst: *GST) ContR {
             utils.saveData(gst);
