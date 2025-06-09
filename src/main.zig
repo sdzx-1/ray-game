@@ -51,6 +51,7 @@ pub fn main() anyerror!void {
 
     rl.setWindowState(.{ .window_resizable = true });
     rl.hideCursor();
+    rl.setTraceLogLevel(.none);
 
     const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
     var walker = try res_dir.walk(gpa);
