@@ -172,12 +172,12 @@ pub fn sel_textureST(target: SDZX) type {
                     const val = gst.textures.read(gst.sel_texture.text_id);
                     const name = val.texture.name;
                     const mp = rl.getMousePosition();
-                    const mwid = rl.measureText(name, 32);
+                    const mwid = rl.measureText(name, 22);
                     rl.drawText(
                         name,
                         @as(i32, @intFromFloat(mp.x)) - @divTrunc(mwid, 2),
                         @as(i32, @intFromFloat(mp.y)) - 40,
-                        32,
+                        22,
                         rl.Color.green,
                     );
                 },

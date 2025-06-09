@@ -162,8 +162,8 @@ pub const Building = struct {
         color: ?rl.Color,
     ) void {
         const r = gst.screen_width / view.width;
-        const x: i32 = @intFromFloat(win_pos.x);
-        const y: i32 = @intFromFloat(win_pos.y);
+        const x: i32 = @intFromFloat(win_pos.x - r * self.width / 2);
+        const y: i32 = @intFromFloat(win_pos.y - r * self.height / 2);
         const w: i32 = @intFromFloat(r * self.width);
         const h: i32 = @intFromFloat(r * self.height);
         if (color) |col| rl.drawRectangle(x, y, w, h, col) else {

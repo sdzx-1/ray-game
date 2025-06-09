@@ -120,8 +120,8 @@ pub const placeST = union(enum) {
     pub fn check_inside(gst: *GST) select.CheckInsideResult {
         const b = &gst.play.selected_build;
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x));
-        const y: i32 = @intFromFloat(@floor(vp.y));
+        const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
+        const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
         const w: i32 = @intFromFloat(b.width);
         const h: i32 = @intFromFloat(b.height);
 
@@ -148,9 +148,14 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_still_inside(gst: *GST) bool {
+        // const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
+        // const x: i32 = @intFromFloat(@floor(vp.x));
+        // const y: i32 = @intFromFloat(@floor(vp.y));
+
+        const b = &gst.play.selected_build;
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x));
-        const y: i32 = @intFromFloat(@floor(vp.y));
+        const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
+        const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
         return (x == gst.play.selected_cell_id.x and
             y == gst.play.selected_cell_id.y);
     }
