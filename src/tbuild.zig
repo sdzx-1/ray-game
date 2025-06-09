@@ -185,14 +185,6 @@ pub const Building = struct {
                 }
             }
         }
-        const idx = blk: {
-            for (0..self.name.len) |i| {
-                if (self.name[i] == 0) break :blk i;
-            }
-            break :blk 0;
-        };
-        const str = gst.printZ("{s}\n{d}, {d}", .{ self.name[0..idx], self.width, self.height });
-        rl.drawText(str, x, y, 32, rl.Color.green);
     }
 
     pub fn draw_gui(self: *Building, gst: *GST) ?buildST {

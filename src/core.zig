@@ -203,8 +203,7 @@ pub const Example = enum {
     };
 
     fn enter_fn(cst: typedFsm.sdzx(@This()), gst: *GST) void {
-        var buf: [130]u8 = @splat(0);
-        gst.log_im(std.fmt.bufPrintZ(&buf, "{}", .{cst}) catch unreachable);
+        gst.log_im(gst.printZ("{}", .{cst}));
     }
 
     pub fn Wit(val: anytype) type {
