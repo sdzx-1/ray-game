@@ -47,7 +47,7 @@ pub const placeST = union(enum) {
                         cell.building = b;
                     }
                 }
-                return wit.conthandler()(gst);
+                return .{ .Curr = wit.conthandler() };
             },
         }
     }

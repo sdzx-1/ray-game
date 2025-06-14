@@ -142,7 +142,7 @@ pub fn sel_textureST(target: SDZX) type {
             switch (genMsg(gst)) {
                 .ToTarget => |wit| {
                     gst.sel_texture.address.* = gst.sel_texture.text_id;
-                    return wit.conthandler()(gst);
+                    return .{ .Curr = wit.conthandler() };
                 },
             }
         }

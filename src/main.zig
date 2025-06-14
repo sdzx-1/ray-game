@@ -107,10 +107,14 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
 
-        switch (next(&gst)) {
+        sw: switch (next(&gst)) {
             .Exit => exit = true,
             .Wait => {},
             .Next => |fun| next = fun,
+            .Curr => |fun| {
+                next = fun;
+                continue :sw fun(&gst);
+            },
         }
 
         rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
