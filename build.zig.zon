@@ -40,13 +40,13 @@
             .url = "git+https://github.com/Not-Nik/raylib-zig?ref=devel#3bf08a304cfe2baf839705063ff999b8d8bc8c54",
             .hash = "raylib_zig-5.6.0-dev-KE8REKAqBQAQugfCOjYYVRFOi7iaEJK1EMDcRUq8AOm2",
         },
-        .typed_fsm = .{
-            .url = "git+https://github.com/sdzx-1/typed-fsm-zig.git#dfdc893718c6f8288c27f241d0a726fbe514f868",
-            .hash = "typed_fsm-0.0.0-g0MC1j84AACqxMJu3m7UJuL0m73QKKqfyVVXl8tx4_iG",
-        },
         .maze = .{
             .url = "git+https://github.com/sdzx-1/maze.git#b926f13f6f281970d687eba87894ec2d682ec125",
             .hash = "maze-0.0.0-osQoE-V7AAC8BCuP43nQx_JTo36tsU0Afx4AgSPKZzKl",
+        },
+        .polystate = .{
+            .url = "git+https://github.com/sdzx-1/polystate.git#0b1fd9bc9edd3952fa97663d7f43152c94c3d0ce",
+            .hash = "polystate-0.0.0-8by0_KswAADVpNs02l1vpKxxv10JphrBCrPfM58rSm_q",
         },
     },
     .paths = .{

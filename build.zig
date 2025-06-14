@@ -6,7 +6,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     // zig fmt: off
-    const typed_fsm  = b.dependency("typed_fsm",  .{.target = target, .optimize = optimize});
+    const polystate  = b.dependency("polystate",  .{.target = target, .optimize = optimize});
     const raylib_dep = b.dependency("raylib_zig", .{.target = target, .optimize = optimize});
     const maze_dep =   b.dependency("maze",       .{.target = target, .optimize = optimize});
 
@@ -23,7 +23,7 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
         .imports = &.{
-            .{ .name = "typed_fsm", .module = typed_fsm.module("root") },
+            .{ .name = "polystate", .module = polystate.module("root") },
             .{ .name = "raylib", .module = raylib_dep.module("raylib") },
             .{ .name = "raygui", .module = raylib_dep.module("raygui") },
             .{ .name = "maze", .module = maze_dep.module("maze") },

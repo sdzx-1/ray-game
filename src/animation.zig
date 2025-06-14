@@ -1,5 +1,5 @@
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const core = @import("core.zig");
 
 const rl = @import("raylib");

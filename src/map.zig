@@ -200,7 +200,7 @@ fn generate_maze(
 }
 
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
 
@@ -214,7 +214,7 @@ const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
-const ContR = typedFsm.ContR(GST);
+const ContR = polystate.ContR(GST);
 const Action = core.Action;
 const RS = core.RS;
 const maze = @import("maze");

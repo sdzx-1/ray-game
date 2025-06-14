@@ -1,5 +1,5 @@
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
 const utils = @import("utils.zig");
@@ -14,7 +14,7 @@ const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
-const ContR = typedFsm.ContR(GST);
+const ContR = polystate.ContR(GST);
 const View = utils.View;
 
 pub const Texture = struct {

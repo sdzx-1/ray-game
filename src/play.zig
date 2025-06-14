@@ -311,7 +311,7 @@ fn tag_to_texture(gst: *const GST, tag: Maze.Tag) rl.Texture2D {
 }
 
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
 const select = @import("select.zig");
@@ -330,7 +330,7 @@ const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
-const ContR = typedFsm.ContR(GST);
+const ContR = polystate.ContR(GST);
 const Action = core.Action;
 const RS = core.RS;
 const Maze = maze.Maze;

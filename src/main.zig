@@ -2,7 +2,7 @@ const std = @import("std");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 
 const core = @import("core.zig");
 const utils = @import("utils.zig");
@@ -16,7 +16,7 @@ pub fn main() anyerror!void {
     var gpa_instance = std.heap.DebugAllocator(.{}).init;
     const gpa = gpa_instance.allocator();
 
-    var graph = typedFsm.Graph.init;
+    var graph = polystate.Graph.init;
     defer graph.deinit(gpa) catch unreachable;
     try graph.generate(gpa, Example);
     const cwd = std.fs.cwd();

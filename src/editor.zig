@@ -1,5 +1,5 @@
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
 
@@ -19,7 +19,7 @@ pub const Editor = struct {
     selected_id: usize = 0,
 };
 
-const ContR = typedFsm.ContR(GST);
+const ContR = polystate.ContR(GST);
 
 pub fn editST(target: SDZX) type {
     return union(enum) {

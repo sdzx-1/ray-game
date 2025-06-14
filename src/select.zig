@@ -1,5 +1,5 @@
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const core = @import("core.zig");
 
 const rl = @import("raylib");
@@ -12,7 +12,7 @@ const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
-const ContR = typedFsm.ContR(GST);
+const ContR = polystate.ContR(GST);
 
 //outside inside hover
 
@@ -29,7 +29,7 @@ pub const SelectRender = fn (*GST, SelectState) bool;
 pub const SelectState = enum { outside, inside, hover };
 
 pub fn selectST(back: SDZX, selected: SDZX) type {
-    const cst = typedFsm.sdzx_to_cst(Example, selected);
+    const cst = polystate.sdzx_to_cst(Example, selected);
     return union(enum) {
         ToBack: WitRow(back),
         ToInside: WitRow(SDZX.C(Example.inside, &.{ back, selected })),
@@ -79,7 +79,7 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
 }
 
 pub fn insideST(back: SDZX, selected: SDZX) type {
-    const cst = typedFsm.sdzx_to_cst(Example, selected);
+    const cst = polystate.sdzx_to_cst(Example, selected);
     return union(enum) {
         // zig fmt: off
         ToBack    : WitRow(back),
@@ -115,7 +115,7 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
 }
 
 pub fn hoverST(back: SDZX, selected: SDZX) type {
-    const cst = typedFsm.sdzx_to_cst(Example, selected);
+    const cst = polystate.sdzx_to_cst(Example, selected);
     return union(enum) {
         // zig fmt: off
         ToBack    : WitRow(back),

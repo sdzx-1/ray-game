@@ -1,5 +1,5 @@
 const std = @import("std");
-const typedFsm = @import("typed_fsm");
+const polystate = @import("polystate");
 const select = @import("select.zig");
 const editor = @import("editor.zig");
 const map = @import("map.zig");
@@ -157,7 +157,7 @@ pub fn Action(cst: type) type {
     };
 }
 
-pub const ContR = typedFsm.ContR(GST);
+pub const ContR = polystate.ContR(GST);
 
 pub const Example = enum {
     exit,
@@ -202,17 +202,17 @@ pub const Example = enum {
         }
     };
 
-    fn enter_fn(cst: typedFsm.sdzx(@This()), gst: *GST) void {
+    fn enter_fn(cst: polystate.sdzx(@This()), gst: *GST) void {
         gst.log_im(gst.printZ("{}", .{cst}));
     }
 
     pub fn Wit(val: anytype) type {
-        return typedFsm.Witness(@This(), typedFsm.val_to_sdzx(@This(), val), GST, enter_fn);
+        return polystate.Witness(@This(), polystate.val_to_sdzx(@This(), val), GST, enter_fn);
     }
 
     pub fn WitRow(val: SDZX) type {
-        return typedFsm.Witness(@This(), val, GST, enter_fn);
+        return polystate.Witness(@This(), val, GST, enter_fn);
     }
 
-    pub const SDZX = typedFsm.sdzx(@This());
+    pub const SDZX = polystate.sdzx(@This());
 };
