@@ -31,7 +31,7 @@ pub const Cell = struct {
 pub const CurrentMap = [200][200]Cell;
 
 pub const placeST = union(enum) {
-    ToPlay: Wit(Example.play),
+    ToPlay: Wit(.{ Example.select, Example.play, .{ Example.select, Example.play, Example.place } }),
 
     pub fn conthandler(gst: *GST) ContR {
         switch (genMsg(gst)) {
