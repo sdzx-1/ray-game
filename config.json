@@ -443,6 +443,44 @@
       "action_id": 3,
       "action_select": false,
       "dropdown_box": false
+    },
+    {
+      "rect": {
+        "x": 1.311e3,
+        "y": 1.64e2,
+        "width": 1.45e2,
+        "height": 4e1
+      },
+      "str_buf": "view build\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      },
+      "enable_action": true,
+      "action_id": 4,
+      "action_select": false,
+      "dropdown_box": false
+    },
+    {
+      "rect": {
+        "x": 1.498e3,
+        "y": 1.65e2,
+        "width": 1.67e2,
+        "height": 4e1
+      },
+      "str_buf": "place build\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      },
+      "enable_action": true,
+      "action_id": 5,
+      "action_select": false,
+      "dropdown_box": false
     }
   ],
   "tbuild": [

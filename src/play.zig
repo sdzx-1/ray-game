@@ -215,6 +215,8 @@ pub const playST = union(enum) {
             .name = "Select",
             .val = .{ .DropdownBox = .{ .fun = get_curr_text_ref, .text = "room;blank;path;connPoint" } },
         },
+        .{ .name = "Build", .val = .{ .Button = toBuild } },
+        .{ .name = "Place", .val = .{ .Button = toPlace } },
     };
 
     fn toEditor(_: *GST) ?@This() {
@@ -222,6 +224,14 @@ pub const playST = union(enum) {
     }
     fn toMenu(_: *GST) ?@This() {
         return .ToMenu;
+    }
+
+    fn toBuild(_: *GST) ?@This() {
+        return .ToBuild;
+    }
+
+    fn toPlace(_: *GST) ?@This() {
+        return .ToPlace;
     }
 
     fn setMazeTextId(_: *GST) ?@This() {
