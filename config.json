@@ -19,7 +19,8 @@
       },
       "enable_action": true,
       "action_id": 1,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -37,7 +38,8 @@
       },
       "enable_action": true,
       "action_id": 3,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -55,7 +57,8 @@
       },
       "enable_action": true,
       "action_id": 2,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -73,7 +76,8 @@
       },
       "enable_action": true,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -91,7 +95,8 @@
       },
       "enable_action": true,
       "action_id": 4,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -109,7 +114,8 @@
       },
       "enable_action": true,
       "action_id": 5,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -127,7 +133,8 @@
       },
       "enable_action": false,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     }
   ],
   "map": [
@@ -147,7 +154,8 @@
       },
       "enable_action": true,
       "action_id": 8,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -165,7 +173,8 @@
       },
       "enable_action": true,
       "action_id": 1,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -183,7 +192,8 @@
       },
       "enable_action": true,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -201,7 +211,8 @@
       },
       "enable_action": true,
       "action_id": 3,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -219,7 +230,8 @@
       },
       "enable_action": true,
       "action_id": 4,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -237,7 +249,8 @@
       },
       "enable_action": true,
       "action_id": 5,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -255,7 +268,8 @@
       },
       "enable_action": true,
       "action_id": 6,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -273,7 +287,8 @@
       },
       "enable_action": false,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -291,7 +306,8 @@
       },
       "enable_action": false,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -309,7 +325,8 @@
       },
       "enable_action": false,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -327,7 +344,8 @@
       },
       "enable_action": true,
       "action_id": 7,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -345,7 +363,8 @@
       },
       "enable_action": false,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     }
   ],
   "play": [
@@ -365,7 +384,8 @@
       },
       "enable_action": true,
       "action_id": 1,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
@@ -383,16 +403,17 @@
       },
       "enable_action": true,
       "action_id": 0,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
-        "x": 1.478e3,
-        "y": 1.04e2,
-        "width": 7.3e1,
+        "x": 1.289e3,
+        "y": 9.3e1,
+        "width": 3.38e2,
         "height": 4e1
       },
-      "str_buf": "room\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "str_buf": "change maze texture\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
       "color": {
         "r": 0,
         "g": 0,
@@ -401,16 +422,17 @@
       },
       "enable_action": true,
       "action_id": 2,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     },
     {
       "rect": {
-        "x": 1.48e3,
-        "y": 1.58e2,
-        "width": 6.9e1,
+        "x": 1.641e3,
+        "y": 9.1e1,
+        "width": 2.02e2,
         "height": 4e1
       },
-      "str_buf": "path\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "str_buf": "empty         \u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
       "color": {
         "r": 0,
         "g": 0,
@@ -419,43 +441,8 @@
       },
       "enable_action": true,
       "action_id": 3,
-      "action_select": false
-    },
-    {
-      "rect": {
-        "x": 1.481e3,
-        "y": 2.12e2,
-        "width": 7.3e1,
-        "height": 4e1
-      },
-      "str_buf": "conn\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
-      "color": {
-        "r": 0,
-        "g": 0,
-        "b": 0,
-        "a": 255
-      },
-      "enable_action": true,
-      "action_id": 4,
-      "action_select": false
-    },
-    {
-      "rect": {
-        "x": 1.483e3,
-        "y": 2.74e2,
-        "width": 8.2e1,
-        "height": 4e1
-      },
-      "str_buf": "blank\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
-      "color": {
-        "r": 0,
-        "g": 0,
-        "b": 0,
-        "a": 255
-      },
-      "enable_action": true,
-      "action_id": 5,
-      "action_select": false
+      "action_select": false,
+      "dropdown_box": false
     }
   ],
   "tbuild": [
@@ -798,20 +785,22 @@
     "room_min_width": 3,
     "room_max_width": 17
   },
-  "room_texture_id": {
-    "x": 2,
-    "y": 31
-  },
-  "path_texture_id": {
-    "x": 5,
-    "y": 31
-  },
-  "conn_texture_id": {
-    "x": 7,
-    "y": 31
-  },
-  "blank_texture_id": {
-    "x": 6,
-    "y": 67
-  }
+  "maze_texture": [
+    {
+      "x": 1,
+      "y": 2
+    },
+    {
+      "x": 6,
+      "y": 67
+    },
+    {
+      "x": 1,
+      "y": 12
+    },
+    {
+      "x": 1,
+      "y": 12
+    }
+  ]
 }

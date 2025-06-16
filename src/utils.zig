@@ -19,10 +19,12 @@ pub const SaveData = struct {
     tbuild: []const tbuild.Building = &.{},
     tbuild_view: View = .{},
     maze_config: map.MazeConfig = .{},
-    room_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
-    path_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
-    conn_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
-    blank_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
+    maze_texture: [4]textures.TextID = .{
+        .{ .x = 2, .y = 31 },
+        .{ .x = 6, .y = 67 },
+        .{ .x = 5, .y = 31 },
+        .{ .x = 7, .y = 31 },
+    },
 
     pub fn save(self: *const @This()) void {
         const cwd = std.fs.cwd();
@@ -66,10 +68,7 @@ pub fn saveData(gst: *GST) void {
         .screen_height = gst.screen_height,
         .hdw = gst.hdw,
         .tbuild_view = gst.tbuild.view,
-        .blank_texture_id = gst.play.blank_texture_id,
-        .conn_texture_id = gst.play.conn_texture_id,
-        .path_texture_id = gst.play.path_texture_id,
-        .room_texture_id = gst.play.room_texture_id,
+        .maze_texture = gst.play.maze_texture,
     };
     save_data.save();
     gst.log("save");
@@ -87,10 +86,7 @@ pub fn loadData(gpa: std.mem.Allocator, gst: *GST) !void {
     gst.hdw = save_data.hdw;
     gst.tbuild.view = save_data.tbuild_view;
 
-    gst.play.blank_texture_id = save_data.blank_texture_id;
-    gst.play.conn_texture_id = save_data.conn_texture_id;
-    gst.play.path_texture_id = save_data.path_texture_id;
-    gst.play.room_texture_id = save_data.room_texture_id;
+    gst.play.maze_texture = save_data.maze_texture;
 
     gst.log("load_data");
 }

@@ -57,12 +57,12 @@ pub const menuST = union(enum) {
 
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",    .val = .{ .Fun = toEditor  } },
-        .{ .name = "Exit",      .val = .{ .Fun = exit      } },
-        .{ .name = "Play",      .val = .{ .Fun = toPlay    } },
-        .{ .name = "Log hello", .val = .{ .Fun = log_hello } },
-        .{ .name = "Save data", .val = .{ .Fun = saveData  } },
-        .{ .name = "animation", .val = .{ .Ptr_f32 = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
+        .{ .name = "Editor",    .val = .{ .Button = toEditor  } },
+        .{ .name = "Exit",      .val = .{ .Button = exit      } },
+        .{ .name = "Play",      .val = .{ .Button = toPlay    } },
+        .{ .name = "Log hello", .val = .{ .Button = log_hello } },
+        .{ .name = "Save data", .val = .{ .Button = saveData  } },
+        .{ .name = "animation", .val = .{ .Slider = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
     };
     // zig fmt: on
 

@@ -9,8 +9,6 @@ pub const buildST = union(enum) {
                 .ToPlay => |wit| return .{ .Next = wit.conthandler() },
                 .ToSelect => |wit| return .{ .Next = wit.conthandler() },
                 .SetTextId => |wit| {
-                    const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-                    gst.sel_texture.address = &ptr.text_id;
                     return .{ .Next = wit.conthandler() };
                 },
             }
@@ -54,6 +52,14 @@ pub const buildST = union(enum) {
             return .ToSelect;
         }
         return null;
+    }
+
+    pub fn set_text_id(gst: *GST, tid: textures.TextID) void {
+        gst.tbuild.list.items[gst.tbuild.selected_id].text_id = tid;
+    }
+
+    pub fn sed_texture(gst: *const GST) textures.TextID {
+        return gst.tbuild.list.items[gst.tbuild.selected_id].text_id;
     }
 
     //select

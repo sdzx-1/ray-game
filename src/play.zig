@@ -5,10 +5,13 @@ pub const Play = struct {
     selected_cell_id: CellID = .{},
     selected_build: tbuild.Building = undefined,
 
-    room_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
-    path_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
-    conn_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
-    blank_texture_id: textures.TextID = .{ .x = 0, .y = 0 },
+    current_texture: i32 = 0,
+    maze_texture: [4]textures.TextID = .{
+        .{ .x = 2, .y = 31 },
+        .{ .x = 6, .y = 67 },
+        .{ .x = 5, .y = 31 },
+        .{ .x = 7, .y = 31 },
+    },
 
     pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
@@ -148,10 +151,6 @@ pub const placeST = union(enum) {
     }
 
     pub fn check_still_inside(gst: *GST) bool {
-        // const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
-        // const x: i32 = @intFromFloat(@floor(vp.x));
-        // const y: i32 = @intFromFloat(@floor(vp.y));
-
         const b = &gst.play.selected_build;
         const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
         const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
@@ -162,16 +161,13 @@ pub const placeST = union(enum) {
 };
 
 pub const playST = union(enum) {
-    ToEditor: Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
-    ToMenu: Wit(.{ Example.animation, Example.play, Example.menu }),
-    ToBuild: Wit(.{ Example.select, Example.play, Example.build }),
-    ToPlace: Wit(.{ Example.select, Example.play, .{ Example.select, Example.play, Example.place } }),
-
-    //
-    SetRoomTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
-    SetPathTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
-    SetConnTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
-    SetBlankTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
+    // zig fmt: off
+    ToEditor     : Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
+    ToMenu       : Wit(.{ Example.animation, Example.play, Example.menu }),
+    ToBuild      : Wit(.{ Example.select, Example.play, Example.build }),
+    ToPlace      : Wit(.{ Example.select, Example.play, .{ Example.select, Example.play, Example.place } }),
+    SetMazeTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
+    // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
@@ -183,23 +179,7 @@ pub const playST = union(enum) {
                 },
                 .ToBuild => |wit| return .{ .Next = wit.conthandler() },
                 .ToPlace => |wit| return .{ .Next = wit.conthandler() },
-                .SetRoomTextId => |wit| {
-                    gst.sel_texture.address = &gst.play.room_texture_id;
-                    return .{ .Next = wit.conthandler() };
-                },
-
-                .SetPathTextId => |wit| {
-                    gst.sel_texture.address = &gst.play.path_texture_id;
-                    return .{ .Next = wit.conthandler() };
-                },
-
-                .SetConnTextId => |wit| {
-                    gst.sel_texture.address = &gst.play.conn_texture_id;
-                    return .{ .Next = wit.conthandler() };
-                },
-
-                .SetBlankTextId => |wit| {
-                    gst.sel_texture.address = &gst.play.blank_texture_id;
+                .SetMazeTextId => |wit| {
                     return .{ .Next = wit.conthandler() };
                 },
             }
@@ -218,13 +198,23 @@ pub const playST = union(enum) {
         return null;
     }
 
+    pub fn set_text_id(gst: *GST, tid: textures.TextID) void {
+        gst.play.maze_texture[@intCast(gst.play.current_texture)] = tid;
+    }
+
+    pub fn sed_texture(gst: *const GST) textures.TextID {
+        return gst.play.maze_texture[@intCast(gst.play.current_texture)];
+    }
+
+    //
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor", .val = .{ .Fun = toEditor } },
-        .{ .name = "Menu", .val = .{ .Fun = toMenu } },
-        .{ .name = "SetRoomTextId", .val = .{ .Fun = setRoomTextId } },
-        .{ .name = "SetPathTextId", .val = .{ .Fun = setPathTextId } },
-        .{ .name = "SetConnTextId", .val = .{ .Fun = setConnTextId } },
-        .{ .name = "SetBlankTextId", .val = .{ .Fun = setBlankTextId } },
+        .{ .name = "Editor", .val = .{ .Button = toEditor } },
+        .{ .name = "Menu", .val = .{ .Button = toMenu } },
+        .{ .name = "SetMazeTextId", .val = .{ .Button = setMazeTextId } },
+        .{
+            .name = "Select",
+            .val = .{ .DropdownBox = .{ .fun = get_curr_text_ref, .text = "room;blank;path;connPoint" } },
+        },
     };
 
     fn toEditor(_: *GST) ?@This() {
@@ -234,20 +224,12 @@ pub const playST = union(enum) {
         return .ToMenu;
     }
 
-    fn setRoomTextId(_: *GST) ?@This() {
-        return .SetRoomTextId;
+    fn setMazeTextId(_: *GST) ?@This() {
+        return .SetMazeTextId;
     }
 
-    fn setPathTextId(_: *GST) ?@This() {
-        return .SetPathTextId;
-    }
-
-    fn setConnTextId(_: *GST) ?@This() {
-        return .SetConnTextId;
-    }
-
-    fn setBlankTextId(_: *GST) ?@This() {
-        return .SetBlankTextId;
+    fn get_curr_text_ref(gst: *GST) *i32 {
+        return &gst.play.current_texture;
     }
 };
 
@@ -270,16 +252,11 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
                 ty > (gst.map.maze_config.total_y - 1)) continue;
 
             const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
-
-            const win_pos = view.view_to_win(gst.screen_width, .{
-                .x = @floatFromInt(tx),
-                .y = @floatFromInt(ty),
-            });
-
+            const win_pos = view.view_to_win(gst.screen_width, .{ .x = @floatFromInt(tx), .y = @floatFromInt(ty) });
             const scale = 1 * gst.screen_width / view.width;
 
             if (val.building == null) {
-                const texture = tag_to_texture(gst, val.tag);
+                const texture = gst.textures.read(gst.play.maze_texture[@intFromEnum(val.tag)]).texture.tex2d;
                 texture.drawPro(
                     .{ .x = 0, .y = 0, .width = 256, .height = 256 },
                     .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
@@ -299,15 +276,6 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
             }
         }
     }
-}
-
-fn tag_to_texture(gst: *const GST, tag: Maze.Tag) rl.Texture2D {
-    return switch (tag) {
-        .room => (gst.textures.read(gst.play.room_texture_id)).texture.tex2d,
-        .path => (gst.textures.read(gst.play.path_texture_id)).texture.tex2d,
-        .connPoint => (gst.textures.read(gst.play.conn_texture_id)).texture.tex2d,
-        .blank => (gst.textures.read(gst.play.blank_texture_id)).texture.tex2d,
-    };
 }
 
 const std = @import("std");

@@ -147,15 +147,15 @@ pub const mapST = union(enum) {
 
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",   .val = .{ .Fun = toEditor } },
-        .{ .name = "Menu",     .val = .{ .Fun = toMenu } },
-        .{ .name = "Exit",     .val = .{ .Fun = exit } },
-        .{ .name = "Gen maze", .val = .{ .Fun = gen_maze } },
-        .{ .name = "rmx",      .val = .{ .Ptr_f32 = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
-        .{ .name = "rmy",      .val = .{ .Ptr_f32 = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
-        .{ .name = "rmwidth",     .val = .{ .Ptr_f32 = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
-        .{ .name = "probability", .val = .{ .Ptr_f32 = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
-        .{ .name = "Play", .val = .{ .Fun = toPlay } },
+        .{ .name = "Editor",   .val = .{ .Button = toEditor } },
+        .{ .name = "Menu",     .val = .{ .Button = toMenu } },
+        .{ .name = "Exit",     .val = .{ .Button = exit } },
+        .{ .name = "Gen maze", .val = .{ .Button = gen_maze } },
+        .{ .name = "rmx",      .val = .{ .Slider = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
+        .{ .name = "rmy",      .val = .{ .Slider = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
+        .{ .name = "rmwidth",     .val = .{ .Slider = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
+        .{ .name = "probability", .val = .{ .Slider = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
+        .{ .name = "Play", .val = .{ .Button = toPlay } },
     };
     // zig fmt: on
 

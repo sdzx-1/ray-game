@@ -131,17 +131,17 @@ pub const texturesST = union(enum) {
 
 pub const SelTexture = struct {
     text_id: TextID = .{ .x = 0, .y = 0 },
-    address: *TextID = undefined,
 };
 
 pub fn sel_textureST(target: SDZX) type {
     return union(enum) {
         ToTarget: WitRow(target),
 
+        const cst = polystate.sdzx_to_cst(Example, target);
         pub fn conthandler(gst: *GST) ContR {
             switch (genMsg(gst)) {
                 .ToTarget => |wit| {
-                    gst.sel_texture.address.* = gst.sel_texture.text_id;
+                    cst.set_text_id(gst, gst.sel_texture.text_id);
                     return .{ .Curr = wit.conthandler() };
                 },
             }
@@ -158,7 +158,7 @@ pub fn sel_textureST(target: SDZX) type {
                 gst.textures.view.drag_view(gst.screen_width);
             }
             gst.textures.render(gst);
-            const selected = gst.sel_texture.address.*;
+            const selected = cst.sed_texture(gst);
             const smp = gst.textures.view.view_to_win(gst.screen_width, .{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
             const wh: f32 = gst.screen_width / gst.textures.view.width;
             rl.drawRectangleLinesEx(.{

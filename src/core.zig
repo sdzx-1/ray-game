@@ -31,6 +31,7 @@ pub const R = struct {
     enable_action: bool = false,
     action_id: i32 = 0,
     action_select: bool = false,
+    dropdown_box: bool = false,
 
     pub fn inR(self: *const R, pos: rl.Vector2) bool {
         const r = self.rect;
@@ -46,14 +47,20 @@ pub const R = struct {
             rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
             const action_ptr = &action_list[@intCast(r.action_id)];
             switch (action_ptr.val) {
-                .Fun => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
-                .Ptr_f32 => |val| {
+                .Button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
+                .Slider => |val| {
                     var buf: [30]u8 = undefined;
                     var buf1: [30]u8 = undefined;
                     const minVal = std.fmt.bufPrintZ(&buf, "{d:.1}", .{val.min}) catch unreachable;
                     const maxVal = std.fmt.bufPrintZ(&buf1, "{d:.1}", .{val.max}) catch unreachable;
                     const ref = val.fun(gst);
                     _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
+                },
+                .DropdownBox => |val| {
+                    const ref = val.fun(gst);
+                    if (rg.dropdownBox(r.rect, val.text, ref, r.dropdown_box) == 1) {
+                        r.dropdown_box = !r.dropdown_box;
+                    }
                 },
             }
             rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
@@ -141,12 +148,9 @@ pub const GST = struct {
 
 pub fn ActionVal(cst: type) type {
     return union(enum) {
-        Fun: *const fn (*GST) ?cst,
-        Ptr_f32: struct {
-            fun: *const fn (*GST) *f32,
-            min: f32,
-            max: f32,
-        },
+        Button: *const fn (*GST) ?cst,
+        Slider: struct { fun: *const fn (*GST) *f32, min: f32, max: f32 },
+        DropdownBox: struct { fun: *const fn (*GST) *i32, text: [:0]const u8 },
     };
 }
 
