@@ -217,11 +217,11 @@ pub const Example = enum {
     }
 
     pub fn Wit(val: anytype) type {
-        return polystate.Witness(@This(), polystate.val_to_sdzx(@This(), val), GST, enter_fn);
+        return polystate.Witness(@This(), GST, enter_fn, polystate.val_to_sdzx(@This(), val));
     }
 
     pub fn WitRow(val: SDZX) type {
-        return polystate.Witness(@This(), val, GST, enter_fn);
+        return polystate.Witness(@This(), GST, enter_fn, val);
     }
 
     pub const SDZX = polystate.sdzx(@This());

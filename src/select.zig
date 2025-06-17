@@ -25,8 +25,8 @@ pub fn selectST(
 
     return union(enum) {
         // zig fmt: off
-        ToBack  : polystate.Witness(FST, back,                                     GST, enter_fn),
-        ToInside: polystate.Witness(FST, SDZX.C(FST.inside, &.{ back, selected }), GST, enter_fn),
+        ToBack  : polystate.Witness(FST, GST, enter_fn, back),
+        ToInside: polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.inside, &.{ back, selected })),
         // zig fmt: on
 
         pub fn conthandler(gst: *GST) polystate.ContR(GST) {
@@ -85,10 +85,10 @@ pub fn insideST(
 
     return union(enum) {
         // zig fmt: off
-        ToBack    : polystate.Witness(FST, back,                                      GST, enter_fn),
-        ToOutside : polystate.Witness(FST, SDZX.C(FST.select, &.{ back, selected }),  GST, enter_fn),
-        ToHover   : polystate.Witness(FST, SDZX.C(FST.hover, &.{ back, selected }),   GST, enter_fn),
-        ToSelected: polystate.Witness(FST, selected,                                  GST, enter_fn),
+        ToBack    : polystate.Witness(FST, GST, enter_fn, back),
+        ToOutside : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.select, &.{ back, selected })),
+        ToHover   : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.hover, &.{ back, selected })),
+        ToSelected: polystate.Witness(FST, GST, enter_fn, selected),
         // zig fmt: on
 
         pub fn conthandler(gst: *GST) polystate.ContR(GST) {
@@ -129,10 +129,10 @@ pub fn hoverST(
 
     return union(enum) {
         // zig fmt: off
-        ToBack    : polystate.Witness(FST, back,                                     GST, enter_fn),
-        ToOutside : polystate.Witness(FST, SDZX.C(FST.select, &.{ back, selected }), GST, enter_fn),
-        ToInside  : polystate.Witness(FST, SDZX.C(FST.inside, &.{ back, selected }), GST, enter_fn),
-        ToSelected: polystate.Witness(FST, selected,                                 GST, enter_fn),
+        ToBack    : polystate.Witness(FST, GST, enter_fn, back),
+        ToOutside : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.select, &.{ back, selected })),
+        ToInside  : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.inside, &.{ back, selected })),
+        ToSelected: polystate.Witness(FST, GST, enter_fn, selected),
         // zig fmt: on
 
         pub fn conthandler(gst: *GST) polystate.ContR(GST) {
