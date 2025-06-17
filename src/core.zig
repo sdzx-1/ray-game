@@ -194,10 +194,16 @@ pub const Example = enum {
     pub const placeST = play.placeST;
     pub const animationST = animation.animationST;
     pub const editST = editor.editST;
-    pub const selectST = select.selectST;
-    pub const insideST = select.insideST;
-    pub const hoverST = select.hoverST;
 
+    pub fn selectST(back: SDZX, selected: SDZX) type {
+        return select.selectST(@This(), GST, enter_fn, back, selected);
+    }
+    pub fn insideST(back: SDZX, selected: SDZX) type {
+        return select.insideST(@This(), GST, enter_fn, back, selected);
+    }
+    pub fn hoverST(back: SDZX, selected: SDZX) type {
+        return select.hoverST(@This(), GST, enter_fn, back, selected);
+    }
     pub const exitST = union(enum) {
         pub fn conthandler(gst: *GST) ContR {
             utils.saveData(gst);

@@ -1,20 +1,6 @@
 const std = @import("std");
 const polystate = @import("polystate");
-const core = @import("core.zig");
-
 const rl = @import("raylib");
-const rg = @import("raygui");
-
-const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
-const GST = core.GST;
-const R = core.R;
-const getTarget = core.getTarget;
-const ContR = polystate.ContR(GST);
-
-//outside inside hover
 
 pub const CheckInsideResult = enum {
     not_in_any_rect,
@@ -25,16 +11,25 @@ pub const Select = struct {
     no_move_duartion: i64 = 0,
 };
 
-pub const SelectRender = fn (*GST, SelectState) bool;
 pub const SelectState = enum { outside, inside, hover };
 
-pub fn selectST(back: SDZX, selected: SDZX) type {
-    const cst = polystate.sdzx_to_cst(Example, selected);
-    return union(enum) {
-        ToBack: WitRow(back),
-        ToInside: WitRow(SDZX.C(Example.inside, &.{ back, selected })),
+pub fn selectST(
+    FST: type,
+    GST: type,
+    enter_fn: ?fn (polystate.sdzx(FST), *GST) void,
+    back: polystate.sdzx(FST),
+    selected: polystate.sdzx(FST),
+) type {
+    const cst = polystate.sdzx_to_cst(FST, selected);
+    const SDZX = polystate.sdzx(FST);
 
-        pub fn conthandler(gst: *GST) ContR {
+    return union(enum) {
+        // zig fmt: off
+        ToBack  : polystate.Witness(FST, back,                                     GST, enter_fn),
+        ToInside: polystate.Witness(FST, SDZX.C(FST.inside, &.{ back, selected }), GST, enter_fn),
+        // zig fmt: on
+
+        pub fn conthandler(gst: *GST) polystate.ContR(GST) {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
                     .ToBack => |wit| return .{ .Next = wit.conthandler() },
@@ -47,7 +42,7 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
-            const render: SelectRender = cst.select_render;
+            const render: fn (*GST, SelectState) bool = cst.select_render;
             _ = render(gst, .outside);
             const res: CheckInsideResult = cst.check_inside(gst);
             switch (res) {
@@ -78,17 +73,25 @@ pub fn selectST(back: SDZX, selected: SDZX) type {
     };
 }
 
-pub fn insideST(back: SDZX, selected: SDZX) type {
-    const cst = polystate.sdzx_to_cst(Example, selected);
+pub fn insideST(
+    FST: type,
+    GST: type,
+    enter_fn: ?fn (polystate.sdzx(FST), *GST) void,
+    back: polystate.sdzx(FST),
+    selected: polystate.sdzx(FST),
+) type {
+    const cst = polystate.sdzx_to_cst(FST, selected);
+    const SDZX = polystate.sdzx(FST);
+
     return union(enum) {
         // zig fmt: off
-        ToBack    : WitRow(back),
-        ToOutside : WitRow(SDZX.C(Example.select, &.{ back, selected })),
-        ToHover   : WitRow(SDZX.C(Example.hover,   &.{ back, selected })),
-        ToSelected: WitRow(selected),
+        ToBack    : polystate.Witness(FST, back,                                      GST, enter_fn),
+        ToOutside : polystate.Witness(FST, SDZX.C(FST.select, &.{ back, selected }),  GST, enter_fn),
+        ToHover   : polystate.Witness(FST, SDZX.C(FST.hover, &.{ back, selected }),   GST, enter_fn),
+        ToSelected: polystate.Witness(FST, selected,                                  GST, enter_fn),
         // zig fmt: on
 
-        pub fn conthandler(gst: *GST) ContR {
+        pub fn conthandler(gst: *GST) polystate.ContR(GST) {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
                     .ToBack => |wit| return .{ .Next = wit.conthandler() },
@@ -100,7 +103,7 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
-            const render: SelectRender = cst.select_render;
+            const render: fn (*GST, SelectState) bool = cst.select_render;
             if (render(gst, .inside)) return .ToOutside;
             const res: bool = cst.check_still_inside(gst);
             if (!res) return .ToOutside;
@@ -114,17 +117,25 @@ pub fn insideST(back: SDZX, selected: SDZX) type {
     };
 }
 
-pub fn hoverST(back: SDZX, selected: SDZX) type {
-    const cst = polystate.sdzx_to_cst(Example, selected);
+pub fn hoverST(
+    FST: type,
+    GST: type,
+    enter_fn: ?fn (polystate.sdzx(FST), *GST) void,
+    back: polystate.sdzx(FST),
+    selected: polystate.sdzx(FST),
+) type {
+    const cst = polystate.sdzx_to_cst(FST, selected);
+    const SDZX = polystate.sdzx(FST);
+
     return union(enum) {
         // zig fmt: off
-        ToBack    : WitRow(back),
-        ToOutside : WitRow(SDZX.C(Example.select, &.{ back, selected })),
-        ToInside  : WitRow(SDZX.C(Example.inside, &.{ back, selected })),
-        ToSelected: WitRow(selected),
+        ToBack    : polystate.Witness(FST, back,                                     GST, enter_fn),
+        ToOutside : polystate.Witness(FST, SDZX.C(FST.select, &.{ back, selected }), GST, enter_fn),
+        ToInside  : polystate.Witness(FST, SDZX.C(FST.inside, &.{ back, selected }), GST, enter_fn),
+        ToSelected: polystate.Witness(FST, selected,                                 GST, enter_fn),
         // zig fmt: on
 
-        pub fn conthandler(gst: *GST) ContR {
+        pub fn conthandler(gst: *GST) polystate.ContR(GST) {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
                     .ToBack => |wit| return .{ .Next = wit.conthandler() },
@@ -139,7 +150,7 @@ pub fn hoverST(back: SDZX, selected: SDZX) type {
         }
 
         fn genMsg(gst: *GST) ?@This() {
-            const render: SelectRender = cst.select_render;
+            const render: fn (*GST, SelectState) bool = cst.select_render;
             if (render(gst, .hover)) return .ToOutside;
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
             if (mouse_moved()) return .ToInside;
