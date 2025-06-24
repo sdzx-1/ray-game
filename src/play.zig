@@ -30,8 +30,25 @@ pub const Cell = struct {
 
 pub const CurrentMap = [200][200]Cell;
 
+pub const xST = union(enum) {
+    X: Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
+
+    pub fn conthandler(gst: *GST) ContR {
+        switch (genMsg(gst)) {
+            .X => |wit| {
+                return .{ .Curr = wit.conthandler() };
+            },
+        }
+    }
+
+    pub fn genMsg(gst: *GST) @This() {
+        _ = gst;
+        return .X;
+    }
+};
+
 pub const placeST = union(enum) {
-    ToPlay: Wit(.{ Example.select, Example.play, .{ Example.select, Example.play, Example.place } }),
+    ToPlay: Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
 
     pub fn conthandler(gst: *GST) ContR {
         switch (genMsg(gst)) {
@@ -165,7 +182,7 @@ pub const playST = union(enum) {
     ToEditor     : Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
     ToMenu       : Wit(.{ Example.animation, Example.play, Example.menu }),
     ToBuild      : Wit(.{ Example.select, Example.play, Example.build }),
-    ToPlace      : Wit(.{ Example.select, Example.play, .{ Example.select, Example.play, Example.place } }),
+    ToPlace      : Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
     SetMazeTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
     // zig fmt: on
 
