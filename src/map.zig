@@ -192,6 +192,10 @@ pub const mapST = union(enum) {
             b,
         );
     }
+
+    pub fn access_rs(gst: *GST) *RS {
+        return &gst.map.rs;
+    }
 };
 
 fn generate_maze(

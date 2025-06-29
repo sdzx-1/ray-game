@@ -35,10 +35,10 @@ pub fn editST(target: SDZX) type {
             } else return .Wait;
         }
 
-        const nst = getTarget(target);
+        const target_ty = polystate.sdzx_to_cst(Example, target);
 
         fn genMsg(gst: *GST) ?@This() {
-            for (@field(gst, nst).rs.items) |*r| {
+            for (target_ty.access_rs(gst).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -56,7 +56,7 @@ pub fn editST(target: SDZX) type {
                 );
             }
 
-            const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected_id];
+            const ptr: *R = &target_ty.access_rs(gst).items[gst.editor.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -69,7 +69,7 @@ pub fn editST(target: SDZX) type {
             rect.width = 40;
             _ = rg.checkBox(rect, "enbale", &ptr.enable_action);
 
-            if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
+            if (@hasDecl(target_ty, "action_list") and
                 ptr.enable_action)
             {
                 rect.y += 40;
@@ -79,7 +79,7 @@ pub fn editST(target: SDZX) type {
                 const drop_str = comptime blk: {
                     var buf: [500:0]u8 = @splat(0);
                     var offset: usize = 0;
-                    const action_list = @field(@field(Example, nst ++ "ST"), "action_list");
+                    const action_list = @field(target_ty, "action_list");
                     for (action_list, 0..) |val, i| {
                         const name = val.name;
                         @memcpy(buf[offset .. offset + name.len], name);
@@ -123,7 +123,7 @@ pub fn editST(target: SDZX) type {
         }
 
         pub fn select_render(gst: *GST, sst: select.SelectState) bool {
-            for (@field(gst, nst).rs.items) |*r| {
+            for (target_ty.access_rs(gst).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -144,7 +144,7 @@ pub fn editST(target: SDZX) type {
             switch (sst) {
                 .outside => {},
                 .inside => {
-                    const r = @field(gst, nst).rs.items[gst.editor.selected_id];
+                    const r = target_ty.access_rs(gst).items[gst.editor.selected_id];
                     rl.drawRectangleLines(
                         @intFromFloat(r.rect.x - 1),
                         @intFromFloat(r.rect.y - 1),
@@ -154,11 +154,11 @@ pub fn editST(target: SDZX) type {
                     );
                 },
                 .hover => {
-                    const ptr: *R = &@field(gst, nst).rs.items[gst.editor.selected_id];
-                    if (@hasDecl(@field(Example, nst ++ "ST"), "action_list") and
+                    const ptr: *R = &target_ty.access_rs(gst).items[gst.editor.selected_id];
+                    if (@hasDecl(target_ty, "action_list") and
                         ptr.enable_action)
                     {
-                        const action_list = @field(@field(Example, nst ++ "ST"), "action_list");
+                        const action_list = @field(target_ty, "action_list");
                         const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
                         const str1 = gst.printZ("{s}", .{str});
@@ -184,11 +184,11 @@ pub fn editST(target: SDZX) type {
                 r.rect.y = mp.y;
                 const size = rl.measureText(&r.str_buf, 32);
                 r.rect.width = @floatFromInt(size);
-                @field(gst, nst).rs.append(gst.gpa, r) catch unreachable;
+                target_ty.access_rs(gst).append(gst.gpa, r) catch unreachable;
                 gst.log("Add button");
             }
 
-            for (@field(gst, nst).rs.items, 0..) |*r, i| {
+            for (target_ty.access_rs(gst).items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
                     gst.editor.selected_id = i;
                     return .in_someone;
@@ -198,14 +198,14 @@ pub fn editST(target: SDZX) type {
         }
 
         pub fn check_still_inside(gst: *GST) bool {
-            const r = @field(gst, nst).rs.items[gst.editor.selected_id];
+            const r = target_ty.access_rs(gst).items[gst.editor.selected_id];
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
                 gst.editor.copyed_rect = r;
             }
             if (rl.isKeyDown(rl.KeyboardKey.d)) {
                 gst.log("Delete!");
-                _ = @field(gst, nst).rs.swapRemove(gst.editor.selected_id);
+                _ = target_ty.access_rs(gst).swapRemove(gst.editor.selected_id);
                 return false;
             }
             return r.inR(rl.getMousePosition());

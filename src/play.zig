@@ -279,6 +279,10 @@ pub const playST = union(enum) {
             b,
         );
     }
+
+    pub fn access_rs(gst: *GST) *RS {
+        return &gst.play.rs;
+    }
 };
 
 pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {

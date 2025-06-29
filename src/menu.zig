@@ -80,6 +80,10 @@ pub const menuST = union(enum) {
         );
     }
 
+    pub fn access_rs(gst: *GST) *RS {
+        return &gst.menu.rs;
+    }
+
     fn saveData(gst: *GST) ?@This() {
         utils.saveData(gst);
         return null;
