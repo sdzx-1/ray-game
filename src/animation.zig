@@ -43,8 +43,8 @@ pub fn animationST(from: SDZX, to: SDZX) type {
     return union(enum) {
         animation_end: WitRow(to),
 
-        const from_t = getTarget(from);
-        const to_t = getTarget(to);
+        const from_ty = polystate.sdzx_to_cst(Example, from);
+        const to_ty = polystate.sdzx_to_cst(Example, to);
 
         pub fn conthandler(gst: *GST) core.ContR {
             if (genMsg(gst)) |msg| {
@@ -63,8 +63,22 @@ pub fn animationST(from: SDZX, to: SDZX) type {
             const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
             var buf: [20]u8 = undefined;
             gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
-            @field(gst, from_t).animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, true);
-            @field(gst, to_t).animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
+            from_ty.animation(
+                gst,
+                gst.screen_width,
+                gst.screen_height,
+                duration,
+                gst.animation.total_time,
+                true,
+            );
+            to_ty.animation(
+                gst,
+                gst.screen_width,
+                gst.screen_height,
+                duration,
+                gst.animation.total_time,
+                false,
+            );
 
             if (duration > gst.animation.total_time - 1000 / 60) {
                 return .animation_end;

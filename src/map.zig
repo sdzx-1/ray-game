@@ -174,6 +174,24 @@ pub const mapST = union(enum) {
     fn mconfig_prob(gst: *GST) *f32 {
         return &gst.map.maze_config.probability;
     }
+
+    pub fn animation(
+        gst: *GST,
+        screen_width: f32,
+        screen_height: f32,
+        duration: f32,
+        total: f32,
+        b: bool,
+    ) void {
+        anim.animation_list_r(
+            screen_width,
+            screen_height,
+            gst.map.rs.items,
+            duration,
+            total,
+            b,
+        );
+    }
 };
 
 fn generate_maze(

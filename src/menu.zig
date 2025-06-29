@@ -22,10 +22,6 @@ const RS = core.RS;
 
 pub const Menu = struct {
     rs: RS = .empty,
-
-    pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
-        anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
-    }
 };
 pub const menuST = union(enum) {
     // zig fmt: off
@@ -65,6 +61,24 @@ pub const menuST = union(enum) {
         .{ .name = "animation", .val = .{ .slider = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
     };
     // zig fmt: on
+
+    pub fn animation(
+        gst: *GST,
+        screen_width: f32,
+        screen_height: f32,
+        duration: f32,
+        total: f32,
+        b: bool,
+    ) void {
+        anim.animation_list_r(
+            screen_width,
+            screen_height,
+            gst.menu.rs.items,
+            duration,
+            total,
+            b,
+        );
+    }
 
     fn saveData(gst: *GST) ?@This() {
         utils.saveData(gst);

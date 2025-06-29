@@ -261,6 +261,24 @@ pub const playST = union(enum) {
     fn get_curr_text_ref(gst: *GST) *i32 {
         return &gst.play.current_texture;
     }
+
+    pub fn animation(
+        gst: *GST,
+        screen_width: f32,
+        screen_height: f32,
+        duration: f32,
+        total: f32,
+        b: bool,
+    ) void {
+        anim.animation_list_r(
+            screen_width,
+            screen_height,
+            gst.play.rs.items,
+            duration,
+            total,
+            b,
+        );
+    }
 };
 
 pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
