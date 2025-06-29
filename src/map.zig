@@ -22,22 +22,22 @@ pub const Map = struct {
 
 pub const mapST = union(enum) {
     // zig fmt: off
-    Exit    : Wit(Example.exit),
-    ToEditor: Wit(.{ Example.select, Example.map ,.{Example.edit, Example.map} }),
-    ToMenu  : Wit(.{ Example.animation, Example.map, Example.menu }),
-    ToPlay  : Wit(Example.play ),
+    exit1    : Wit(Example.exit),
+    to_editor: Wit(.{ Example.select, Example.map ,.{Example.edit, Example.map} }),
+    to_menu  : Wit(.{ Example.animation, Example.map, Example.menu }),
+    to_play  : Wit(Example.play ),
     // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
             switch (msg) {
-                .Exit => |wit| return .{ .Next = wit.conthandler() },
-                .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                .ToMenu => |wit| {
+                .exit1 => |wit| return .{ .Next = wit.conthandler() },
+                .to_editor => |wit| return .{ .Next = wit.conthandler() },
+                .to_menu => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
-                .ToPlay => |wit| {
+                .to_play => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     if (gst.map.maze == null) {
                         generate_maze(
@@ -71,7 +71,7 @@ pub const mapST = union(enum) {
         } else return .Wait;
     }
     fn genMsg(gst: *GST) ?@This() {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
             _ = gen_maze(gst);
@@ -104,19 +104,19 @@ pub const mapST = union(enum) {
     }
 
     fn toEditor(_: *GST) ?@This() {
-        return .ToEditor;
+        return .to_editor;
     }
 
     fn toMenu(_: *GST) ?@This() {
-        return .ToMenu;
+        return .to_menu;
     }
 
     fn toPlay(_: *GST) ?@This() {
-        return .ToPlay;
+        return .to_play;
     }
 
     fn exit(_: *GST) ?@This() {
-        return .Exit;
+        return .exit1;
     }
 
     fn gen_maze(gst: *GST) ?@This() {
@@ -147,15 +147,15 @@ pub const mapST = union(enum) {
 
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",   .val = .{ .Button = toEditor } },
-        .{ .name = "Menu",     .val = .{ .Button = toMenu } },
-        .{ .name = "Exit",     .val = .{ .Button = exit } },
-        .{ .name = "Gen maze", .val = .{ .Button = gen_maze } },
-        .{ .name = "rmx",      .val = .{ .Slider = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
-        .{ .name = "rmy",      .val = .{ .Slider = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
-        .{ .name = "rmwidth",     .val = .{ .Slider = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
-        .{ .name = "probability", .val = .{ .Slider = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
-        .{ .name = "Play", .val = .{ .Button = toPlay } },
+        .{ .name = "Editor",   .val = .{ .button = toEditor } },
+        .{ .name = "Menu",     .val = .{ .button = toMenu } },
+        .{ .name = "Exit",     .val = .{ .button = exit } },
+        .{ .name = "Gen maze", .val = .{ .button = gen_maze } },
+        .{ .name = "rmx",      .val = .{ .slider = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
+        .{ .name = "rmy",      .val = .{ .slider = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
+        .{ .name = "rmwidth",     .val = .{ .slider = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
+        .{ .name = "probability", .val = .{ .slider = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
+        .{ .name = "Play", .val = .{ .button = toPlay } },
     };
     // zig fmt: on
 

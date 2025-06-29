@@ -41,7 +41,7 @@ pub fn animation_list_r(
 
 pub fn animationST(from: SDZX, to: SDZX) type {
     return union(enum) {
-        End: WitRow(to),
+        animation_end: WitRow(to),
 
         const from_t = getTarget(from);
         const to_t = getTarget(to);
@@ -49,7 +49,7 @@ pub fn animationST(from: SDZX, to: SDZX) type {
         pub fn conthandler(gst: *GST) core.ContR {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .End => |wit| return .{ .Next = wit.conthandler() },
+                    .animation_end => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
         }
@@ -57,7 +57,7 @@ pub fn animationST(from: SDZX, to: SDZX) type {
         fn genMsg(gst: *GST) ?@This() {
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                 gst.log("skip animation");
-                return .End;
+                return .animation_end;
             }
 
             const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
@@ -67,7 +67,7 @@ pub fn animationST(from: SDZX, to: SDZX) type {
             @field(gst, to_t).animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
 
             if (duration > gst.animation.total_time - 1000 / 60) {
-                return .End;
+                return .animation_end;
             }
             return null;
         }

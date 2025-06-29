@@ -29,19 +29,19 @@ pub const Menu = struct {
 };
 pub const menuST = union(enum) {
     // zig fmt: off
-    Exit:     Wit(Example.exit),
-    ToEditor: Wit(.{Example.select, Example.menu,  .{Example.edit, Example.menu}}),
-    ToPlay:   Wit(.{ Example.animation, Example.menu, Example.map }),
-    ToTextures: Wit(Example.textures),
+    exit1:     Wit(Example.exit),
+    to_editor: Wit(.{Example.select, Example.menu,  .{Example.edit, Example.menu}}),
+    to_play:   Wit(.{ Example.animation, Example.menu, Example.map }),
+    to_textures: Wit(Example.textures),
     // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
             switch (msg) {
-                .Exit => |wit| return .{ .Next = wit.conthandler() },
-                .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                .ToTextures => |wit| return .{ .Next = wit.conthandler() },
-                .ToPlay => |wit| {
+                .exit1 => |wit| return .{ .Next = wit.conthandler() },
+                .to_editor => |wit| return .{ .Next = wit.conthandler() },
+                .to_textures => |wit| return .{ .Next = wit.conthandler() },
+                .to_play => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
@@ -49,20 +49,20 @@ pub const menuST = union(enum) {
         } else return .Wait;
     }
     fn genMsg(gst: *GST) ?@This() {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .ToTextures;
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
+        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .to_textures;
         for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return null;
     }
 
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",    .val = .{ .Button = toEditor  } },
-        .{ .name = "Exit",      .val = .{ .Button = exit      } },
-        .{ .name = "Play",      .val = .{ .Button = toPlay    } },
-        .{ .name = "Log hello", .val = .{ .Button = log_hello } },
-        .{ .name = "Save data", .val = .{ .Button = saveData  } },
-        .{ .name = "animation", .val = .{ .Slider = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
+        .{ .name = "Editor",    .val = .{ .button = toEditor  } },
+        .{ .name = "Exit",      .val = .{ .button = exit      } },
+        .{ .name = "Play",      .val = .{ .button = toPlay    } },
+        .{ .name = "Log hello", .val = .{ .button = log_hello } },
+        .{ .name = "Save data", .val = .{ .button = saveData  } },
+        .{ .name = "animation", .val = .{ .slider = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
     };
     // zig fmt: on
 
@@ -72,15 +72,15 @@ pub const menuST = union(enum) {
     }
 
     fn toEditor(_: *GST) ?@This() {
-        return .ToEditor;
+        return .to_editor;
     }
 
     fn toPlay(_: *GST) ?@This() {
-        return .ToPlay;
+        return .to_play;
     }
 
     fn exit(_: *GST) ?@This() {
-        return .Exit;
+        return .exit1;
     }
 
     fn log_hello(gst: *GST) ?@This() {

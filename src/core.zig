@@ -47,8 +47,8 @@ pub const R = struct {
             rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
             const action_ptr = &action_list[@intCast(r.action_id)];
             switch (action_ptr.val) {
-                .Button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
-                .Slider => |val| {
+                .button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
+                .slider => |val| {
                     var buf: [30]u8 = undefined;
                     var buf1: [30]u8 = undefined;
                     const minVal = std.fmt.bufPrintZ(&buf, "{d:.1}", .{val.min}) catch unreachable;
@@ -56,7 +56,7 @@ pub const R = struct {
                     const ref = val.fun(gst);
                     _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
                 },
-                .DropdownBox => |val| {
+                .dropdown_box => |val| {
                     const ref = val.fun(gst);
                     if (rg.dropdownBox(r.rect, val.text, ref, r.dropdown_box) == 1) {
                         r.dropdown_box = !r.dropdown_box;
@@ -148,9 +148,9 @@ pub const GST = struct {
 
 pub fn ActionVal(cst: type) type {
     return union(enum) {
-        Button: *const fn (*GST) ?cst,
-        Slider: struct { fun: *const fn (*GST) *f32, min: f32, max: f32 },
-        DropdownBox: struct { fun: *const fn (*GST) *i32, text: [:0]const u8 },
+        button: *const fn (*GST) ?cst,
+        slider: struct { fun: *const fn (*GST) *f32, min: f32, max: f32 },
+        dropdown_box: struct { fun: *const fn (*GST) *i32, text: [:0]const u8 },
     };
 }
 

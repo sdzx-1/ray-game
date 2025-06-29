@@ -33,11 +33,11 @@ pub const CurrentMap = [200][200]Cell;
 pub fn xST(back: SDZX, target: SDZX) type {
     return union(enum) {
         // X: Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
-        X: WitRow(SDZX.C(.select, &.{ back, SDZX.C(.select, &.{ SDZX.C(.x, &.{ back, target }), target }) })),
+        x: WitRow(SDZX.C(.select, &.{ back, SDZX.C(.select, &.{ SDZX.C(.x, &.{ back, target }), target }) })),
 
         pub fn conthandler(gst: *GST) ContR {
             switch (genMsg(gst)) {
-                .X => |wit| {
+                .x => |wit| {
                     return .{ .Curr = wit.conthandler() };
                 },
             }
@@ -45,17 +45,17 @@ pub fn xST(back: SDZX, target: SDZX) type {
 
         pub fn genMsg(gst: *GST) @This() {
             _ = gst;
-            return .X;
+            return .x;
         }
     };
 }
 
 pub const placeST = union(enum) {
-    ToPlay: Wit(.{ Example.select, Example.play, .{ Example.select, .{ Example.x, Example.play, Example.place }, Example.place } }),
+    to_play: Wit(.{ Example.select, Example.play, .{ Example.select, .{ Example.x, Example.play, Example.place }, Example.place } }),
 
     pub fn conthandler(gst: *GST) ContR {
         switch (genMsg(gst)) {
-            .ToPlay => |wit| {
+            .to_play => |wit| {
                 const b = gst.play.selected_build;
                 const cell_id = gst.play.selected_cell_id;
                 const y: i32 = @intCast(cell_id.y);
@@ -77,7 +77,7 @@ pub const placeST = union(enum) {
 
     pub fn genMsg(gst: *GST) @This() {
         _ = gst;
-        return .ToPlay;
+        return .to_play;
     }
 
     pub fn select_render1(gst: *GST, sst: select.SelectState) bool {
@@ -182,24 +182,24 @@ pub const placeST = union(enum) {
 
 pub const playST = union(enum) {
     // zig fmt: off
-    ToEditor     : Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
-    ToMenu       : Wit(.{ Example.animation, Example.play, Example.menu }),
-    ToBuild      : Wit(.{ Example.select, Example.play, Example.build }),
-    ToPlace      : Wit(.{ Example.select, Example.play, .{ Example.select, .{Example.x, Example.play, Example.place}, Example.place } }),
-    SetMazeTextId: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
+    to_editor     : Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
+    to_menu       : Wit(.{ Example.animation, Example.play, Example.menu }),
+    to_build      : Wit(.{ Example.select, Example.play, Example.build }),
+    to_place      : Wit(.{ Example.select, Example.play, .{ Example.select, .{Example.x, Example.play, Example.place}, Example.place } }),
+    set_maze_text_id: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
     // zig fmt: on
 
     pub fn conthandler(gst: *GST) ContR {
         if (genMsg(gst)) |msg| {
             switch (msg) {
-                .ToEditor => |wit| return .{ .Next = wit.conthandler() },
-                .ToMenu => |wit| {
+                .to_editor => |wit| return .{ .Next = wit.conthandler() },
+                .to_menu => |wit| {
                     gst.animation.start_time = std.time.milliTimestamp();
                     return .{ .Next = wit.conthandler() };
                 },
-                .ToBuild => |wit| return .{ .Next = wit.conthandler() },
-                .ToPlace => |wit| return .{ .Next = wit.conthandler() },
-                .SetMazeTextId => |wit| {
+                .to_build => |wit| return .{ .Next = wit.conthandler() },
+                .to_place => |wit| return .{ .Next = wit.conthandler() },
+                .set_maze_text_id => |wit| {
                     return .{ .Next = wit.conthandler() };
                 },
             }
@@ -212,9 +212,9 @@ pub const playST = union(enum) {
         draw_cells(&gst.play.view, gst, 0);
         for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
 
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .ToEditor;
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .ToBuild;
-        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .ToPlace;
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
+        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
         return null;
     }
 
@@ -228,34 +228,34 @@ pub const playST = union(enum) {
 
     //
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor", .val = .{ .Button = toEditor } },
-        .{ .name = "Menu", .val = .{ .Button = toMenu } },
-        .{ .name = "SetMazeTextId", .val = .{ .Button = setMazeTextId } },
+        .{ .name = "Editor", .val = .{ .button = toEditor } },
+        .{ .name = "Menu", .val = .{ .button = toMenu } },
+        .{ .name = "SetMazeTextId", .val = .{ .button = setMazeTextId } },
         .{
             .name = "Select",
-            .val = .{ .DropdownBox = .{ .fun = get_curr_text_ref, .text = "room;blank;path;connPoint" } },
+            .val = .{ .dropdown_box = .{ .fun = get_curr_text_ref, .text = "room;blank;path;connPoint" } },
         },
-        .{ .name = "Build", .val = .{ .Button = toBuild } },
-        .{ .name = "Place", .val = .{ .Button = toPlace } },
+        .{ .name = "Build", .val = .{ .button = toBuild } },
+        .{ .name = "Place", .val = .{ .button = toPlace } },
     };
 
     fn toEditor(_: *GST) ?@This() {
-        return .ToEditor;
+        return .to_editor;
     }
     fn toMenu(_: *GST) ?@This() {
-        return .ToMenu;
+        return .to_menu;
     }
 
     fn toBuild(_: *GST) ?@This() {
-        return .ToBuild;
+        return .to_build;
     }
 
     fn toPlace(_: *GST) ?@This() {
-        return .ToPlace;
+        return .to_place;
     }
 
     fn setMazeTextId(_: *GST) ?@This() {
-        return .SetMazeTextId;
+        return .set_maze_text_id;
     }
 
     fn get_curr_text_ref(gst: *GST) *i32 {

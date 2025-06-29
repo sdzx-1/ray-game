@@ -23,14 +23,14 @@ const ContR = polystate.ContR(GST);
 
 pub fn editST(target: SDZX) type {
     return union(enum) {
-        Finish: WitRow(target),
-        ToOutside: WitRow(SDZX.C(Example.select, &.{ target, SDZX.C(Example.edit, &.{target}) })),
+        finish: WitRow(target),
+        to_select: WitRow(SDZX.C(Example.select, &.{ target, SDZX.C(Example.edit, &.{target}) })),
 
         pub fn conthandler(gst: *GST) ContR {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .Finish => |wit| return .{ .Next = wit.conthandler() },
-                    .ToOutside => |wit| return .{ .Next = wit.conthandler() },
+                    .finish => |wit| return .{ .Next = wit.conthandler() },
+                    .to_select => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
         }
@@ -109,9 +109,9 @@ pub fn editST(target: SDZX) type {
             const size = rl.measureText(&ptr.str_buf, 32);
             ptr.rect.width = @max(32, @as(f32, @floatFromInt(size)));
 
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .Finish;
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .finish;
             if (rl.isKeyPressed(rl.KeyboardKey.enter) or
-                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .ToOutside;
+                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .to_select;
 
             if (rl.isMouseButtonDown(rl.MouseButton.left)) {
                 const v = rl.getMouseDelta();

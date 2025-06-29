@@ -25,15 +25,15 @@ pub fn selectST(
 
     return union(enum) {
         // zig fmt: off
-        ToBack  : polystate.Witness(FST, GST, enter_fn, back),
-        ToInside: polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.inside, &.{ back, selected })),
+        to_back  : polystate.Witness(FST, GST, enter_fn, back),
+        to_inside: polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.inside, &.{ back, selected })),
         // zig fmt: on
 
         pub fn conthandler(gst: *GST) polystate.ContR(GST) {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .ToBack => |wit| return .{ .Next = wit.conthandler() },
-                    .ToInside => |wit| {
+                    .to_back => |wit| return .{ .Next = wit.conthandler() },
+                    .to_inside => |wit| {
                         gst.select.no_move_duartion = std.time.milliTimestamp();
                         return .{ .Next = wit.conthandler() };
                     },
@@ -47,9 +47,9 @@ pub fn selectST(
             const res: CheckInsideResult = cst.check_inside(gst);
             switch (res) {
                 .not_in_any_rect => {},
-                .in_someone => return .ToInside,
+                .in_someone => return .to_inside,
             }
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             return null;
         }
 
@@ -85,33 +85,33 @@ pub fn insideST(
 
     return union(enum) {
         // zig fmt: off
-        ToBack    : polystate.Witness(FST, GST, enter_fn, back),
-        ToOutside : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.select, &.{ back, selected })),
-        ToHover   : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.hover, &.{ back, selected })),
-        ToSelected: polystate.Witness(FST, GST, enter_fn, selected),
+        to_back    : polystate.Witness(FST, GST, enter_fn, back),
+        to_outside : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.select, &.{ back, selected })),
+        to_hover   : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.hover, &.{ back, selected })),
+        to_selected: polystate.Witness(FST, GST, enter_fn, selected),
         // zig fmt: on
 
         pub fn conthandler(gst: *GST) polystate.ContR(GST) {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .ToBack => |wit| return .{ .Next = wit.conthandler() },
-                    .ToOutside => |wit| return .{ .Next = wit.conthandler() },
-                    .ToHover => |wit| return .{ .Next = wit.conthandler() },
-                    .ToSelected => |wit| return .{ .Next = wit.conthandler() },
+                    .to_back => |wit| return .{ .Next = wit.conthandler() },
+                    .to_outside => |wit| return .{ .Next = wit.conthandler() },
+                    .to_hover => |wit| return .{ .Next = wit.conthandler() },
+                    .to_selected => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
         }
 
         fn genMsg(gst: *GST) ?@This() {
             const render: fn (*GST, SelectState) bool = cst.select_render;
-            if (render(gst, .inside)) return .ToOutside;
+            if (render(gst, .inside)) return .to_outside;
             const res: bool = cst.check_still_inside(gst);
-            if (!res) return .ToOutside;
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
+            if (!res) return .to_outside;
+            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             if (mouse_moved()) gst.select.no_move_duartion = std.time.milliTimestamp();
             const deta = std.time.milliTimestamp() - gst.select.no_move_duartion;
-            if (deta > 400) return .ToHover;
+            if (deta > 400) return .to_hover;
             return null;
         }
     };
@@ -129,32 +129,32 @@ pub fn hoverST(
 
     return union(enum) {
         // zig fmt: off
-        ToBack    : polystate.Witness(FST, GST, enter_fn, back),
-        ToOutside : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.select, &.{ back, selected })),
-        ToInside  : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.inside, &.{ back, selected })),
-        ToSelected: polystate.Witness(FST, GST, enter_fn, selected),
+        to_back    : polystate.Witness(FST, GST, enter_fn, back),
+        to_outside : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.select, &.{ back, selected })),
+        to_inside  : polystate.Witness(FST, GST, enter_fn, SDZX.C(FST.inside, &.{ back, selected })),
+        to_selected: polystate.Witness(FST, GST, enter_fn, selected),
         // zig fmt: on
 
         pub fn conthandler(gst: *GST) polystate.ContR(GST) {
             if (genMsg(gst)) |msg| {
                 switch (msg) {
-                    .ToBack => |wit| return .{ .Next = wit.conthandler() },
-                    .ToOutside => |wit| return .{ .Next = wit.conthandler() },
-                    .ToInside => |wit| {
+                    .to_back => |wit| return .{ .Next = wit.conthandler() },
+                    .to_outside => |wit| return .{ .Next = wit.conthandler() },
+                    .to_inside => |wit| {
                         gst.select.no_move_duartion = std.time.milliTimestamp();
                         return .{ .Next = wit.conthandler() };
                     },
-                    .ToSelected => |wit| return .{ .Next = wit.conthandler() },
+                    .to_selected => |wit| return .{ .Next = wit.conthandler() },
                 }
             } else return .Wait;
         }
 
         fn genMsg(gst: *GST) ?@This() {
             const render: fn (*GST, SelectState) bool = cst.select_render;
-            if (render(gst, .hover)) return .ToOutside;
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .ToSelected;
-            if (mouse_moved()) return .ToInside;
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .ToBack;
+            if (render(gst, .hover)) return .to_outside;
+            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
+            if (mouse_moved()) return .to_inside;
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             return null;
         }
     };
