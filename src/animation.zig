@@ -5,15 +5,10 @@ const core = @import("core.zig");
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
-const getTarget = core.getTarget;
 
-pub const Animation = struct {
+pub const AnimationData = struct {
     total_time: f32 = 150,
     start_time: i64 = 0,
 };
@@ -39,51 +34,30 @@ pub fn animation_list_r(
     }
 }
 
-pub fn animationST(from: SDZX, to: SDZX) type {
+pub fn Animation(
+    fsm: fn (type) type,
+    from: type,
+    to: type,
+) type {
     return union(enum) {
-        animation_end: WitRow(to),
+        animation_end: fsm(to),
 
-        const from_ty = polystate.sdzx_to_cst(Example, from);
-        const to_ty = polystate.sdzx_to_cst(Example, to);
-
-        pub fn conthandler(gst: *GST) core.ContR {
-            if (genMsg(gst)) |msg| {
-                switch (msg) {
-                    .animation_end => |wit| return .{ .Next = wit.conthandler() },
-                }
-            } else return .Wait;
-        }
-
-        fn genMsg(gst: *GST) ?@This() {
+        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                 gst.log("skip animation");
-                return .animation_end;
+                return .{ .next = .animation_end };
             }
 
             const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
             var buf: [20]u8 = undefined;
             gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
-            from_ty.animation(
-                gst,
-                gst.screen_width,
-                gst.screen_height,
-                duration,
-                gst.animation.total_time,
-                true,
-            );
-            to_ty.animation(
-                gst,
-                gst.screen_width,
-                gst.screen_height,
-                duration,
-                gst.animation.total_time,
-                false,
-            );
+            from.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, true);
+            to.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
 
             if (duration > gst.animation.total_time - 1000 / 60) {
-                return .animation_end;
+                return .{ .next = .animation_end };
             }
-            return null;
+            return .no_trasition;
         }
     };
 }

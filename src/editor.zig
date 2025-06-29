@@ -2,43 +2,26 @@ const std = @import("std");
 const polystate = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
+const Select = select.Select;
 
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
-const getTarget = core.getTarget;
 
-pub const Editor = struct {
+pub const EditorData = struct {
     copyed_rect: ?R = null,
     selected_id: usize = 0,
 };
 
-const ContR = polystate.ContR(GST);
-
-pub fn editST(target: SDZX) type {
+pub fn Editor(fsm: fn (type) type, target: type) type {
     return union(enum) {
-        finish: WitRow(target),
-        to_select: WitRow(SDZX.C(Example.select, &.{ target, SDZX.C(Example.edit, &.{target}) })),
+        finish: fsm(target),
+        to_select: fsm(Select(fsm, target, Editor(fsm, target))),
 
-        pub fn conthandler(gst: *GST) ContR {
-            if (genMsg(gst)) |msg| {
-                switch (msg) {
-                    .finish => |wit| return .{ .Next = wit.conthandler() },
-                    .to_select => |wit| return .{ .Next = wit.conthandler() },
-                }
-            } else return .Wait;
-        }
-
-        const target_ty = polystate.sdzx_to_cst(Example, target);
-
-        fn genMsg(gst: *GST) ?@This() {
-            for (target_ty.access_rs(gst).items) |*r| {
+        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+            for (target.access_rs(gst).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -56,7 +39,7 @@ pub fn editST(target: SDZX) type {
                 );
             }
 
-            const ptr: *R = &target_ty.access_rs(gst).items[gst.editor.selected_id];
+            const ptr: *R = &target.access_rs(gst).items[gst.editor.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -69,7 +52,7 @@ pub fn editST(target: SDZX) type {
             rect.width = 40;
             _ = rg.checkBox(rect, "enbale", &ptr.enable_action);
 
-            if (@hasDecl(target_ty, "action_list") and
+            if (@hasDecl(target, "action_list") and
                 ptr.enable_action)
             {
                 rect.y += 40;
@@ -79,7 +62,7 @@ pub fn editST(target: SDZX) type {
                 const drop_str = comptime blk: {
                     var buf: [500:0]u8 = @splat(0);
                     var offset: usize = 0;
-                    const action_list = @field(target_ty, "action_list");
+                    const action_list = @field(target, "action_list");
                     for (action_list, 0..) |val, i| {
                         const name = val.name;
                         @memcpy(buf[offset .. offset + name.len], name);
@@ -109,9 +92,9 @@ pub fn editST(target: SDZX) type {
             const size = rl.measureText(&ptr.str_buf, 32);
             ptr.rect.width = @max(32, @as(f32, @floatFromInt(size)));
 
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .finish;
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .{ .next = .finish };
             if (rl.isKeyPressed(rl.KeyboardKey.enter) or
-                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .to_select;
+                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .{ .next = .to_select };
 
             if (rl.isMouseButtonDown(rl.MouseButton.left)) {
                 const v = rl.getMouseDelta();
@@ -119,11 +102,11 @@ pub fn editST(target: SDZX) type {
                 ptr.rect.y += v.y;
             }
 
-            return null;
+            return .no_trasition;
         }
 
-        pub fn select_render(gst: *GST, sst: select.SelectState) bool {
-            for (target_ty.access_rs(gst).items) |*r| {
+        pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
+            for (target.access_rs(gst).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -144,7 +127,7 @@ pub fn editST(target: SDZX) type {
             switch (sst) {
                 .outside => {},
                 .inside => {
-                    const r = target_ty.access_rs(gst).items[gst.editor.selected_id];
+                    const r = target.access_rs(gst).items[gst.editor.selected_id];
                     rl.drawRectangleLines(
                         @intFromFloat(r.rect.x - 1),
                         @intFromFloat(r.rect.y - 1),
@@ -154,11 +137,11 @@ pub fn editST(target: SDZX) type {
                     );
                 },
                 .hover => {
-                    const ptr: *R = &target_ty.access_rs(gst).items[gst.editor.selected_id];
-                    if (@hasDecl(target_ty, "action_list") and
+                    const ptr: *R = &target.access_rs(gst).items[gst.editor.selected_id];
+                    if (@hasDecl(target, "action_list") and
                         ptr.enable_action)
                     {
-                        const action_list = @field(target_ty, "action_list");
+                        const action_list = @field(target, "action_list");
                         const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
                         const str1 = gst.printZ("{s}", .{str});
@@ -184,11 +167,11 @@ pub fn editST(target: SDZX) type {
                 r.rect.y = mp.y;
                 const size = rl.measureText(&r.str_buf, 32);
                 r.rect.width = @floatFromInt(size);
-                target_ty.access_rs(gst).append(gst.gpa, r) catch unreachable;
+                target.access_rs(gst).append(gst.gpa, r) catch unreachable;
                 gst.log("Add button");
             }
 
-            for (target_ty.access_rs(gst).items, 0..) |*r, i| {
+            for (target.access_rs(gst).items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
                     gst.editor.selected_id = i;
                     return .in_someone;
@@ -198,14 +181,14 @@ pub fn editST(target: SDZX) type {
         }
 
         pub fn check_still_inside(gst: *GST) bool {
-            const r = target_ty.access_rs(gst).items[gst.editor.selected_id];
+            const r = target.access_rs(gst).items[gst.editor.selected_id];
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
                 gst.editor.copyed_rect = r;
             }
             if (rl.isKeyDown(rl.KeyboardKey.d)) {
                 gst.log("Delete!");
-                _ = target_ty.access_rs(gst).swapRemove(gst.editor.selected_id);
+                _ = target.access_rs(gst).swapRemove(gst.editor.selected_id);
                 return false;
             }
             return r.inR(rl.getMousePosition());

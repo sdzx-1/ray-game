@@ -2,53 +2,40 @@ const std = @import("std");
 const polystate = @import("polystate");
 const core = @import("core.zig");
 const utils = @import("utils.zig");
-const select = @import("select.zig");
 const anim = @import("animation.zig");
+const Select = @import("select.zig").Select;
+const Editor = @import("editor.zig").Editor;
+const Animation = @import("animation.zig").Animation;
+const Textures = @import("textures.zig").Textures;
+const Map = @import("map.zig").Map;
 
 const rl = @import("raylib");
 const rg = @import("raygui");
 
 const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
-const getTarget = core.getTarget;
 const ContR = polystate.ContR(GST);
 const Action = core.Action;
 const SaveData = utils.SaveData;
 const RS = core.RS;
 
-pub const Menu = struct {
+pub const MenuData = struct {
     rs: RS = .empty,
 };
-pub const menuST = union(enum) {
+pub const Menu = union(enum) {
     // zig fmt: off
-    exit1:     Wit(Example.exit),
-    to_editor: Wit(.{Example.select, Example.menu,  .{Example.edit, Example.menu}}),
-    to_play:   Wit(.{ Example.animation, Example.menu, Example.map }),
-    to_textures: Wit(Example.textures),
+    exit1      : Example(polystate.Exit),
+    to_editor  : Example(Select(Example, Menu, Editor(Example, Menu))),
+    to_play    : Example(Animation(Example, Menu, Map)),
+    to_textures: Example(Textures),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) ContR {
-        if (genMsg(gst)) |msg| {
-            switch (msg) {
-                .exit1 => |wit| return .{ .Next = wit.conthandler() },
-                .to_editor => |wit| return .{ .Next = wit.conthandler() },
-                .to_textures => |wit| return .{ .Next = wit.conthandler() },
-                .to_play => |wit| {
-                    gst.animation.start_time = std.time.milliTimestamp();
-                    return .{ .Next = wit.conthandler() };
-                },
-            }
-        } else return .Wait;
-    }
-    fn genMsg(gst: *GST) ?@This() {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .to_textures;
-        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
-        return null;
+    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .{ .next = .to_editor };
+        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .{ .next = .to_textures };
+        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return .{ .next = msg };
+        return .no_trasition;
     }
 
     // zig fmt: off
@@ -93,7 +80,8 @@ pub const menuST = union(enum) {
         return .to_editor;
     }
 
-    fn toPlay(_: *GST) ?@This() {
+    fn toPlay(gst: *GST) ?@This() {
+        gst.animation.start_time = std.time.milliTimestamp();
         return .to_play;
     }
 

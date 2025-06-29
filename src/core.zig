@@ -74,33 +74,25 @@ pub const R = struct {
 
 pub const RS = std.ArrayListUnmanaged(R);
 
-pub fn getTarget(comptime target: Example.SDZX) []const u8 {
-    const nst = switch (target) {
-        .Term => |v| @tagName(v),
-        .Fun => |val| @tagName(val.fun),
-    };
-    return nst;
-}
-
 pub const GST = struct {
     gpa: std.mem.Allocator,
     screen_width: f32 = 1000,
     screen_height: f32 = 800,
     hdw: f32 = 800.0 / 1000.0,
     random: std.Random,
-    select: select.Select = .{},
-    editor: editor.Editor = .{},
-    menu: menu.Menu = .{},
-    map: map.Map = .{},
-    play: play.Play,
-    tbuild: tbuild.Tbuild = .{},
-    animation: animation.Animation = .{},
-    textures: textures.Textures,
-    sel_texture: textures.SelTexture = .{},
+    select: select.SelectData = .{},
+    editor: editor.EditorData = .{},
+    menu: menu.MenuData = .{},
+    map: map.MapData = .{},
+    play: play.PlayData,
+    tbuild: tbuild.TbuildData = .{},
+    animation: animation.AnimationData = .{},
+    textures: textures.TexturesData,
+    sel_texture: textures.SetTextureData = .{},
 
     //
     notify: Notify = .{},
-    im_log_buf: [260:0]u8 = @splat(0),
+    im_log_buf: [60:0]u8 = @splat(0),
     tmp_buf: []u8,
 
     pub fn log(self: *@This(), str: []const u8) void {
@@ -120,7 +112,7 @@ pub const GST = struct {
     }
 
     pub fn log_im(self: *@This(), str: []const u8) void {
-        _ = std.fmt.bufPrintZ(&self.im_log_buf, "{s}", .{str}) catch unreachable;
+        _ = std.fmt.bufPrintZ(&self.im_log_buf, "{s}", .{str}) catch &self.im_log_buf;
     }
 
     pub fn render_log(self: *@This()) void {
@@ -161,71 +153,9 @@ pub fn Action(cst: type) type {
     };
 }
 
-pub const ContR = polystate.ContR(GST);
-
-pub const Example = enum {
-    exit,
-    //
-    menu,
-    map,
-    play,
-    build,
-    textures,
-    sel_texture,
-    place,
-    x,
-
-    //
-    animation,
-
-    //
-    edit,
-
-    //
-    select,
-    inside,
-    hover,
-
-    pub const sel_textureST = textures.sel_textureST;
-    pub const texturesST = textures.texturesST;
-    pub const buildST = tbuild.buildST;
-    pub const menuST = menu.menuST;
-    pub const mapST = map.mapST;
-    pub const playST = play.playST;
-    pub const placeST = play.placeST;
-    pub const animationST = animation.animationST;
-    pub const editST = editor.editST;
-
-    pub const xST = play.xST;
-
-    pub fn selectST(back: SDZX, selected: SDZX) type {
-        return select.selectST(@This(), GST, enter_fn, back, selected);
-    }
-    pub fn insideST(back: SDZX, selected: SDZX) type {
-        return select.insideST(@This(), GST, enter_fn, back, selected);
-    }
-    pub fn hoverST(back: SDZX, selected: SDZX) type {
-        return select.hoverST(@This(), GST, enter_fn, back, selected);
-    }
-    pub const exitST = union(enum) {
-        pub fn conthandler(gst: *GST) ContR {
-            utils.saveData(gst);
-            std.debug.print("exit\n", .{});
-            return .Exit;
-        }
-    };
-
-    fn enter_fn(cst: polystate.sdzx(@This()), gst: *GST) void {
-        gst.log_im(gst.printZ("{}", .{cst}));
-    }
-
-    pub fn Wit(val: anytype) type {
-        return polystate.Witness(@This(), GST, enter_fn, polystate.val_to_sdzx(@This(), val));
-    }
-
-    pub fn WitRow(val: SDZX) type {
-        return polystate.Witness(@This(), GST, enter_fn, val);
-    }
-
-    pub const SDZX = polystate.sdzx(@This());
-};
+fn enter_fn(gst: *GST, state: type) void {
+    gst.log_im(gst.printZ("{s}", .{@typeName(state)}));
+}
+pub fn Example(state: type) type {
+    return polystate.FSM(512, GST, enter_fn, state);
+}

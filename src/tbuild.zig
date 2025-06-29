@@ -1,24 +1,14 @@
-pub const buildST = union(enum) {
-    ToPlay: Wit(Example.play),
-    ToSelect: WitRow(SDZX.C(Example.select, &.{ SDZX.V(Example.play), SDZX.V(Example.build) })),
-    SetTextId: Wit(.{ Example.select, Example.build, .{ Example.sel_texture, Example.build } }),
+pub const TBuild = union(enum) {
+    // zig fmt: off
+    to_play   : Example(Play),
+    to_select : Example(Select(Example, Play, TBuild)),
+    set_text_Id: Example(Select(Example, TBuild, SetTexture(TBuild))),
+    // zig fmt: on
 
-    pub fn conthandler(gst: *GST) ContR {
-        if (genMsg(gst)) |msg| {
-            switch (msg) {
-                .ToPlay => |wit| return .{ .Next = wit.conthandler() },
-                .ToSelect => |wit| return .{ .Next = wit.conthandler() },
-                .SetTextId => |wit| {
-                    return .{ .Next = wit.conthandler() };
-                },
-            }
-        } else return .Wait;
-    }
-
-    fn genMsg(gst: *GST) ?@This() {
+    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        if (ptr.draw_gui(gst)) |msg| return msg;
+        if (ptr.draw_gui(gst)) |msg| return .{ .next = msg };
 
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
@@ -46,12 +36,12 @@ pub const buildST = union(enum) {
             ptr.width = ptr.width + 1;
         }
         if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
-            return .ToPlay;
+            return .{ .next = .to_play };
         }
         if (rl.isKeyPressed(rl.KeyboardKey.caps_lock)) {
-            return .ToSelect;
+            return .{ .next = .to_select };
         }
-        return null;
+        return .no_trasition;
     }
 
     pub fn set_text_id(gst: *GST, tid: textures.TextID) void {
@@ -63,7 +53,7 @@ pub const buildST = union(enum) {
     }
 
     //select
-    pub fn select_render(gst: *GST, sst: select.SelectState) bool {
+    pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
             gst.tbuild.view.drag_view(gst.screen_width);
@@ -108,7 +98,7 @@ pub const buildST = union(enum) {
     }
 };
 
-pub const Tbuild = struct {
+pub const TbuildData = struct {
     list: std.ArrayListUnmanaged(Building) = .empty,
     selected_id: usize = 0,
     view: View = .{ .x = 0, .y = 0, .width = 25 },
@@ -193,14 +183,14 @@ pub const Building = struct {
         }
     }
 
-    pub fn draw_gui(self: *Building, gst: *GST) ?buildST {
+    pub fn draw_gui(self: *Building, gst: *GST) ?TBuild {
         const win_pos = gst.tbuild.view.view_to_win(gst.screen_width, .{ .x = self.x, .y = self.y });
         const r = gst.screen_width / gst.tbuild.view.width;
         var rect: rl.Rectangle = .{ .x = win_pos.x, .y = win_pos.y, .width = 250, .height = 30 };
         _ = rg.textBox(rect, &self.name, 30, false);
         rect.y -= 33;
         rect.width = 240;
-        if (rg.button(rect, "select texture")) return .SetTextId;
+        if (rg.button(rect, "select texture")) return .set_text_Id;
         rect.y = win_pos.y + self.height * r + 3;
         rect.width = 200;
         rect.height = 300;
@@ -216,13 +206,18 @@ const select = @import("select.zig");
 const textures = @import("textures.zig");
 const utils = @import("utils.zig");
 
+const Example = core.Example;
+const Menu = @import("menu.zig").Menu;
+const Select = @import("select.zig").Select;
+const Editor = @import("editor.zig").Editor;
+const Animation = @import("animation.zig").Animation;
+const Map = @import("map.zig").Map;
+const SetTexture = @import("textures.zig").SetTexture;
+const Play = @import("play.zig").Play;
+
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;

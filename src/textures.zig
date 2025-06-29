@@ -8,22 +8,26 @@ const rl = @import("raylib");
 const rg = @import("raygui");
 
 const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
+const Menu = @import("menu.zig").Menu;
+const Select = @import("select.zig").Select;
+const Editor = @import("editor.zig").Editor;
+const Animation = @import("animation.zig").Animation;
+const Map = @import("map.zig").Map;
+const Play = @import("play.zig").Play;
+
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
 const ContR = polystate.ContR(GST);
 const View = utils.View;
 
-pub const Texture = struct {
+pub const TextureData = struct {
     name: [:0]const u8,
     tex2d: rl.Texture2D,
 };
 
 pub const Cell = union(enum) {
-    texture: Texture,
+    texture: TextureData,
     blank: void,
     text_dir_name: [:0]const u8,
 };
@@ -46,7 +50,7 @@ pub fn arr_set_blank(ta: *TextArr) void {
     }
 }
 
-pub const Textures = struct {
+pub const TexturesData = struct {
     text_arr: *TextArr,
     view: View = .{ .x = 0, .y = 0, .width = 25 },
 
@@ -103,18 +107,10 @@ pub const Textures = struct {
     }
 };
 
-pub const texturesST = union(enum) {
-    ToMenu: Wit(Example.menu),
+pub const Textures = union(enum) {
+    to_menu: Example(Menu),
 
-    pub fn conthandler(gst: *GST) ContR {
-        if (genMsg(gst)) |msg| {
-            switch (msg) {
-                .ToMenu => |wit| return .{ .Next = wit.conthandler() },
-            }
-        } else return .Wait;
-    }
-
-    fn genMsg(gst: *GST) ?@This() {
+    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
         {
             gst.textures.view.mouse_wheel(gst.hdw);
             gst.textures.view.drag_view(gst.screen_width);
@@ -123,42 +119,32 @@ pub const texturesST = union(enum) {
         gst.textures.render(gst);
 
         if (rl.isKeyPressed(rl.KeyboardKey.m)) {
-            return .ToMenu;
+            return .{ .next = .to_menu };
         }
-        return null;
+        return .no_trasition;
     }
 };
 
-pub const SelTexture = struct {
+pub const SetTextureData = struct {
     text_id: TextID = .{ .x = 0, .y = 0 },
 };
 
-pub fn sel_textureST(target: SDZX) type {
+pub fn SetTexture(target: type) type {
     return union(enum) {
-        ToTarget: WitRow(target),
+        to_target: Example(target),
 
-        const cst = polystate.sdzx_to_cst(Example, target);
-        pub fn conthandler(gst: *GST) ContR {
-            switch (genMsg(gst)) {
-                .ToTarget => |wit| {
-                    cst.set_text_id(gst, gst.sel_texture.text_id);
-                    return .{ .Curr = wit.conthandler() };
-                },
-            }
+        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+            target.set_text_id(gst, gst.sel_texture.text_id);
+            return .{ .next = .to_target };
         }
 
-        fn genMsg(gst: *GST) @This() {
-            _ = gst;
-            return .ToTarget;
-        }
-
-        pub fn select_render(gst: *GST, sst: select.SelectState) bool {
+        pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
             {
                 gst.textures.view.mouse_wheel(gst.hdw);
                 gst.textures.view.drag_view(gst.screen_width);
             }
             gst.textures.render(gst);
-            const selected = cst.sed_texture(gst);
+            const selected = target.sed_texture(gst);
             const smp = gst.textures.view.view_to_win(gst.screen_width, .{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
             const wh: f32 = gst.screen_width / gst.textures.view.width;
             rl.drawRectangleLinesEx(.{

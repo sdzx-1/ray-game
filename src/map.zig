@@ -9,7 +9,7 @@ pub const MazeConfig = struct {
     room_max_width: i32 = 17,
 };
 
-pub const Map = struct {
+pub const MapData = struct {
     rs: RS = .empty,
     maze: ?Maze = null,
     maze_config: MazeConfig = .{},
@@ -20,58 +20,16 @@ pub const Map = struct {
     }
 };
 
-pub const mapST = union(enum) {
+pub const Map = union(enum) {
     // zig fmt: off
-    exit1    : Wit(Example.exit),
-    to_editor: Wit(.{ Example.select, Example.map ,.{Example.edit, Example.map} }),
-    to_menu  : Wit(.{ Example.animation, Example.map, Example.menu }),
-    to_play  : Wit(Example.play ),
+    exit1    : Example(polystate.Exit),
+    to_editor: Example(Select(Example, Map, Editor(Example, Map))),
+    to_menu  : Example(Animation(Example, Map, Menu)),
+    to_play  : Example(Play),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) ContR {
-        if (genMsg(gst)) |msg| {
-            switch (msg) {
-                .exit1 => |wit| return .{ .Next = wit.conthandler() },
-                .to_editor => |wit| return .{ .Next = wit.conthandler() },
-                .to_menu => |wit| {
-                    gst.animation.start_time = std.time.milliTimestamp();
-                    return .{ .Next = wit.conthandler() };
-                },
-                .to_play => |wit| {
-                    gst.animation.start_time = std.time.milliTimestamp();
-                    if (gst.map.maze == null) {
-                        generate_maze(
-                            gst.gpa,
-                            &gst.map.maze,
-                            gst.map.maze_config.total_x,
-                            gst.map.maze_config.total_y,
-                            gst.map.maze_config.room_min_width,
-                            gst.map.maze_config.room_max_width,
-                            gst.random.int(u64),
-                            gst.map.maze_config.probability,
-                        );
-                    }
-                    const m = gst.map.maze.?;
-
-                    for (0..m.totalYSize) |y| {
-                        for (0..m.totalXSize) |x| {
-                            const idx = Maze.Index.from_uszie_xy(x, y);
-                            const val = m.readBoard(idx);
-                            gst.play.current_map[y][x] = .{ .tag = val, .building = null };
-                        }
-                    }
-
-                    const sx = @as(f32, @floatFromInt(gst.map.maze_config.total_x));
-                    const sy = @as(f32, @floatFromInt(gst.map.maze_config.total_y));
-                    gst.play.view.width = 50;
-                    gst.play.view.center(gst.hdw, sx / 2, sy / 2);
-                    return .{ .Next = wit.conthandler() };
-                },
-            }
-        } else return .Wait;
-    }
-    fn genMsg(gst: *GST) ?@This() {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
+    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .{ .next = .to_editor };
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
             _ = gen_maze(gst);
@@ -99,19 +57,51 @@ pub const mapST = union(enum) {
             }
         }
 
-        for (gst.map.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
-        return null;
+        for (gst.map.rs.items) |*r| {
+            if (r.render(gst, @This(), action_list)) |msg| {
+                return .{ .next = msg };
+            }
+        }
+        return .no_trasition;
     }
 
     fn toEditor(_: *GST) ?@This() {
         return .to_editor;
     }
 
-    fn toMenu(_: *GST) ?@This() {
+    fn toMenu(gst: *GST) ?@This() {
+        gst.animation.start_time = std.time.milliTimestamp();
         return .to_menu;
     }
 
-    fn toPlay(_: *GST) ?@This() {
+    fn toPlay(gst: *GST) ?@This() {
+        gst.animation.start_time = std.time.milliTimestamp();
+        if (gst.map.maze == null) {
+            generate_maze(
+                gst.gpa,
+                &gst.map.maze,
+                gst.map.maze_config.total_x,
+                gst.map.maze_config.total_y,
+                gst.map.maze_config.room_min_width,
+                gst.map.maze_config.room_max_width,
+                gst.random.int(u64),
+                gst.map.maze_config.probability,
+            );
+        }
+        const m = gst.map.maze.?;
+
+        for (0..m.totalYSize) |y| {
+            for (0..m.totalXSize) |x| {
+                const idx = Maze.Index.from_uszie_xy(x, y);
+                const val = m.readBoard(idx);
+                gst.play.current_map[y][x] = .{ .tag = val, .building = null };
+            }
+        }
+
+        const sx = @as(f32, @floatFromInt(gst.map.maze_config.total_x));
+        const sy = @as(f32, @floatFromInt(gst.map.maze_config.total_y));
+        gst.play.view.width = 50;
+        gst.play.view.center(gst.hdw, sx / 2, sy / 2);
         return .to_play;
     }
 
@@ -225,18 +215,18 @@ const std = @import("std");
 const polystate = @import("polystate");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
+const Select = @import("select.zig").Select;
+const Editor = @import("editor.zig").Editor;
+const Animation = @import("animation.zig").Animation;
+const Menu = @import("menu.zig").Menu;
+const Play = @import("play.zig").Play;
 
 const rl = @import("raylib");
 const rg = @import("raygui");
 
 const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
-const getTarget = core.getTarget;
-const ContR = polystate.ContR(GST);
 const Action = core.Action;
 const RS = core.RS;
 const maze = @import("maze");

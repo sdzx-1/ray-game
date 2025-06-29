@@ -1,4 +1,4 @@
-pub const Play = struct {
+pub const PlayData = struct {
     rs: RS = .empty,
     current_map: *CurrentMap,
     view: View = undefined,
@@ -30,57 +30,38 @@ pub const Cell = struct {
 
 pub const CurrentMap = [200][200]Cell;
 
-pub fn xST(back: SDZX, target: SDZX) type {
+pub fn X(back: type, target: type) type {
     return union(enum) {
-        // X: Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
-        x: WitRow(SDZX.C(.select, &.{ back, SDZX.C(.select, &.{ SDZX.C(.x, &.{ back, target }), target }) })),
+        XX: Example(Select(Example, back, Select(Example, X(back, target), target))),
 
-        pub fn conthandler(gst: *GST) ContR {
-            switch (genMsg(gst)) {
-                .x => |wit| {
-                    return .{ .Curr = wit.conthandler() };
-                },
-            }
-        }
-
-        pub fn genMsg(gst: *GST) @This() {
-            _ = gst;
-            return .x;
+        pub fn conthandler(_: *GST) polystate.NextState(@This()) {
+            return .{ .current = .XX };
         }
     };
 }
 
-pub const placeST = union(enum) {
-    to_play: Wit(.{ Example.select, Example.play, .{ Example.select, .{ Example.x, Example.play, Example.place }, Example.place } }),
+pub const Place = union(enum) {
+    to_play: Example(Select(Example, Play, Select(Example, X(Play, Place), Place))),
 
-    pub fn conthandler(gst: *GST) ContR {
-        switch (genMsg(gst)) {
-            .to_play => |wit| {
-                const b = gst.play.selected_build;
-                const cell_id = gst.play.selected_cell_id;
-                const y: i32 = @intCast(cell_id.y);
-                const x: i32 = @intCast(cell_id.x);
-                const w: i32 = @intFromFloat(b.width);
-                const h: i32 = @intFromFloat(b.height);
-                var ty = y;
-                while (ty < y + h) : (ty += 1) {
-                    var tx = x;
-                    while (tx < x + w) : (tx += 1) {
-                        const cell = &gst.play.current_map[@intCast(ty)][@intCast(tx)];
-                        cell.building = b;
-                    }
-                }
-                return .{ .Curr = wit.conthandler() };
-            },
+    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        const b = gst.play.selected_build;
+        const cell_id = gst.play.selected_cell_id;
+        const y: i32 = @intCast(cell_id.y);
+        const x: i32 = @intCast(cell_id.x);
+        const w: i32 = @intFromFloat(b.width);
+        const h: i32 = @intFromFloat(b.height);
+        var ty = y;
+        while (ty < y + h) : (ty += 1) {
+            var tx = x;
+            while (tx < x + w) : (tx += 1) {
+                const cell = &gst.play.current_map[@intCast(ty)][@intCast(tx)];
+                cell.building = b;
+            }
         }
+        return .{ .current = .to_play };
     }
 
-    pub fn genMsg(gst: *GST) @This() {
-        _ = gst;
-        return .to_play;
-    }
-
-    pub fn select_render1(gst: *GST, sst: select.SelectState) bool {
+    pub fn select_render1(gst: *GST, sst: select.SelectStage) bool {
         _ = sst;
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
@@ -107,7 +88,7 @@ pub const placeST = union(enum) {
 
     //select position
 
-    pub fn select_render(gst: *GST, sst: select.SelectState) bool {
+    pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         draw_cells(&gst.play.view, gst, -2);
@@ -180,42 +161,25 @@ pub const placeST = union(enum) {
     }
 };
 
-pub const playST = union(enum) {
+pub const Play = union(enum) {
     // zig fmt: off
-    to_editor     : Wit(.{ Example.select, Example.play, .{ Example.edit, Example.play } }),
-    to_menu       : Wit(.{ Example.animation, Example.play, Example.menu }),
-    to_build      : Wit(.{ Example.select, Example.play, Example.build }),
-    to_place      : Wit(.{ Example.select, Example.play, .{ Example.select, .{Example.x, Example.play, Example.place}, Example.place } }),
-    set_maze_text_id: Wit(.{ Example.select, Example.play, .{ Example.sel_texture, Example.play } }),
+    to_editor       : Example(Select(Example, Play, Editor(Example, Play))),
+    to_menu         : Example(Animation(Example, Play, Menu)),
+    to_build        : Example(Select(Example, Play, TBuild)),
+    to_place        : Example(Select(Example, Play, Select(Example, X(Play, Place), Place))),
+    set_maze_text_id: Example(Select(Example, Play, SetTexture(Play))),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) ContR {
-        if (genMsg(gst)) |msg| {
-            switch (msg) {
-                .to_editor => |wit| return .{ .Next = wit.conthandler() },
-                .to_menu => |wit| {
-                    gst.animation.start_time = std.time.milliTimestamp();
-                    return .{ .Next = wit.conthandler() };
-                },
-                .to_build => |wit| return .{ .Next = wit.conthandler() },
-                .to_place => |wit| return .{ .Next = wit.conthandler() },
-                .set_maze_text_id => |wit| {
-                    return .{ .Next = wit.conthandler() };
-                },
-            }
-        } else return .Wait;
-    }
-
-    fn genMsg(gst: *GST) ?@This() {
+    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         draw_cells(&gst.play.view, gst, 0);
-        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return .{ .next = msg };
 
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
-        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
-        return null;
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .{ .next = .to_editor };
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .{ .next = .to_build };
+        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .{ .next = .to_place };
+        return .no_trasition;
     }
 
     pub fn set_text_id(gst: *GST, tid: textures.TextID) void {
@@ -242,7 +206,8 @@ pub const playST = union(enum) {
     fn toEditor(_: *GST) ?@This() {
         return .to_editor;
     }
-    fn toMenu(_: *GST) ?@This() {
+    fn toMenu(gst: *GST) ?@This() {
+        gst.animation.start_time = std.time.milliTimestamp();
         return .to_menu;
     }
 
@@ -339,18 +304,21 @@ const tbuild = @import("tbuild.zig");
 const textures = @import("textures.zig");
 const utils = @import("utils.zig");
 
+const Example = core.Example;
+const Menu = @import("menu.zig").Menu;
+const Select = @import("select.zig").Select;
+const Editor = @import("editor.zig").Editor;
+const Animation = @import("animation.zig").Animation;
+const Map = @import("map.zig").Map;
+const TBuild = @import("tbuild.zig").TBuild;
+const SetTexture = @import("textures.zig").SetTexture;
+
 const rl = @import("raylib");
 const rg = @import("raygui");
 const maze = @import("maze");
 
-const Example = core.Example;
-const Wit = Example.Wit;
-const WitRow = Example.WitRow;
-const SDZX = Example.SDZX;
 const GST = core.GST;
 const R = core.R;
-const getTarget = core.getTarget;
-const ContR = polystate.ContR(GST);
 const Action = core.Action;
 const RS = core.RS;
 const Maze = maze.Maze;

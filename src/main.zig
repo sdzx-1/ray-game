@@ -8,6 +8,7 @@ const core = @import("core.zig");
 const utils = @import("utils.zig");
 const play = @import("play.zig");
 const textures = @import("textures.zig");
+const Menu = @import("menu.zig").Menu;
 
 const Example = core.Example;
 const SaveData = utils.SaveData;
@@ -16,9 +17,11 @@ pub fn main() anyerror!void {
     var gpa_instance = std.heap.DebugAllocator(.{}).init;
     const gpa = gpa_instance.allocator();
 
+    const StartState = Example(Menu);
+
     var graph = polystate.Graph.init;
     defer graph.deinit(gpa) catch unreachable;
-    try graph.generate(gpa, Example);
+    try graph.generate(gpa, StartState);
     const cwd = std.fs.cwd();
     const t_dot_path = try cwd.createFile("t.dot", .{});
     try t_dot_path.writeAll(try std.fmt.allocPrint(gpa, "{}", .{graph}));
@@ -91,9 +94,7 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
-    const wit = Example.Wit(Example.menu){};
-
-    var next = wit.conthandler();
+    var next = &StartState.conthandler;
     var exit: bool = false;
 
     while (!exit) {
@@ -108,10 +109,10 @@ pub fn main() anyerror!void {
         rl.clearBackground(.white);
 
         sw: switch (next(&gst)) {
-            .Exit => exit = true,
-            .Wait => {},
-            .Next => |fun| next = fun,
-            .Curr => |fun| {
+            .exit => exit = true,
+            .no_trasition => {},
+            .next => |fun| next = fun,
+            .current => |fun| {
                 next = fun;
                 continue :sw fun(&gst);
             },
