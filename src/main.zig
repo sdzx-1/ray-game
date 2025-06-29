@@ -121,4 +121,6 @@ pub fn main() anyerror!void {
         rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
         gst.render_log();
     }
+
+    utils.saveData(&gst);
 }
