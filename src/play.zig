@@ -63,11 +63,19 @@ pub const Place = union(enum) {
 
     pub fn select_render1(gst: *GST, sst: select.SelectStage) bool {
         _ = sst;
+        draw_cells(&gst.play.view, gst, -1);
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
             gst.tbuild.view.drag_view(gst.screen_width);
         }
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
+        for (gst.tbuild.list.items) |*b| {
+            const win_pos = gst.tbuild.view.view_to_win(
+                gst.screen_width,
+                .{ .x = b.x, .y = b.y },
+            );
+            b.draw(gst);
+            rl.drawCircleV(win_pos, 9, rl.Color.green);
+        }
         return false;
     }
 
@@ -91,7 +99,17 @@ pub const Place = union(enum) {
     pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, -2);
+        draw_cells(&gst.play.view, gst, -1);
+
+        for (gst.tbuild.list.items) |*b| {
+            const win_pos = gst.tbuild.view.view_to_win(
+                gst.screen_width,
+                .{ .x = b.x, .y = b.y },
+            );
+            b.draw(gst);
+            rl.drawCircleV(win_pos, 9, rl.Color.green);
+        }
+
         if (rl.isKeyPressed(rl.KeyboardKey.r)) {
             gst.play.selected_build.rotate();
             return true;
@@ -118,6 +136,7 @@ pub const Place = union(enum) {
             },
             else => {},
         }
+
         return false;
     }
 
