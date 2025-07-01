@@ -56,38 +56,8 @@ pub fn main() anyerror!void {
     rl.hideCursor();
     rl.setTraceLogLevel(.none);
 
-    const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
-    var walker = try res_dir.walk(gpa);
+    try textures.load(&gst);
 
-    var x: usize = 0;
-    var y: usize = 0;
-    while (try walker.next()) |entry| {
-        switch (entry.kind) {
-            .file => {
-                const ext = std.fs.path.extension(entry.basename);
-                if (std.mem.eql(u8, ext, ".png")) {
-                    const path = try std.fs.path.joinZ(gpa, &.{ "data/resouces", entry.path });
-                    const loaded_texture = try rl.loadTexture(path);
-                    gst.textures.text_arr[y][x] = .{ .texture = .{
-                        .name = try gpa.dupeZ(u8, entry.basename),
-                        .tex2d = loaded_texture,
-                    } };
-                    x += 1;
-                    if (x >= textures.Width) {
-                        y += 1;
-                        x = 0;
-                    }
-                }
-            },
-            else => {
-                x = 1;
-                y += 1;
-                const str = try gpa.dupeZ(u8, entry.basename);
-                gst.textures.text_arr[y][0] = .{ .text_dir_name = str };
-            },
-        }
-    }
-    std.debug.print("y: {d}, x: {d}\n", .{ y, x });
     defer gst.textures.deinit();
     errdefer gst.textures.deinit();
 
