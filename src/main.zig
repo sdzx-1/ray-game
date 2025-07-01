@@ -56,7 +56,13 @@ pub fn main() anyerror!void {
     rl.hideCursor();
     rl.setTraceLogLevel(.none);
 
-    try textures.load(&gst);
+    { //load textures
+        rl.beginDrawing();
+        rl.clearBackground(.white);
+        rl.drawText("Loading textures...", 100, 100, 50, rl.Color.black);
+        rl.endDrawing();
+        try textures.load(&gst);
+    }
 
     defer gst.textures.deinit();
     errdefer gst.textures.deinit();
