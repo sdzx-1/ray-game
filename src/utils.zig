@@ -101,6 +101,11 @@ pub const View = struct {
         return .{ .x = deta_win_pos.x * r, .y = deta_win_pos.y * r };
     }
 
+    pub fn dview_to_dwin(self: *const View, screen_w: f32, deta_view_pos: rl.Vector2) rl.Vector2 {
+        const r = screen_w / self.width;
+        return .{ .x = deta_view_pos.x * r, .y = deta_view_pos.y * r };
+    }
+
     pub fn win_to_view(self: *const View, screen_w: f32, win_pos: rl.Vector2) rl.Vector2 {
         const r = self.width / screen_w;
         return .{ .x = self.x + win_pos.x * r, .y = self.y + win_pos.y * r };

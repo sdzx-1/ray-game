@@ -113,8 +113,8 @@ pub const Map = union(enum) {
         if (!gst.map.generating) {
             gst.map.generating = !gst.map.generating;
             if (gst.map.maze) |*m| {
-                gst.map.maze = null;
                 m.deinit(gst.gpa);
+                gst.map.maze = null;
             }
             _ = std.Thread.spawn(
                 .{},
