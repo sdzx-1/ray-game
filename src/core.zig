@@ -157,5 +157,5 @@ fn enter_fn(gst: *GST, state: type) void {
     gst.log_im(gst.printZ("{s}", .{@typeName(state)}));
 }
 pub fn Example(state: type) type {
-    return polystate.FSM(512, GST, enter_fn, state);
+    return polystate.FSM("Example", GST, enter_fn, state);
 }

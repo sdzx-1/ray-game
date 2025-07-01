@@ -21,7 +21,7 @@ pub fn main() anyerror!void {
 
     var graph = polystate.Graph.init;
     defer graph.deinit(gpa) catch unreachable;
-    try graph.generate(gpa, StartState);
+    graph.generate(gpa, StartState);
     const cwd = std.fs.cwd();
     const t_dot_path = try cwd.createFile("t.dot", .{});
     try t_dot_path.writeAll(try std.fmt.allocPrint(gpa, "{}", .{graph}));
@@ -94,10 +94,10 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
-    var next = &StartState.conthandler;
-    var exit: bool = false;
+    const Runner = polystate.Runner(120, true, StartState);
+    var curr_id: ?Runner.StateId = Runner.fsm_state_to_state_id(StartState);
 
-    while (!exit) {
+    while (curr_id) |id| {
         rl.beginDrawing();
         defer rl.endDrawing();
         if (rl.isWindowResized()) {
@@ -108,15 +108,7 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
 
-        sw: switch (next(&gst)) {
-            .exit => exit = true,
-            .no_trasition => {},
-            .next => |fun| next = fun,
-            .current => |fun| {
-                next = fun;
-                continue :sw fun(&gst);
-            },
-        }
+        curr_id = Runner.run_conthandler(id, &gst);
 
         rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
         gst.render_log();
