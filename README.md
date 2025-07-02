@@ -1,6 +1,4 @@
 # ray-game
-Examples for polystate, Requires the [latest zig compiler](https://ziglang.org/download/).
-
 This project is an experiment: building a game with polystate to showcase its advantages and practical usage.
 
 **I used this project to explore the limits of polystate, it is not suitable for users who are new to polystate!**
