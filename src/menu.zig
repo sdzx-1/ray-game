@@ -1,5 +1,5 @@
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 const utils = @import("utils.zig");
 const anim = @import("animation.zig");
@@ -15,7 +15,6 @@ const rg = @import("raygui");
 const Example = core.Example;
 const GST = core.GST;
 const R = core.R;
-const ContR = polystate.ContR(GST);
 const Action = core.Action;
 const SaveData = utils.SaveData;
 const RS = core.RS;
@@ -25,16 +24,17 @@ pub const MenuData = struct {
 };
 pub const Menu = union(enum) {
     // zig fmt: off
-    exit1      : Example(polystate.Exit),
-    to_editor  : Example(Select(Example, Menu, Editor(Example, Menu))),
-    to_play    : Example(Animation(Example, Menu, Map)),
-    to_textures: Example(Textures),
+    exit1       : Example(.next, ps.Exit),
+    to_editor   : Example(.next, Select(Example, Menu, Editor(Example, Menu))),
+    to_play     : Example(.next, Animation(Example, Menu, Map)),
+    to_textures : Example(.next, Textures),
+    no_trasition: Example(.next, @This()),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .{ .next = .to_editor };
-        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .{ .next = .to_textures };
-        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return .{ .next = msg };
+    pub fn handler(gst: *GST) @This() {
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
+        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .to_textures;
+        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return .no_trasition;
     }
 

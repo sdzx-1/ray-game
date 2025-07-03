@@ -1,5 +1,5 @@
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const rl = @import("raylib");
 const GST = @import("core.zig").GST;
 
@@ -15,17 +15,18 @@ pub const SelectData = struct {
 pub const SelectStage = enum { outside, inside, hover };
 
 pub fn Select(
-    fsm: fn (type) type,
+    fsm: fn (ps.Method, type) type,
     back: type,
     selected: type,
 ) type {
     return union(enum) {
         // zig fmt: off
-        to_back  : fsm(back),
-        to_inside: fsm(Inside(fsm, back, selected)),
+        to_back     : fsm(.next, back),
+        to_inside   : fsm(.next, Inside(fsm, back, selected)),
+        no_trasition: fsm(.next, @This()),
         // zig fmt: on
 
-        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        pub fn handler(gst: *GST) @This() {
             const render: fn (*GST, SelectStage) bool = selected.select_render;
             _ = render(gst, .outside);
             const res: CheckInsideResult = selected.check_inside(gst);
@@ -33,10 +34,10 @@ pub fn Select(
                 .not_in_any_rect => {},
                 .in_someone => {
                     gst.select.no_move_duartion = std.time.milliTimestamp();
-                    return .{ .next = .to_inside };
+                    return .to_inside;
                 },
             }
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .{ .next = .to_back };
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             return .no_trasition;
         }
 
@@ -61,55 +62,57 @@ pub fn Select(
 }
 
 pub fn Inside(
-    fsm: fn (type) type,
+    fsm: fn (ps.Method, type) type,
     back: type,
     selected: type,
 ) type {
     return union(enum) {
         // zig fmt: off
-        to_back    : fsm(back),
-        to_outside : fsm(Select(fsm, back, selected)),
-        to_hover   : fsm(Hover(fsm, back, selected)),
-        to_selected: fsm(selected),
+        to_back     : fsm(.next, back),
+        to_outside  : fsm(.next, Select(fsm, back, selected)),
+        to_hover    : fsm(.next, Hover(fsm, back, selected)),
+        to_selected : fsm(.next, selected),
+        no_trasition: fsm(.next, @This()),
         // zig fmt: on
 
-        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        pub fn handler(gst: *GST) @This() {
             const render: fn (*GST, SelectStage) bool = selected.select_render;
-            if (render(gst, .inside)) return .{ .next = .to_outside };
+            if (render(gst, .inside)) return .to_outside;
             const res: bool = selected.check_still_inside(gst);
-            if (!res) return .{ .next = .to_outside };
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .{ .next = .to_selected };
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .{ .next = .to_back };
+            if (!res) return .to_outside;
+            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             if (mouse_moved()) gst.select.no_move_duartion = std.time.milliTimestamp();
             const deta = std.time.milliTimestamp() - gst.select.no_move_duartion;
-            if (deta > 400) return .{ .next = .to_hover };
+            if (deta > 400) return .to_hover;
             return .no_trasition;
         }
     };
 }
 
 pub fn Hover(
-    fsm: fn (type) type,
+    fsm: fn (ps.Method, type) type,
     back: type,
     selected: type,
 ) type {
     return union(enum) {
         // zig fmt: off
-        to_back    : fsm(back),
-        to_outside : fsm(Select(fsm, back, selected)),
-        to_inside  : fsm(Inside(fsm, back, selected)),
-        to_selected: fsm(selected),
+        to_back     : fsm(.next, back),
+        to_outside  : fsm(.next, Select(fsm, back, selected)),
+        to_inside   : fsm(.next, Inside(fsm, back, selected)),
+        to_selected : fsm(.next, selected),
+        no_trasition: fsm(.next, @This()),
         // zig fmt: on
 
-        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        pub fn handler(gst: *GST) @This() {
             const render: fn (*GST, SelectStage) bool = selected.select_render;
-            if (render(gst, .hover)) return .{ .next = .to_outside };
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .{ .next = .to_selected };
+            if (render(gst, .hover)) return .to_outside;
+            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
             if (mouse_moved()) {
                 gst.select.no_move_duartion = std.time.milliTimestamp();
-                return .{ .next = .to_inside };
+                return .to_inside;
             }
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .{ .next = .to_back };
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             return .no_trasition;
         }
     };

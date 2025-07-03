@@ -22,14 +22,15 @@ pub const MapData = struct {
 
 pub const Map = union(enum) {
     // zig fmt: off
-    exit1    : Example(polystate.Exit),
-    to_editor: Example(Select(Example, Map, Editor(Example, Map))),
-    to_menu  : Example(Animation(Example, Map, Menu)),
-    to_play  : Example(Play),
+    exit1       : Example(.next, ps.Exit),
+    to_editor   : Example(.next, Select(Example, Map, Editor(Example, Map))),
+    to_menu     : Example(.next, Animation(Example, Map, Menu)),
+    to_play     : Example(.next, Play),
+    no_trasition: Example(.next, @This()),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .{ .next = .to_editor };
+    pub fn handler(gst: *GST) @This() {
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
             _ = gen_maze(gst);
@@ -59,7 +60,7 @@ pub const Map = union(enum) {
 
         for (gst.map.rs.items) |*r| {
             if (r.render(gst, @This(), action_list)) |msg| {
-                return .{ .next = msg };
+                return msg;
             }
         }
         return .no_trasition;
@@ -212,7 +213,7 @@ fn generate_maze(
 }
 
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
 const Select = @import("select.zig").Select;

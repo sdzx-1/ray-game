@@ -32,18 +32,18 @@ pub const CurrentMap = [200][200]Cell;
 
 pub fn X(back: type, target: type) type {
     return union(enum) {
-        XX: Example(Select(Example, back, Select(Example, X(back, target), target))),
+        XX: Example(.current, Select(Example, back, Select(Example, X(back, target), target))),
 
-        pub fn conthandler(_: *GST) polystate.NextState(@This()) {
-            return .{ .current = .XX };
+        pub fn handler(_: *GST) @This() {
+            return .XX;
         }
     };
 }
 
 pub const Place = union(enum) {
-    to_play: Example(Select(Example, Play, Select(Example, X(Play, Place), Place))),
+    to_play: Example(.current, Select(Example, Play, Select(Example, X(Play, Place), Place))),
 
-    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+    pub fn handler(gst: *GST) @This() {
         const b = gst.play.selected_build;
         const cell_id = gst.play.selected_cell_id;
         const y: i32 = @intCast(cell_id.y);
@@ -58,7 +58,7 @@ pub const Place = union(enum) {
                 cell.building = b;
             }
         }
-        return .{ .current = .to_play };
+        return .to_play;
     }
 
     pub fn select_render1(gst: *GST, sst: select.SelectStage) bool {
@@ -182,22 +182,23 @@ pub const Place = union(enum) {
 
 pub const Play = union(enum) {
     // zig fmt: off
-    to_editor       : Example(Select(Example, Play, Editor(Example, Play))),
-    to_menu         : Example(Animation(Example, Play, Menu)),
-    to_build        : Example(Select(Example, Play, TBuild)),
-    to_place        : Example(Select(Example, Play, Select(Example, X(Play, Place), Place))),
-    set_maze_text_id: Example(Select(Example, Play, SetTexture(Play))),
+    to_editor       : Example(.next, Select(Example, Play, Editor(Example, Play))),
+    to_menu         : Example(.next, Animation(Example, Play, Menu)),
+    to_build        : Example(.next, Select(Example, Play, TBuild)),
+    to_place        : Example(.next, Select(Example, Play, Select(Example, X(Play, Place), Place))),
+    set_maze_text_id: Example(.next, Select(Example, Play, SetTexture(Play))),
+    no_trasition    : Example(.next, @This()),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+    pub fn handler(gst: *GST) @This() {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
         draw_cells(&gst.play.view, gst, 0);
-        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return .{ .next = msg };
+        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
 
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .{ .next = .to_editor };
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .{ .next = .to_build };
-        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .{ .next = .to_place };
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
+        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
         return .no_trasition;
     }
 
@@ -315,7 +316,7 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
 }
 
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
 const select = @import("select.zig");

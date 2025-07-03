@@ -1,5 +1,5 @@
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 
 const rl = @import("raylib");
@@ -35,17 +35,18 @@ pub fn animation_list_r(
 }
 
 pub fn Animation(
-    fsm: fn (type) type,
+    fsm: fn (ps.Method, type) type,
     from: type,
     to: type,
 ) type {
     return union(enum) {
-        animation_end: fsm(to),
+        animation_end: fsm(.next, to),
+        no_trasition: fsm(.next, @This()),
 
-        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        pub fn handler(gst: *GST) @This() {
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                 gst.log("skip animation");
-                return .{ .next = .animation_end };
+                return .animation_end;
             }
 
             const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
@@ -55,7 +56,7 @@ pub fn Animation(
             to.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
 
             if (duration > gst.animation.total_time - 1000 / 60) {
-                return .{ .next = .animation_end };
+                return .animation_end;
             }
             return .no_trasition;
         }

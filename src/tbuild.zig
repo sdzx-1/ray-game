@@ -1,14 +1,15 @@
 pub const TBuild = union(enum) {
     // zig fmt: off
-    to_play   : Example(Play),
-    to_select : Example(Select(Example, Play, TBuild)),
-    set_text_Id: Example(Select(Example, TBuild, SetTexture(TBuild))),
+    to_play     : Example(.next, Play),
+    to_select   : Example(.next, Select(Example, Play, TBuild)),
+    set_text_Id : Example(.next, Select(Example, TBuild, SetTexture(TBuild))),
+    no_trasition: Example(.next, @This()),
     // zig fmt: on
 
-    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+    pub fn handler(gst: *GST) @This() {
         for (gst.tbuild.list.items) |*b| b.draw(gst);
         const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        if (ptr.draw_gui(gst)) |msg| return .{ .next = msg };
+        if (ptr.draw_gui(gst)) |msg| return msg;
 
         {
             gst.tbuild.view.mouse_wheel(gst.hdw);
@@ -36,10 +37,10 @@ pub const TBuild = union(enum) {
             ptr.width = ptr.width + 1;
         }
         if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
-            return .{ .next = .to_play };
+            return .to_play;
         }
         if (rl.isKeyPressed(rl.KeyboardKey.caps_lock)) {
-            return .{ .next = .to_select };
+            return .to_select;
         }
         return .no_trasition;
     }
@@ -200,7 +201,7 @@ pub const Building = struct {
 };
 
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
 const textures = @import("textures.zig");
@@ -220,6 +221,4 @@ const rg = @import("raygui");
 
 const GST = core.GST;
 const R = core.R;
-const getTarget = core.getTarget;
-const ContR = polystate.ContR(GST);
 const View = utils.View;

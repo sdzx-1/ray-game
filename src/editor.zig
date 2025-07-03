@@ -1,5 +1,5 @@
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
 const Select = select.Select;
@@ -15,12 +15,13 @@ pub const EditorData = struct {
     selected_id: usize = 0,
 };
 
-pub fn Editor(fsm: fn (type) type, target: type) type {
+pub fn Editor(fsm: fn (ps.Method, type) type, target: type) type {
     return union(enum) {
-        finish: fsm(target),
-        to_select: fsm(Select(fsm, target, Editor(fsm, target))),
+        finish: fsm(.next, target),
+        to_select: fsm(.next, Select(fsm, target, Editor(fsm, target))),
+        no_trasition: fsm(.next, @This()),
 
-        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        pub fn handler(gst: *GST) @This() {
             for (target.access_rs(gst).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
@@ -92,9 +93,9 @@ pub fn Editor(fsm: fn (type) type, target: type) type {
             const size = rl.measureText(&ptr.str_buf, 32);
             ptr.rect.width = @max(32, @as(f32, @floatFromInt(size)));
 
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .{ .next = .finish };
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .finish;
             if (rl.isKeyPressed(rl.KeyboardKey.enter) or
-                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .{ .next = .to_select };
+                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .to_select;
 
             if (rl.isMouseButtonDown(rl.MouseButton.left)) {
                 const v = rl.getMouseDelta();

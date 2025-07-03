@@ -1,5 +1,5 @@
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const select = @import("select.zig");
 const editor = @import("editor.zig");
 const map = @import("map.zig");
@@ -156,6 +156,6 @@ pub fn Action(cst: type) type {
 fn enter_fn(gst: *GST, state: type) void {
     gst.log_im(gst.printZ("{s}", .{@typeName(state)}));
 }
-pub fn Example(state: type) type {
-    return polystate.FSM("Example", GST, enter_fn, state);
+pub fn Example(method: ps.Method, state: type) type {
+    return ps.FSM("Example", .suspendable, GST, enter_fn, method, state);
 }

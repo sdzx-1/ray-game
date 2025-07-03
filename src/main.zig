@@ -2,7 +2,7 @@ const std = @import("std");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 
 const core = @import("core.zig");
 const utils = @import("utils.zig");
@@ -17,9 +17,9 @@ pub fn main() anyerror!void {
     var gpa_instance = std.heap.DebugAllocator(.{}).init;
     const gpa = gpa_instance.allocator();
 
-    const StartState = Example(Menu);
+    const StartState = Example(.next, Menu);
 
-    var graph = polystate.Graph.init;
+    var graph = ps.Graph.init;
     defer graph.deinit(gpa) catch unreachable;
     graph.generate(gpa, StartState);
     const cwd = std.fs.cwd();
@@ -70,8 +70,8 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
-    const Runner = polystate.Runner(120, true, StartState);
-    var curr_id: ?Runner.StateId = Runner.fsm_state_to_state_id(StartState);
+    const Runner = ps.Runner(120, true, StartState);
+    var curr_id: ?Runner.StateId = Runner.state_to_id(Menu);
 
     while (curr_id) |id| {
         rl.beginDrawing();
@@ -84,7 +84,7 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
 
-        curr_id = Runner.run_conthandler(id, &gst);
+        curr_id = Runner.run_handler(id, &gst);
 
         rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
         gst.render_log();

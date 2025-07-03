@@ -1,5 +1,5 @@
 const std = @import("std");
-const polystate = @import("polystate");
+const ps = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
 const utils = @import("utils.zig");
@@ -18,7 +18,6 @@ const Play = @import("play.zig").Play;
 const GST = core.GST;
 const R = core.R;
 const getTarget = core.getTarget;
-const ContR = polystate.ContR(GST);
 const View = utils.View;
 
 pub const TextureData = struct {
@@ -108,9 +107,10 @@ pub const TexturesData = struct {
 };
 
 pub const Textures = union(enum) {
-    to_menu: Example(Menu),
+    to_menu: Example(.next, Menu),
+    no_trasition: Example(.next, @This()),
 
-    pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+    pub fn handler(gst: *GST) @This() {
         {
             gst.textures.view.mouse_wheel(gst.hdw);
             gst.textures.view.drag_view(gst.screen_width);
@@ -119,7 +119,7 @@ pub const Textures = union(enum) {
         gst.textures.render(gst);
 
         if (rl.isKeyPressed(rl.KeyboardKey.m)) {
-            return .{ .next = .to_menu };
+            return .to_menu;
         }
         return .no_trasition;
     }
@@ -131,11 +131,11 @@ pub const SetTextureData = struct {
 
 pub fn SetTexture(target: type) type {
     return union(enum) {
-        to_target: Example(target),
+        to_target: Example(.current, target),
 
-        pub fn conthandler(gst: *GST) polystate.NextState(@This()) {
+        pub fn handler(gst: *GST) @This() {
             target.set_text_id(gst, gst.sel_texture.text_id);
-            return .{ .next = .to_target };
+            return .to_target;
         }
 
         pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
