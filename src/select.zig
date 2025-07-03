@@ -1,7 +1,6 @@
 const std = @import("std");
 const ps = @import("polystate");
 const rl = @import("raylib");
-const GST = @import("core.zig").GST;
 
 pub const CheckInsideResult = enum {
     not_in_any_rect,
@@ -19,6 +18,7 @@ pub fn Select(
     back: type,
     selected: type,
 ) type {
+    const GST = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
         to_back     : fsm(.next, back),
@@ -66,6 +66,7 @@ pub fn Inside(
     back: type,
     selected: type,
 ) type {
+    const GST = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
         to_back     : fsm(.next, back),
@@ -95,6 +96,7 @@ pub fn Hover(
     back: type,
     selected: type,
 ) type {
+    const GST = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
         to_back     : fsm(.next, back),

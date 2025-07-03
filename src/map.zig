@@ -23,8 +23,8 @@ pub const MapData = struct {
 pub const Map = union(enum) {
     // zig fmt: off
     exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Example, Map, Editor(Example, Map))),
-    to_menu     : Example(.next, Animation(Example, Map, Menu)),
+    to_editor   : Example(.next, Select(Example, Map, Editor( Map))),
+    to_menu     : Example(.next, Animation(Map, Menu)),
     to_play     : Example(.next, Play),
     no_trasition: Example(.next, @This()),
     // zig fmt: on

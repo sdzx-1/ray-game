@@ -3,6 +3,7 @@ const ps = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
 const Select = select.Select;
+const Example = core.Example;
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -15,11 +16,11 @@ pub const EditorData = struct {
     selected_id: usize = 0,
 };
 
-pub fn Editor(fsm: fn (ps.Method, type) type, target: type) type {
+pub fn Editor(target: type) type {
     return union(enum) {
-        finish: fsm(.next, target),
-        to_select: fsm(.next, Select(fsm, target, Editor(fsm, target))),
-        no_trasition: fsm(.next, @This()),
+        finish: Example(.next, target),
+        to_select: Example(.next, Select(Example, target, Editor(target))),
+        no_trasition: Example(.next, @This()),
 
         pub fn handler(gst: *GST) @This() {
             for (target.access_rs(gst).items) |*r| {

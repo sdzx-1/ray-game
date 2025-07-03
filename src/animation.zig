@@ -1,6 +1,7 @@
 const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
+const Example = core.Example;
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -35,13 +36,12 @@ pub fn animation_list_r(
 }
 
 pub fn Animation(
-    fsm: fn (ps.Method, type) type,
     from: type,
     to: type,
 ) type {
     return union(enum) {
-        animation_end: fsm(.next, to),
-        no_trasition: fsm(.next, @This()),
+        animation_end: Example(.next, to),
+        no_trasition: Example(.next, @This()),
 
         pub fn handler(gst: *GST) @This() {
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {

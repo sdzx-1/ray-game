@@ -182,8 +182,8 @@ pub const Place = union(enum) {
 
 pub const Play = union(enum) {
     // zig fmt: off
-    to_editor       : Example(.next, Select(Example, Play, Editor(Example, Play))),
-    to_menu         : Example(.next, Animation(Example, Play, Menu)),
+    to_editor       : Example(.next, Select(Example, Play, Editor(Play))),
+    to_menu         : Example(.next, Animation(Play, Menu)),
     to_build        : Example(.next, Select(Example, Play, TBuild)),
     to_place        : Example(.next, Select(Example, Play, Select(Example, X(Play, Place), Place))),
     set_maze_text_id: Example(.next, Select(Example, Play, SetTexture(Play))),

@@ -25,8 +25,8 @@ pub const MenuData = struct {
 pub const Menu = union(enum) {
     // zig fmt: off
     exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Example, Menu, Editor(Example, Menu))),
-    to_play     : Example(.next, Animation(Example, Menu, Map)),
+    to_editor   : Example(.next, Select(Example, Menu, Editor(Menu))),
+    to_play     : Example(.next, Animation(Menu, Map)),
     to_textures : Example(.next, Textures),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
