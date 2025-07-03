@@ -92,7 +92,7 @@ pub const GST = struct {
 
     //
     notify: Notify = .{},
-    im_log_buf: [60:0]u8 = @splat(0),
+    im_log_buf: [160:0]u8 = @splat(0),
     tmp_buf: []u8,
 
     pub fn log(self: *@This(), str: []const u8) void {
@@ -131,10 +131,14 @@ pub const GST = struct {
         }
 
         if (self.notify.current_msg) |cmsg| {
-            rl.drawText(cmsg, 0, 0, 32, rl.Color.red);
+            rl.drawText(cmsg, 0, 40, 32, rl.Color.red);
         }
 
-        rl.drawText(&self.im_log_buf, 0, 40, 32, rl.Color.red);
+        rl.drawRectangleRec(
+            .{ .x = 0, .y = 0, .width = @floatFromInt(rl.measureText(&self.im_log_buf, 22)), .height = 32 },
+            rl.Color.black,
+        );
+        rl.drawText(&self.im_log_buf, 0, 0, 22, rl.Color.white);
     }
 };
 
