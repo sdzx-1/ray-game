@@ -118,7 +118,7 @@ pub const Textures = union(enum) {
 
         gst.textures.render(gst);
 
-        if (rl.isKeyPressed(rl.KeyboardKey.m)) {
+        if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
             return .to_menu;
         }
         return .no_trasition;

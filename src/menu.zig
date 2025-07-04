@@ -33,7 +33,6 @@ pub const Menu = union(enum) {
 
     pub fn handler(gst: *GST) @This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        if (rl.isKeyPressed(rl.KeyboardKey.t)) return .to_textures;
         for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
         return .no_trasition;
     }
@@ -46,6 +45,7 @@ pub const Menu = union(enum) {
         .{ .name = "Log hello", .val = .{ .button = log_hello } },
         .{ .name = "Save data", .val = .{ .button = saveData  } },
         .{ .name = "animation", .val = .{ .slider = .{.fun =  animation_duration_ref, .min = 50, .max = 5000}  } },
+        .{ .name = "View textures",   .val = .{ .button = toTextures    } },
     };
     // zig fmt: on
 
@@ -74,6 +74,10 @@ pub const Menu = union(enum) {
     fn saveData(gst: *GST) ?@This() {
         utils.saveData(gst);
         return null;
+    }
+
+    fn toTextures(_: *GST) ?@This() {
+        return .to_textures;
     }
 
     fn toEditor(_: *GST) ?@This() {

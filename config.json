@@ -135,6 +135,25 @@
       "action_id": 0,
       "action_select": false,
       "dropdown_box": false
+    },
+    {
+      "rect": {
+        "x": 6.34e2,
+        "y": 1.08e2,
+        "width": 1.42e2,
+        "height": 4e1
+      },
+      "str_buf": "textures\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "color": {
+        "r": 18,
+        "g": 97,
+        "b": 91,
+        "a": 255
+      },
+      "enable_action": true,
+      "action_id": 6,
+      "action_select": false,
+      "dropdown_box": false
     }
   ],
   "map": [
