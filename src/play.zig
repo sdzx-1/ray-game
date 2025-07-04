@@ -182,6 +182,7 @@ pub const Place = union(enum) {
 
 pub const Play = union(enum) {
     // zig fmt: off
+    to_exit         : Example(.next, ps.Exit),
     to_editor       : Example(.next, Select(Example, Play, Editor(Play))),
     to_menu         : Example(.next, Animation(Play, Menu)),
     to_build        : Example(.next, Select(Example, Play, TBuild)),
@@ -221,7 +222,12 @@ pub const Play = union(enum) {
         },
         .{ .name = "Build", .val = .{ .button = toBuild } },
         .{ .name = "Place", .val = .{ .button = toPlace } },
+        .{ .name = "Exit", .val = .{ .button = toExit } },
     };
+
+    fn toExit(_: *GST) ?@This() {
+        return .to_exit;
+    }
 
     fn toEditor(_: *GST) ?@This() {
         return .to_editor;
