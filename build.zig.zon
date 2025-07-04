@@ -45,8 +45,8 @@
             .hash = "maze-0.0.0-osQoE-V7AAC8BCuP43nQx_JTo36tsU0Afx4AgSPKZzKl",
         },
         .polystate = .{
-            .url = "git+https://github.com/sdzx-1/polystate.git#82e9414930bd9e697f60a7be4a5223a8a0a038da",
-            .hash = "polystate-0.0.0-8by0_CdMAADeC28ILYnh2V8avcBtHxus5DcvAxW2FzPQ",
+            .url = "git+https://github.com/sdzx-1/polystate.git#d92c1c05187ae33971bb969d2be227b8742de99f",
+            .hash = "polystate-0.0.0-8by0_EZNAACWUz_D7gQ9bvTcFjIDGjy17ROvj3w_frbp",
         },
     },
     .paths = .{
