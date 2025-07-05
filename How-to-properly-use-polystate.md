@@ -148,3 +148,46 @@ The power that compositional semantics gives us is: we can analyze and write cod
 Finally, thank you readers for your patience in reading this far. Let's see this code in action! (This is a gif image, it might take some time to load)
 
 ![state_flow_final_gif](data/8.gif) 
+
+```mermaid
+---
+config:
+  layout: elk
+title: Todo
+---
+stateDiagram
+  direction TB
+  575014105 --> 3838454308:exit
+  3838454308 --> 739776489:yes
+  739776489 --> 736101806:yes
+  739776489 --> 575014105:no
+  739776489 --> 739776489:no_trasition
+  3838454308 --> 575014105:no
+  3838454308 --> 3838454308:no_trasition
+  575014105 --> 2009994374:add
+  2009994374 --> 491390045:OK
+  491390045 --> 575014105:add_entry
+  2009994374 --> 2009994374:no_trasition
+  575014105 --> 52369220:modify
+  52369220 --> 761267644:OK
+  761267644 --> 575014105:modify_entry
+  52369220 --> 52369220:no_trasition
+  575014105 --> 3041929165:modify_action
+  3041929165 --> 575014105:OK
+  3041929165 --> 3041929165:no_trasition
+  575014105 --> 1646078307:modify_areYouSure
+  1646078307 --> 575014105:OK
+  1646078307 --> 1646078307:no_trasition
+  575014105 --> 575014105:no_trasition
+  575014105:exe-todo.Main
+  3838454308:generic.AreYouSure((function 'Todo'),generic.AreYouSure((function 'Todo'),polystate.Exit,exe-todo.Main),exe-todo.Main)
+  739776489:generic.AreYouSure((function 'Todo'),polystate.Exit,exe-todo.Main)
+  736101806:polystate.Exit
+  2009994374:generic.Action((function 'Todo'),exe-todo.Add,exe-todo.Add)
+  491390045:exe-todo.Add
+  52369220:generic.Action((function 'Todo'),exe-todo.Modify,exe-todo.Modify)
+  761267644:exe-todo.Modify
+  3041929165:generic.Action((function 'Todo'),generic.Action((function 'Todo'),polystate.Exit,polystate.Exit),exe-todo.Main)
+  1646078307:generic.Action((function 'Todo'),generic.AreYouSure((function 'Todo'),polystate.Exit,polystate.Exit),exe-todo.Main)
+
+```
