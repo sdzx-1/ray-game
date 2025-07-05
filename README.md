@@ -13,7 +13,8 @@ Some interesting highlights so far:
 2. Combining types to express action composition significantly improves the program's modularity. I discovered a way to combine state machine states—a new coding approach.
 
 
-![editor_graph](data/graph.svg)
+![dot_graph](data/graph.svg)
+![mermaid_graph](data/mermaid_graph.svg)
 
 # discord
 https://discord.gg/SWjPcCbT

@@ -19,12 +19,15 @@ pub fn main() anyerror!void {
 
     const StartState = Example(.next, Menu);
 
-    var graph = ps.Graph.init;
-    defer graph.deinit(gpa) catch unreachable;
-    graph.generate(gpa, StartState);
+    var graph = try ps.Graph.initWithFsm(gpa, StartState, 100);
+    defer graph.deinit();
+
     const cwd = std.fs.cwd();
     const t_dot_path = try cwd.createFile("t.dot", .{});
-    try t_dot_path.writeAll(try std.fmt.allocPrint(gpa, "{}", .{graph}));
+    try graph.generateDot(t_dot_path.writer());
+
+    const t_mermaid_path = try cwd.createFile("t.mmd", .{});
+    try graph.generateMermaid(t_mermaid_path.writer());
 
     var prng = std.Random.DefaultPrng.init(blk: {
         var seed: u64 = undefined;
@@ -71,7 +74,7 @@ pub fn main() anyerror!void {
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
     const Runner = ps.Runner(120, true, StartState);
-    var curr_id: ?Runner.StateId = Runner.state_to_id(Menu);
+    var curr_id: ?Runner.StateId = Runner.idFromState(Menu);
 
     while (curr_id) |id| {
         rl.beginDrawing();
@@ -84,7 +87,7 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
 
-        curr_id = Runner.run_handler(id, &gst);
+        curr_id = Runner.runHandler(id, &gst);
 
         rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
         gst.render_log();
