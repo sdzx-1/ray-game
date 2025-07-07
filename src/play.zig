@@ -299,23 +299,31 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
             const scale = 1 * gst.screen_width / view.width;
 
             if (val.building == null) {
-                const texture = gst.textures.read(gst.play.maze_texture[@intFromEnum(val.tag)]).texture.tex2d;
-                texture.drawPro(
-                    .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                    .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
-                    .{ .x = 0, .y = 0 },
-                    0,
-                    rl.Color.white,
-                );
+                switch (gst.textures.read(gst.play.maze_texture[@intFromEnum(val.tag)])) {
+                    .texture => |texture| {
+                        texture.tex2d.drawPro(
+                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                            .{ .x = 0, .y = 0 },
+                            0,
+                            rl.Color.white,
+                        );
+                    },
+                    else => {},
+                }
             } else {
-                const texture = gst.textures.read(val.building.?.text_id).texture.tex2d;
-                texture.drawPro(
-                    .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                    .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
-                    .{ .x = 0, .y = 0 },
-                    0,
-                    val.building.?.color,
-                );
+                switch (gst.textures.read(val.building.?.text_id)) {
+                    .texture => |texture| {
+                        texture.tex2d.drawPro(
+                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
+                            .{ .x = 0, .y = 0 },
+                            0,
+                            val.building.?.color,
+                        );
+                    },
+                    else => {},
+                }
             }
         }
     }
