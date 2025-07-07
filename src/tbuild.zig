@@ -166,19 +166,23 @@ pub const Building = struct {
         if (color) |col| rl.drawRectangle(x, y, w, h, col) else {
             for (0..@intFromFloat(self.height)) |dy| {
                 for (0..@intFromFloat(self.width)) |dx| {
-                    const texture = gst.textures.read(self.text_id).texture.tex2d;
-                    texture.drawPro(
-                        .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                        .{
-                            .x = win_pos.x + @as(f32, @floatFromInt(dx)) * r,
-                            .y = win_pos.y + @as(f32, @floatFromInt(dy)) * r,
-                            .width = r,
-                            .height = r,
+                    switch (gst.textures.read(self.text_id)) {
+                        .texture => |texture| {
+                            texture.tex2d.drawPro(
+                                .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                                .{
+                                    .x = win_pos.x + @as(f32, @floatFromInt(dx)) * r,
+                                    .y = win_pos.y + @as(f32, @floatFromInt(dy)) * r,
+                                    .width = r,
+                                    .height = r,
+                                },
+                                .{ .x = 0, .y = 0 },
+                                0,
+                                self.color,
+                            );
                         },
-                        .{ .x = 0, .y = 0 },
-                        0,
-                        self.color,
-                    );
+                        else => {},
+                    }
                 }
             }
         }
