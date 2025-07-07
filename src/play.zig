@@ -101,15 +101,6 @@ pub const Place = union(enum) {
         gst.play.view.drag_view(gst.screen_width);
         draw_cells(&gst.play.view, gst, -1);
 
-        for (gst.tbuild.list.items) |*b| {
-            const win_pos = gst.tbuild.view.view_to_win(
-                gst.screen_width,
-                .{ .x = b.x, .y = b.y },
-            );
-            b.draw(gst);
-            rl.drawCircleV(win_pos, 9, rl.Color.green);
-        }
-
         if (rl.isKeyPressed(rl.KeyboardKey.r)) {
             gst.play.selected_build.rotate();
             return true;
