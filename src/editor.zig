@@ -159,7 +159,20 @@ pub fn Editor(target: type) type {
             }
 
             switch (sst) {
-                .outside => {},
+                .outside => {
+                    if (rl.isKeyPressed(rl.KeyboardKey.space)) {
+                        const mp = rl.getMousePosition();
+                        var r: R = .{};
+                        if (gst.editor.copyed_rect) |cr| r = cr;
+                        r.rect.x = mp.x;
+                        r.rect.y = mp.y;
+                        const size = rl.measureText(&r.str_buf, 32);
+                        r.rect.width = @floatFromInt(size);
+                        target.access_rs(gst).append(gst.gpa, r) catch unreachable;
+                        gst.log("Add button");
+                        return true;
+                    }
+                },
                 else => {
                     if (rl.isKeyDown(rl.KeyboardKey.d)) {
                         gst.log("Delete!");
@@ -172,18 +185,6 @@ pub fn Editor(target: type) type {
         }
 
         pub fn check_inside(gst: *GST) select.CheckInsideResult {
-            if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-                const mp = rl.getMousePosition();
-                var r: R = .{};
-                if (gst.editor.copyed_rect) |cr| r = cr;
-                r.rect.x = mp.x;
-                r.rect.y = mp.y;
-                const size = rl.measureText(&r.str_buf, 32);
-                r.rect.width = @floatFromInt(size);
-                target.access_rs(gst).append(gst.gpa, r) catch unreachable;
-                gst.log("Add button");
-            }
-
             for (target.access_rs(gst).items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
                     gst.editor.selected_id = i;
