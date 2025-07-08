@@ -17,4 +17,4 @@ Some interesting highlights so far:
 ![mermaid_graph](data/mermaid_graph.svg)
 
 # discord
-https://discord.gg/SWjPcCbT
+https://discord.gg/b5dnQPHRzb
