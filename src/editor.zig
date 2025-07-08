@@ -157,6 +157,17 @@ pub fn Editor(target: type) type {
                     }
                 },
             }
+
+            switch (sst) {
+                .outside => {},
+                else => {
+                    if (rl.isKeyDown(rl.KeyboardKey.d)) {
+                        gst.log("Delete!");
+                        _ = target.access_rs(gst).swapRemove(gst.editor.selected_id);
+                        return true;
+                    }
+                },
+            }
             return false;
         }
 
@@ -187,11 +198,6 @@ pub fn Editor(target: type) type {
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
                 gst.editor.copyed_rect = r;
-            }
-            if (rl.isKeyDown(rl.KeyboardKey.d)) {
-                gst.log("Delete!");
-                _ = target.access_rs(gst).swapRemove(gst.editor.selected_id);
-                return false;
             }
             return r.inR(rl.getMousePosition());
         }
