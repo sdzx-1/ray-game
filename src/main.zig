@@ -13,21 +13,11 @@ const Menu = @import("menu.zig").Menu;
 const Example = core.Example;
 const SaveData = utils.SaveData;
 
+pub const EnterFsmState = Example(.next, Menu);
+
 pub fn main() anyerror!void {
     var gpa_instance = std.heap.DebugAllocator(.{}).init;
     const gpa = gpa_instance.allocator();
-
-    const StartState = Example(.next, Menu);
-
-    var graph = try ps.Graph.initWithFsm(gpa, StartState, 100);
-    defer graph.deinit();
-
-    const cwd = std.fs.cwd();
-    const t_dot_path = try cwd.createFile("t.dot", .{});
-    try graph.generateDot(t_dot_path.writer());
-
-    const t_mermaid_path = try cwd.createFile("t.mmd", .{});
-    try graph.generateMermaid(t_mermaid_path.writer());
 
     var prng = std.Random.DefaultPrng.init(blk: {
         var seed: u64 = undefined;
@@ -73,7 +63,7 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
-    const Runner = ps.Runner(120, true, StartState);
+    const Runner = ps.Runner(120, true, EnterFsmState);
     var curr_id: ?Runner.StateId = Runner.idFromState(Menu);
 
     while (curr_id) |id| {

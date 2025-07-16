@@ -1,4 +1,5 @@
 const std = @import("std");
+const addInstallGraphFile = @import("polystate").addInstallGraphFile;
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -29,6 +30,13 @@ pub fn build(b: *std.Build) void {
             .{ .name = "maze", .module = maze_dep.module("maze") },
         },
     });
+
+    //generate state graph
+    const install_dot_file = addInstallGraphFile(b, "ray-game", exe_mod, 100, .graphviz, polystate, target, .{ .custom = "graphs" });
+    const install_mmd_file = addInstallGraphFile(b, "ray-game", exe_mod, 100, .mermaid, polystate, target, .{ .custom = "graphs" });
+
+    b.getInstallStep().dependOn(&install_dot_file.step);
+    b.getInstallStep().dependOn(&install_mmd_file.step);
 
     const exe = b.addExecutable(.{
         .name = "ray_game",
