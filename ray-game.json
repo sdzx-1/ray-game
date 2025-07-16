@@ -1,0 +1,1043 @@
+{
+  "name": "Example",
+  "nodes": [
+    {
+      "name": "menu.Menu",
+      "id": 0
+    },
+    {
+      "name": "polystate.Exit",
+      "id": 1
+    },
+    {
+      "name": "select.Select((function 'Example'),{0},{5})",
+      "id": 2
+    },
+    {
+      "name": "select.Inside((function 'Example'),{0},{5})",
+      "id": 3
+    },
+    {
+      "name": "select.Hover((function 'Example'),{0},{5})",
+      "id": 4
+    },
+    {
+      "name": "editor.Editor({0})",
+      "id": 5
+    },
+    {
+      "name": "animation.Animation({0},{7})",
+      "id": 6
+    },
+    {
+      "name": "map.Map",
+      "id": 7
+    },
+    {
+      "name": "select.Select((function 'Example'),{7},{11})",
+      "id": 8
+    },
+    {
+      "name": "select.Inside((function 'Example'),{7},{11})",
+      "id": 9
+    },
+    {
+      "name": "select.Hover((function 'Example'),{7},{11})",
+      "id": 10
+    },
+    {
+      "name": "editor.Editor({7})",
+      "id": 11
+    },
+    {
+      "name": "animation.Animation({7},{0})",
+      "id": 12
+    },
+    {
+      "name": "play.Play",
+      "id": 13
+    },
+    {
+      "name": "select.Select((function 'Example'),{13},{17})",
+      "id": 14
+    },
+    {
+      "name": "select.Inside((function 'Example'),{13},{17})",
+      "id": 15
+    },
+    {
+      "name": "select.Hover((function 'Example'),{13},{17})",
+      "id": 16
+    },
+    {
+      "name": "editor.Editor({13})",
+      "id": 17
+    },
+    {
+      "name": "animation.Animation({13},{0})",
+      "id": 18
+    },
+    {
+      "name": "select.Select((function 'Example'),{13},{22})",
+      "id": 19
+    },
+    {
+      "name": "select.Inside((function 'Example'),{13},{22})",
+      "id": 20
+    },
+    {
+      "name": "select.Hover((function 'Example'),{13},{22})",
+      "id": 21
+    },
+    {
+      "name": "tbuild.TBuild",
+      "id": 22
+    },
+    {
+      "name": "select.Select((function 'Example'),{22},{26})",
+      "id": 23
+    },
+    {
+      "name": "select.Inside((function 'Example'),{22},{26})",
+      "id": 24
+    },
+    {
+      "name": "select.Hover((function 'Example'),{22},{26})",
+      "id": 25
+    },
+    {
+      "name": "textures.SetTexture({22})",
+      "id": 26
+    },
+    {
+      "name": "select.Select((function 'Example'),{13},{30})",
+      "id": 27
+    },
+    {
+      "name": "select.Inside((function 'Example'),{13},{30})",
+      "id": 28
+    },
+    {
+      "name": "select.Hover((function 'Example'),{13},{30})",
+      "id": 29
+    },
+    {
+      "name": "select.Select((function 'Example'),{31},{34})",
+      "id": 30
+    },
+    {
+      "name": "play.X({13},{34})",
+      "id": 31
+    },
+    {
+      "name": "select.Inside((function 'Example'),{31},{34})",
+      "id": 32
+    },
+    {
+      "name": "select.Hover((function 'Example'),{31},{34})",
+      "id": 33
+    },
+    {
+      "name": "play.Place",
+      "id": 34
+    },
+    {
+      "name": "select.Select((function 'Example'),{13},{38})",
+      "id": 35
+    },
+    {
+      "name": "select.Inside((function 'Example'),{13},{38})",
+      "id": 36
+    },
+    {
+      "name": "select.Hover((function 'Example'),{13},{38})",
+      "id": 37
+    },
+    {
+      "name": "textures.SetTexture({13})",
+      "id": 38
+    },
+    {
+      "name": "textures.Textures",
+      "id": 39
+    }
+  ],
+  "edges": [
+    {
+      "from": 0,
+      "to": 1,
+      "color": "blue",
+      "label": "exit1"
+    },
+    {
+      "from": 0,
+      "to": 2,
+      "color": "blue",
+      "label": "to_editor"
+    },
+    {
+      "from": 0,
+      "to": 6,
+      "color": "blue",
+      "label": "to_play"
+    },
+    {
+      "from": 0,
+      "to": 39,
+      "color": "blue",
+      "label": "to_textures"
+    },
+    {
+      "from": 0,
+      "to": 0,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 2,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 2,
+      "to": 2,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 3,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 3,
+      "to": 2,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 3,
+      "to": 4,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 3,
+      "to": 5,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 3,
+      "to": 3,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 4,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 4,
+      "to": 2,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 4,
+      "to": 3,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 4,
+      "to": 4,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 5,
+      "to": 0,
+      "color": "blue",
+      "label": "finish"
+    },
+    {
+      "from": 5,
+      "to": 2,
+      "color": "blue",
+      "label": "to_select"
+    },
+    {
+      "from": 5,
+      "to": 5,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "color": "blue",
+      "label": "animation_end"
+    },
+    {
+      "from": 6,
+      "to": 6,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 7,
+      "to": 1,
+      "color": "blue",
+      "label": "exit1"
+    },
+    {
+      "from": 7,
+      "to": 8,
+      "color": "blue",
+      "label": "to_editor"
+    },
+    {
+      "from": 7,
+      "to": 12,
+      "color": "blue",
+      "label": "to_menu"
+    },
+    {
+      "from": 7,
+      "to": 13,
+      "color": "blue",
+      "label": "to_play"
+    },
+    {
+      "from": 7,
+      "to": 7,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 8,
+      "to": 7,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 8,
+      "to": 9,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 8,
+      "to": 8,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 9,
+      "to": 7,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 9,
+      "to": 8,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 9,
+      "to": 10,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 9,
+      "to": 11,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 9,
+      "to": 9,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 10,
+      "to": 7,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 10,
+      "to": 8,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 10,
+      "to": 9,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 10,
+      "to": 11,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 10,
+      "to": 10,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 11,
+      "to": 7,
+      "color": "blue",
+      "label": "finish"
+    },
+    {
+      "from": 11,
+      "to": 8,
+      "color": "blue",
+      "label": "to_select"
+    },
+    {
+      "from": 11,
+      "to": 11,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 12,
+      "to": 0,
+      "color": "blue",
+      "label": "animation_end"
+    },
+    {
+      "from": 12,
+      "to": 12,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 13,
+      "to": 1,
+      "color": "blue",
+      "label": "to_exit"
+    },
+    {
+      "from": 13,
+      "to": 14,
+      "color": "blue",
+      "label": "to_editor"
+    },
+    {
+      "from": 13,
+      "to": 18,
+      "color": "blue",
+      "label": "to_menu"
+    },
+    {
+      "from": 13,
+      "to": 19,
+      "color": "blue",
+      "label": "to_build"
+    },
+    {
+      "from": 13,
+      "to": 27,
+      "color": "blue",
+      "label": "to_place"
+    },
+    {
+      "from": 13,
+      "to": 35,
+      "color": "blue",
+      "label": "set_maze_text_id"
+    },
+    {
+      "from": 13,
+      "to": 13,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 14,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 14,
+      "to": 15,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 14,
+      "to": 14,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 15,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 15,
+      "to": 14,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 15,
+      "to": 16,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 15,
+      "to": 17,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 15,
+      "to": 15,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 16,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 16,
+      "to": 14,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 16,
+      "to": 15,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 16,
+      "to": 17,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 16,
+      "to": 16,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 17,
+      "to": 13,
+      "color": "blue",
+      "label": "finish"
+    },
+    {
+      "from": 17,
+      "to": 14,
+      "color": "blue",
+      "label": "to_select"
+    },
+    {
+      "from": 17,
+      "to": 17,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 18,
+      "to": 0,
+      "color": "blue",
+      "label": "animation_end"
+    },
+    {
+      "from": 18,
+      "to": 18,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 19,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 19,
+      "to": 20,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 19,
+      "to": 19,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 20,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 20,
+      "to": 19,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 20,
+      "to": 21,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 20,
+      "to": 22,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 20,
+      "to": 20,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 21,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 21,
+      "to": 19,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 21,
+      "to": 20,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 21,
+      "to": 22,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 21,
+      "to": 21,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 22,
+      "to": 13,
+      "color": "blue",
+      "label": "to_play"
+    },
+    {
+      "from": 22,
+      "to": 19,
+      "color": "blue",
+      "label": "to_select"
+    },
+    {
+      "from": 22,
+      "to": 23,
+      "color": "blue",
+      "label": "set_text_Id"
+    },
+    {
+      "from": 22,
+      "to": 22,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 23,
+      "to": 22,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 23,
+      "to": 24,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 23,
+      "to": 23,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 24,
+      "to": 22,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 24,
+      "to": 23,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 24,
+      "to": 25,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 24,
+      "to": 26,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 24,
+      "to": 24,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 25,
+      "to": 22,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 25,
+      "to": 23,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 25,
+      "to": 24,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 25,
+      "to": 26,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 25,
+      "to": 25,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 26,
+      "to": 22,
+      "color": "black",
+      "label": "to_target"
+    },
+    {
+      "from": 27,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 27,
+      "to": 28,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 27,
+      "to": 27,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 28,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 28,
+      "to": 27,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 28,
+      "to": 29,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 28,
+      "to": 30,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 28,
+      "to": 28,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 29,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 29,
+      "to": 27,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 29,
+      "to": 28,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 29,
+      "to": 30,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 29,
+      "to": 29,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 30,
+      "to": 31,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 30,
+      "to": 32,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 30,
+      "to": 30,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 31,
+      "to": 27,
+      "color": "black",
+      "label": "XX"
+    },
+    {
+      "from": 32,
+      "to": 31,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 32,
+      "to": 30,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 32,
+      "to": 33,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 32,
+      "to": 34,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 32,
+      "to": 32,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 33,
+      "to": 31,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 33,
+      "to": 30,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 33,
+      "to": 32,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 33,
+      "to": 34,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 33,
+      "to": 33,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 34,
+      "to": 27,
+      "color": "black",
+      "label": "to_play"
+    },
+    {
+      "from": 35,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 35,
+      "to": 36,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 35,
+      "to": 35,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 36,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 36,
+      "to": 35,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 36,
+      "to": 37,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 36,
+      "to": 38,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 36,
+      "to": 36,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 37,
+      "to": 13,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 37,
+      "to": 35,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 37,
+      "to": 36,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 37,
+      "to": 38,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 37,
+      "to": 37,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 38,
+      "to": 13,
+      "color": "black",
+      "label": "to_target"
+    },
+    {
+      "from": 39,
+      "to": 0,
+      "color": "blue",
+      "label": "to_menu"
+    },
+    {
+      "from": 39,
+      "to": 39,
+      "color": "blue",
+      "label": "no_trasition"
+    }
+  ]
+}
