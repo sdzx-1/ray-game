@@ -9,11 +9,6 @@ const rg = @import("raygui");
 
 const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
-const Select = @import("select.zig").Select;
-const Editor = @import("editor.zig").Editor;
-const Animation = @import("animation.zig").Animation;
-const Map = @import("map.zig").Map;
-const Play = @import("play.zig").Play;
 
 const GST = core.GST;
 const R = core.R;

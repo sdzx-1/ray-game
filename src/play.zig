@@ -32,7 +32,7 @@ pub const CurrentMap = [200][200]Cell;
 
 pub fn X(back: type, target: type) type {
     return union(enum) {
-        XX: Example(.current, Select(Example, back, Select(Example, X(back, target), target))),
+        XX: Example(.current, Select(back, Select(X(back, target), target))),
 
         pub fn handler(_: *GST) @This() {
             return .XX;
@@ -41,7 +41,7 @@ pub fn X(back: type, target: type) type {
 }
 
 pub const Place = union(enum) {
-    to_play: Example(.current, Select(Example, Play, Select(Example, X(Play, Place), Place))),
+    to_play: Example(.current, Select(Play, Select(X(Play, Place), Place))),
 
     pub fn handler(gst: *GST) @This() {
         const b = gst.play.selected_build;
@@ -174,11 +174,11 @@ pub const Place = union(enum) {
 pub const Play = union(enum) {
     // zig fmt: off
     to_exit         : Example(.next, ps.Exit),
-    to_editor       : Example(.next, Select(Example, Play, Editor(Play))),
+    to_editor       : Example(.next, Select(Play, Editor(Play))),
     to_menu         : Example(.next, Animation(Play, Menu)),
-    to_build        : Example(.next, Select(Example, Play, TBuild)),
-    to_place        : Example(.next, Select(Example, Play, Select(Example, X(Play, Place), Place))),
-    set_maze_text_id: Example(.next, Select(Example, Play, SetTexture(Play))),
+    to_build        : Example(.next, Select(Play, TBuild)),
+    to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
+    set_maze_text_id: Example(.next, Select(Play, SetTexture(Play))),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
 
@@ -331,7 +331,7 @@ const utils = @import("utils.zig");
 
 const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
-const Select = @import("select.zig").Select;
+const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Animation = @import("animation.zig").Animation;
 const Map = @import("map.zig").Map;

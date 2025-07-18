@@ -2,7 +2,7 @@ const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
 const select = @import("select.zig");
-const Select = select.Select;
+const Select = core.Select;
 const Example = core.Example;
 
 const rl = @import("raylib");
@@ -19,7 +19,7 @@ pub const EditorData = struct {
 pub fn Editor(target: type) type {
     return union(enum) {
         finish: Example(.next, target),
-        to_select: Example(.next, Select(Example, target, Editor(target))),
+        to_select: Example(.next, Select(target, Editor(target))),
         no_trasition: Example(.next, @This()),
 
         pub fn handler(gst: *GST) @This() {

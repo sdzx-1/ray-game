@@ -23,7 +23,7 @@ pub const MapData = struct {
 pub const Map = union(enum) {
     // zig fmt: off
     exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Example, Map, Editor( Map))),
+    to_editor   : Example(.next, Select(Map, Editor( Map))),
     to_menu     : Example(.next, Animation(Map, Menu)),
     to_play     : Example(.next, Play),
     no_trasition: Example(.next, @This()),
@@ -216,7 +216,7 @@ const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
 const anim = @import("animation.zig");
-const Select = @import("select.zig").Select;
+const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Animation = @import("animation.zig").Animation;
 const Menu = @import("menu.zig").Menu;

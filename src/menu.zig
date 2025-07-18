@@ -3,7 +3,7 @@ const ps = @import("polystate");
 const core = @import("core.zig");
 const utils = @import("utils.zig");
 const anim = @import("animation.zig");
-const Select = @import("select.zig").Select;
+const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Animation = @import("animation.zig").Animation;
 const Textures = @import("textures.zig").Textures;
@@ -25,7 +25,7 @@ pub const MenuData = struct {
 pub const Menu = union(enum) {
     // zig fmt: off
     exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Example, Menu, Editor(Menu))),
+    to_editor   : Example(.next, Select(Menu, Editor(Menu))),
     to_play     : Example(.next, Animation(Menu, Map)),
     to_textures : Example(.next, Textures),
     no_trasition: Example(.next, @This()),

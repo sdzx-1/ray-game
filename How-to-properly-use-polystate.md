@@ -134,7 +134,18 @@ pub fn xST(back: SDZX, target: SDZX) type {
     };
 }
 ```
+New code:
+```zig
+pub fn X(back: type, target: type) type {
+    return union(enum) {
+        XX: Example(.current, Select(back, Select(X(back, target), target))),
 
+        pub fn handler(_: *GST) @This() {
+            return .XX;
+        }
+    };
+}
+```
 This kind of code is very difficult to understand and write just by reading the code. Therefore, when we build complex state machines through composition, using symbolic reasoning to understand code and implement requirements is the correct approach.
 
 Let me compare our abstract representation with the actual state machine:

@@ -1,8 +1,8 @@
 pub const TBuild = union(enum) {
     // zig fmt: off
     to_play     : Example(.next, Play),
-    to_select   : Example(.next, Select(Example, Play, TBuild)),
-    set_text_Id : Example(.next, Select(Example, TBuild, SetTexture(TBuild))),
+    to_select   : Example(.next, Select(Play, TBuild)),
+    set_text_Id : Example(.next, Select(TBuild, SetTexture(TBuild))),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
@@ -213,7 +213,7 @@ const utils = @import("utils.zig");
 
 const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
-const Select = @import("select.zig").Select;
+const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Animation = @import("animation.zig").Animation;
 const Map = @import("map.zig").Map;

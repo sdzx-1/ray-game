@@ -163,3 +163,7 @@ fn enter_fn(gst: *GST, state: type) void {
 pub fn Example(method: ps.Method, state: type) type {
     return ps.FSM("Example", .suspendable, GST, enter_fn, method, state);
 }
+
+pub fn Select(back: type, selected: type) type {
+    return select.Select(Example, back, selected);
+}
