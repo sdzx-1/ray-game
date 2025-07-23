@@ -79,8 +79,8 @@ pub fn main() anyerror!void {
 
         curr_id = Runner.runHandler(id, &gst);
 
-        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
         gst.render_log();
+        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
     }
 
     utils.saveData(&gst);

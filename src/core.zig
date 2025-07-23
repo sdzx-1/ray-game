@@ -135,10 +135,10 @@ pub const GST = struct {
         }
 
         rl.drawRectangleRec(
-            .{ .x = 0, .y = 0, .width = @floatFromInt(rl.measureText(&self.im_log_buf, 22)), .height = 32 },
+            .{ .x = 0, .y = 0, .width = @floatFromInt(rl.measureText(&self.im_log_buf, 32)), .height = 32 },
             rl.Color.black,
         );
-        rl.drawText(&self.im_log_buf, 0, 0, 22, rl.Color.white);
+        rl.drawText(&self.im_log_buf, 0, 0, 32, rl.Color.white);
     }
 };
 
