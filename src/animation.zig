@@ -44,6 +44,9 @@ pub fn Animation(
         no_trasition: Example(.next, @This()),
 
         pub fn handler(gst: *GST) @This() {
+            const from_data = fromData(gst);
+            const to_data = fromData(gst);
+
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                 gst.log("skip animation");
                 return .animation_end;
@@ -52,13 +55,26 @@ pub fn Animation(
             const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
             var buf: [20]u8 = undefined;
             gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
-            from.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, true);
-            to.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
+
+            from_data.animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, true);
+            to_data.animation(gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
 
             if (duration > gst.animation.total_time - 1000 / 60) {
                 return .animation_end;
             }
             return .no_trasition;
+        }
+
+        const FromData = @FieldType(GST, @tagName(from.gst_field));
+
+        const ToData = @FieldType(GST, @tagName(to.gst_field));
+
+        fn fromData(gst: *GST) *FromData {
+            return &@field(gst, @tagName(from.gst_field));
+        }
+
+        fn toData(gst: *GST) *ToData {
+            return &@field(gst, @tagName(to.gst_field));
         }
     };
 }

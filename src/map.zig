@@ -15,28 +15,14 @@ pub const MapData = struct {
     maze_config: MazeConfig = .{},
     generating: bool = false,
 
-    pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
+    pub fn animation(self: *const MapData, screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
     }
-};
 
-pub const Map = union(enum) {
-    // zig fmt: off
-    exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Map, Editor( Map))),
-    to_menu     : Example(.next, Animation(Map, Menu)),
-    to_play     : Example(.next, Play),
-    no_trasition: Example(.next, @This()),
-    // zig fmt: on
+    pub fn render(self: *MapData) ?Map {
+        const gst = self.parentGst();
 
-    pub fn handler(gst: *GST) @This() {
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-
-        if (rl.isKeyPressed(rl.KeyboardKey.g)) {
-            _ = gen_maze(gst);
-        }
-
-        if (gst.map.maze) |m| {
+        if (self.maze) |m| {
             for (0..m.totalYSize) |y| {
                 for (0..m.totalXSize) |x| {
                     const idx = Maze.Index.from_uszie_xy(x, y);
@@ -58,11 +44,53 @@ pub const Map = union(enum) {
             }
         }
 
-        for (gst.map.rs.items) |*r| {
-            if (r.render(gst, @This(), action_list)) |msg| {
+        for (self.rs.items) |*r| {
+            if (r.render(gst, Map, action_list)) |msg| {
                 return msg;
             }
         }
+        return null;
+    }
+
+    fn parentGst(self: *MapData) *GST {
+        return @alignCast(@fieldParentPtr("map", self));
+    }
+
+    pub const action_list: []const (Action(Map)) = &.{
+        .{ .name = "Editor", .val = .{ .button = Map.toEditor } },
+        .{ .name = "Menu", .val = .{ .button = Map.toMenu } },
+        .{ .name = "Exit", .val = .{ .button = Map.exit } },
+        .{ .name = "Gen maze", .val = .{ .button = Map.gen_maze } },
+        .{ .name = "rmx", .val = .{ .slider = .{ .fun = Map.mconfig_x, .min = 0, .max = 1000 } } },
+        .{ .name = "rmy", .val = .{ .slider = .{ .fun = Map.mconfig_y, .min = 0, .max = 1000 } } },
+        .{ .name = "rmwidth", .val = .{ .slider = .{ .fun = Map.mconfig_width, .min = 2, .max = 100 } } },
+        .{ .name = "probability", .val = .{ .slider = .{ .fun = Map.mconfig_prob, .min = 0, .max = 0.4 } } },
+        .{ .name = "Play", .val = .{ .button = Map.toPlay } },
+    };
+};
+
+pub const Map = union(enum) {
+    // zig fmt: off
+    exit1       : Example(.next, ps.Exit),
+    to_editor   : Example(.next, Select(Map, Editor(Map))),
+    to_menu     : Example(.next, Animation(Map, Menu)),
+    to_play     : Example(.next, Play),
+    no_trasition: Example(.next, @This()),
+    // zig fmt: on
+
+    pub const gst_field: std.meta.FieldEnum(GST) = .map;
+
+    pub fn handler(gst: *GST) @This() {
+        if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
+
+        if (rl.isKeyPressed(rl.KeyboardKey.g)) {
+            _ = gen_maze(gst);
+        }
+
+        if (gst.map.render()) |transition| {
+            return transition;
+        }
+
         return .no_trasition;
     }
 
@@ -136,20 +164,6 @@ pub const Map = union(enum) {
         return null;
     }
 
-    // zig fmt: off
-    pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",   .val = .{ .button = toEditor } },
-        .{ .name = "Menu",     .val = .{ .button = toMenu } },
-        .{ .name = "Exit",     .val = .{ .button = exit } },
-        .{ .name = "Gen maze", .val = .{ .button = gen_maze } },
-        .{ .name = "rmx",      .val = .{ .slider = .{.fun = mconfig_x, .min = 0, .max = 1000}  } },
-        .{ .name = "rmy",      .val = .{ .slider = .{.fun = mconfig_y, .min = 0, .max = 1000}  } },
-        .{ .name = "rmwidth",     .val = .{ .slider = .{.fun = mconfig_width, .min = 2, .max = 100}  } },
-        .{ .name = "probability", .val = .{ .slider = .{.fun = mconfig_prob, .min = 0, .max = 0.4}  } },
-        .{ .name = "Play", .val = .{ .button = toPlay } },
-    };
-    // zig fmt: on
-
     fn mconfig_x(gst: *GST) *f32 {
         return &gst.map.maze_config.x;
     }
@@ -164,28 +178,6 @@ pub const Map = union(enum) {
 
     fn mconfig_prob(gst: *GST) *f32 {
         return &gst.map.maze_config.probability;
-    }
-
-    pub fn animation(
-        gst: *GST,
-        screen_width: f32,
-        screen_height: f32,
-        duration: f32,
-        total: f32,
-        b: bool,
-    ) void {
-        anim.animation_list_r(
-            screen_width,
-            screen_height,
-            gst.map.rs.items,
-            duration,
-            total,
-            b,
-        );
-    }
-
-    pub fn access_rs(gst: *GST) *RS {
-        return &gst.map.rs;
     }
 };
 

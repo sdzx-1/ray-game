@@ -21,6 +21,34 @@ const RS = core.RS;
 
 pub const MenuData = struct {
     rs: RS = .empty,
+
+    pub fn animation(self: *const MenuData, screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
+        anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
+    }
+
+    pub fn render(self: *MenuData) ?Menu {
+        const gst = self.parentGst();
+        for (self.rs.items) |*r| {
+            if (r.render(gst, Menu, action_list)) |msg| {
+                return msg;
+            }
+        }
+        return null;
+    }
+
+    fn parentGst(self: *MenuData) *GST {
+        return @alignCast(@fieldParentPtr("menu", self));
+    }
+
+    pub const action_list: []const (Action(Menu)) = &.{
+        .{ .name = "Editor", .val = .{ .button = Menu.toEditor } },
+        .{ .name = "Exit", .val = .{ .button = Menu.exit } },
+        .{ .name = "Play", .val = .{ .button = Menu.toPlay } },
+        .{ .name = "Log hello", .val = .{ .button = Menu.log_hello } },
+        .{ .name = "Save data", .val = .{ .button = Menu.saveData } },
+        .{ .name = "animation", .val = .{ .slider = .{ .fun = Menu.animation_duration_ref, .min = 50, .max = 5000 } } },
+        .{ .name = "View textures", .val = .{ .button = Menu.toTextures } },
+    };
 };
 pub const Menu = union(enum) {
     // zig fmt: off
@@ -31,9 +59,15 @@ pub const Menu = union(enum) {
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
+    pub const gst_field: std.meta.FieldEnum(GST) = .menu;
+
     pub fn handler(gst: *GST) @This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+
+        if (gst.menu.render()) |transition| {
+            return transition;
+        }
+
         return .no_trasition;
     }
 
@@ -48,28 +82,6 @@ pub const Menu = union(enum) {
         .{ .name = "View textures",   .val = .{ .button = toTextures    } },
     };
     // zig fmt: on
-
-    pub fn animation(
-        gst: *GST,
-        screen_width: f32,
-        screen_height: f32,
-        duration: f32,
-        total: f32,
-        b: bool,
-    ) void {
-        anim.animation_list_r(
-            screen_width,
-            screen_height,
-            gst.menu.rs.items,
-            duration,
-            total,
-            b,
-        );
-    }
-
-    pub fn access_rs(gst: *GST) *RS {
-        return &gst.menu.rs;
-    }
 
     fn saveData(gst: *GST) ?@This() {
         utils.saveData(gst);

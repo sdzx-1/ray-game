@@ -13,9 +13,39 @@ pub const PlayData = struct {
         .{ .x = 7, .y = 31 },
     },
 
-    pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
+    pub fn render(self: *PlayData) ?Play {
+        const gst = self.parentGst();
+
+        draw_cells(&self.view, gst, 0);
+
+        for (self.rs.items) |*r| {
+            if (r.render(gst, Play, action_list)) |msg| {
+                return msg;
+            }
+        }
+        return null;
+    }
+
+    pub fn animation(self: *const PlayData, screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
         anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
     }
+
+    fn parentGst(self: *PlayData) *GST {
+        return @alignCast(@fieldParentPtr("play", self));
+    }
+
+    pub const action_list: []const (Action(Play)) = &.{
+        .{ .name = "Editor", .val = .{ .button = Play.toEditor } },
+        .{ .name = "Menu", .val = .{ .button = Play.toMenu } },
+        .{ .name = "SetMazeTextId", .val = .{ .button = Play.setMazeTextId } },
+        .{
+            .name = "Select",
+            .val = .{ .dropdown_box = .{ .fun = Play.get_curr_text_ref, .text = "room;blank;path;connPoint" } },
+        },
+        .{ .name = "Build", .val = .{ .button = Play.toBuild } },
+        .{ .name = "Place", .val = .{ .button = Play.toPlace } },
+        .{ .name = "Exit", .val = .{ .button = Play.toExit } },
+    };
 };
 
 pub const CellID = struct {
@@ -182,11 +212,15 @@ pub const Play = union(enum) {
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
 
+    pub const gst_field: std.meta.FieldEnum(GST) = .play;
+
     pub fn handler(gst: *GST) @This() {
         gst.play.view.mouse_wheel(gst.hdw);
         gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, 0);
-        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+
+        if (gst.play.render()) |transition| {
+            return transition;
+        }
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
         if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
@@ -201,20 +235,6 @@ pub const Play = union(enum) {
     pub fn sed_texture(gst: *const GST) textures.TextID {
         return gst.play.maze_texture[@intCast(gst.play.current_texture)];
     }
-
-    //
-    pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor", .val = .{ .button = toEditor } },
-        .{ .name = "Menu", .val = .{ .button = toMenu } },
-        .{ .name = "SetMazeTextId", .val = .{ .button = setMazeTextId } },
-        .{
-            .name = "Select",
-            .val = .{ .dropdown_box = .{ .fun = get_curr_text_ref, .text = "room;blank;path;connPoint" } },
-        },
-        .{ .name = "Build", .val = .{ .button = toBuild } },
-        .{ .name = "Place", .val = .{ .button = toPlace } },
-        .{ .name = "Exit", .val = .{ .button = toExit } },
-    };
 
     fn toExit(_: *GST) ?@This() {
         return .to_exit;
@@ -242,28 +262,6 @@ pub const Play = union(enum) {
 
     fn get_curr_text_ref(gst: *GST) *i32 {
         return &gst.play.current_texture;
-    }
-
-    pub fn animation(
-        gst: *GST,
-        screen_width: f32,
-        screen_height: f32,
-        duration: f32,
-        total: f32,
-        b: bool,
-    ) void {
-        anim.animation_list_r(
-            screen_width,
-            screen_height,
-            gst.play.rs.items,
-            duration,
-            total,
-            b,
-        );
-    }
-
-    pub fn access_rs(gst: *GST) *RS {
-        return &gst.play.rs;
     }
 };
 

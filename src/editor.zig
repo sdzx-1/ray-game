@@ -10,6 +10,8 @@ const rg = @import("raygui");
 
 const GST = core.GST;
 const R = core.R;
+const RS = core.RS;
+const Action = core.Action;
 
 pub const EditorData = struct {
     copyed_rect: ?R = null,
@@ -19,11 +21,13 @@ pub const EditorData = struct {
 pub fn Editor(target: type) type {
     return union(enum) {
         finish: Example(.next, target),
-        to_select: Example(.next, Select(target, Editor(target))),
+        to_select: Example(.next, Select(target, @This())),
         no_trasition: Example(.next, @This()),
 
         pub fn handler(gst: *GST) @This() {
-            for (target.access_rs(gst).items) |*r| {
+            const rs = targetRs(gst);
+
+            for (rs.items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -41,7 +45,7 @@ pub fn Editor(target: type) type {
                 );
             }
 
-            const ptr: *R = &target.access_rs(gst).items[gst.editor.selected_id];
+            const ptr: *R = &rs.items[gst.editor.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -54,9 +58,7 @@ pub fn Editor(target: type) type {
             rect.width = 40;
             _ = rg.checkBox(rect, "enbale", &ptr.enable_action);
 
-            if (@hasDecl(target, "action_list") and
-                ptr.enable_action)
-            {
+            if (has_action_list and ptr.enable_action) {
                 rect.y += 40;
                 rect.width = 150;
                 rect.height = 40;
@@ -64,7 +66,6 @@ pub fn Editor(target: type) type {
                 const drop_str = comptime blk: {
                     var buf: [500:0]u8 = @splat(0);
                     var offset: usize = 0;
-                    const action_list = @field(target, "action_list");
                     for (action_list, 0..) |val, i| {
                         const name = val.name;
                         @memcpy(buf[offset .. offset + name.len], name);
@@ -108,7 +109,9 @@ pub fn Editor(target: type) type {
         }
 
         pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
-            for (target.access_rs(gst).items) |*r| {
+            const rs = targetRs(gst);
+
+            for (rs.items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -129,7 +132,7 @@ pub fn Editor(target: type) type {
             switch (sst) {
                 .outside => {},
                 .inside => {
-                    const r = target.access_rs(gst).items[gst.editor.selected_id];
+                    const r = rs.items[gst.editor.selected_id];
                     rl.drawRectangleLines(
                         @intFromFloat(r.rect.x - 1),
                         @intFromFloat(r.rect.y - 1),
@@ -139,11 +142,8 @@ pub fn Editor(target: type) type {
                     );
                 },
                 .hover => {
-                    const ptr: *R = &target.access_rs(gst).items[gst.editor.selected_id];
-                    if (@hasDecl(target, "action_list") and
-                        ptr.enable_action)
-                    {
-                        const action_list = @field(target, "action_list");
+                    const ptr: *R = &rs.items[gst.editor.selected_id];
+                    if (has_action_list and ptr.enable_action) {
                         const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
                         const str1 = gst.printZ("{s}", .{str});
@@ -168,7 +168,7 @@ pub fn Editor(target: type) type {
                         r.rect.y = mp.y;
                         const size = rl.measureText(&r.str_buf, 32);
                         r.rect.width = @floatFromInt(size);
-                        target.access_rs(gst).append(gst.gpa, r) catch unreachable;
+                        rs.append(gst.gpa, r) catch unreachable;
                         gst.log("Add button");
                         return true;
                     }
@@ -176,7 +176,7 @@ pub fn Editor(target: type) type {
                 else => {
                     if (rl.isKeyDown(rl.KeyboardKey.d)) {
                         gst.log("Delete!");
-                        _ = target.access_rs(gst).swapRemove(gst.editor.selected_id);
+                        _ = rs.swapRemove(gst.editor.selected_id);
                         return true;
                     }
                 },
@@ -185,7 +185,9 @@ pub fn Editor(target: type) type {
         }
 
         pub fn check_inside(gst: *GST) select.CheckInsideResult {
-            for (target.access_rs(gst).items, 0..) |*r, i| {
+            const rs = targetRs(gst);
+
+            for (rs.items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
                     gst.editor.selected_id = i;
                     return .in_someone;
@@ -195,12 +197,24 @@ pub fn Editor(target: type) type {
         }
 
         pub fn check_still_inside(gst: *GST) bool {
-            const r = target.access_rs(gst).items[gst.editor.selected_id];
+            const rs = targetRs(gst);
+
+            const r = rs.items[gst.editor.selected_id];
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
                 gst.log("Copy!");
                 gst.editor.copyed_rect = r;
             }
             return r.inR(rl.getMousePosition());
+        }
+
+        const TargetData = @FieldType(GST, @tagName(target.gst_field));
+
+        const has_action_list = @hasDecl(TargetData, "action_list");
+
+        const action_list: []const (Action(target)) = if (has_action_list) TargetData.action_list else undefined;
+
+        fn targetRs(gst: *GST) *RS {
+            return &@field(gst, @tagName(target.gst_field)).rs;
         }
     };
 }
