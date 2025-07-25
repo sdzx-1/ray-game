@@ -87,16 +87,16 @@ And this is the actual code: [code](https://github.com/sdzx-1/ray-game/commit/8d
 pub const xST = union(enum) {
     X: Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
 
-    pub fn conthandler(gst: *GST) ContR {
-        switch (genMsg(gst)) {
+    pub fn conthandler(ctx: *Context) ContR {
+        switch (genMsg(ctx)) {
             .X => |wit| {
                 return .{ .Curr = wit.conthandler() };
             },
         }
     }
 
-    pub fn genMsg(gst: *GST) @This() {
-        _ = gst;
+    pub fn genMsg(ctx: *Context) @This() {
+        _ = ctx;
         return .X;
     }
 };
@@ -123,8 +123,8 @@ pub fn xST(back: SDZX, target: SDZX) type {
     return union(enum) {
         X: WitRow(SDZX.C(.select, &.{ back, SDZX.C(.select, &.{ SDZX.C(.x, &.{ back, target }), target }) })),
 
-        pub fn conthandler(gst: *GST) ContR {
-            switch (genMsg(gst)) {
+        pub fn conthandler(ctx: *Context) ContR {
+            switch (genMsg(ctx)) {
                 .X => |wit| {
                     return .{ .Curr = wit.conthandler() };
                 },
@@ -140,7 +140,7 @@ pub fn X(back: type, target: type) type {
     return union(enum) {
         XX: Example(.current, Select(back, Select(X(back, target), target))),
 
-        pub fn handler(_: *GST) @This() {
+        pub fn handler(_: *Context) @This() {
             return .XX;
         }
     };

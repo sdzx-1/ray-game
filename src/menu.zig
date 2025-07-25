@@ -13,7 +13,7 @@ const rl = @import("raylib");
 const rg = @import("raygui");
 
 const Example = core.Example;
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
 const SaveData = utils.SaveData;
@@ -31,9 +31,9 @@ pub const Menu = union(enum) {
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
-    pub fn handler(gst: *GST) @This() {
+    pub fn handler(ctx: *Context) @This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        for (gst.menu.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+        for (ctx.menu.rs.items) |*r| if (r.render(ctx, @This(), action_list)) |msg| return msg;
         return .no_trasition;
     }
 
@@ -50,7 +50,7 @@ pub const Menu = union(enum) {
     // zig fmt: on
 
     pub fn animation(
-        gst: *GST,
+        ctx: *Context,
         screen_width: f32,
         screen_height: f32,
         duration: f32,
@@ -60,45 +60,45 @@ pub const Menu = union(enum) {
         anim.animation_list_r(
             screen_width,
             screen_height,
-            gst.menu.rs.items,
+            ctx.menu.rs.items,
             duration,
             total,
             b,
         );
     }
 
-    pub fn access_rs(gst: *GST) *RS {
-        return &gst.menu.rs;
+    pub fn access_rs(ctx: *Context) *RS {
+        return &ctx.menu.rs;
     }
 
-    fn saveData(gst: *GST) ?@This() {
-        utils.saveData(gst);
+    fn saveData(ctx: *Context) ?@This() {
+        utils.saveData(ctx);
         return null;
     }
 
-    fn toTextures(_: *GST) ?@This() {
+    fn toTextures(_: *Context) ?@This() {
         return .to_textures;
     }
 
-    fn toEditor(_: *GST) ?@This() {
+    fn toEditor(_: *Context) ?@This() {
         return .to_editor;
     }
 
-    fn toPlay(gst: *GST) ?@This() {
-        gst.animation.start_time = std.time.milliTimestamp();
+    fn toPlay(ctx: *Context) ?@This() {
+        ctx.animation.start_time = std.time.milliTimestamp();
         return .to_play;
     }
 
-    fn exit(_: *GST) ?@This() {
+    fn exit(_: *Context) ?@This() {
         return .exit1;
     }
 
-    fn log_hello(gst: *GST) ?@This() {
-        gst.log("hello!!!!");
+    fn log_hello(ctx: *Context) ?@This() {
+        ctx.log("hello!!!!");
         return null;
     }
 
-    fn animation_duration_ref(gst: *GST) *f32 {
-        return &gst.animation.total_time;
+    fn animation_duration_ref(ctx: *Context) *f32 {
+        return &ctx.animation.total_time;
     }
 };

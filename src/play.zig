@@ -34,7 +34,7 @@ pub fn X(back: type, target: type) type {
     return union(enum) {
         XX: Example(.current, Select(back, Select(X(back, target), target))),
 
-        pub fn handler(_: *GST) @This() {
+        pub fn handler(_: *Context) @This() {
             return .XX;
         }
     };
@@ -43,9 +43,9 @@ pub fn X(back: type, target: type) type {
 pub const Place = union(enum) {
     to_play: Example(.current, Select(Play, Select(X(Play, Place), Place))),
 
-    pub fn handler(gst: *GST) @This() {
-        const b = gst.play.selected_build;
-        const cell_id = gst.play.selected_cell_id;
+    pub fn handler(ctx: *Context) @This() {
+        const b = ctx.play.selected_build;
+        const cell_id = ctx.play.selected_cell_id;
         const y: i32 = @intCast(cell_id.y);
         const x: i32 = @intCast(cell_id.x);
         const w: i32 = @intFromFloat(b.width);
@@ -54,74 +54,74 @@ pub const Place = union(enum) {
         while (ty < y + h) : (ty += 1) {
             var tx = x;
             while (tx < x + w) : (tx += 1) {
-                const cell = &gst.play.current_map[@intCast(ty)][@intCast(tx)];
+                const cell = &ctx.play.current_map[@intCast(ty)][@intCast(tx)];
                 cell.building = b;
             }
         }
         return .to_play;
     }
 
-    pub fn select_render1(gst: *GST, sst: select.SelectStage) bool {
+    pub fn select_render1(ctx: *Context, sst: select.SelectStage) bool {
         _ = sst;
-        draw_cells(&gst.play.view, gst, -1);
+        draw_cells(&ctx.play.view, ctx, -1);
         {
-            gst.tbuild.view.mouse_wheel(gst.hdw);
-            gst.tbuild.view.drag_view(gst.screen_width);
+            ctx.tbuild.view.mouse_wheel(ctx.hdw);
+            ctx.tbuild.view.drag_view(ctx.screen_width);
         }
-        for (gst.tbuild.list.items) |*b| {
-            const win_pos = gst.tbuild.view.view_to_win(
-                gst.screen_width,
+        for (ctx.tbuild.list.items) |*b| {
+            const win_pos = ctx.tbuild.view.view_to_win(
+                ctx.screen_width,
                 .{ .x = b.x, .y = b.y },
             );
-            b.draw(gst);
+            b.draw(ctx);
             rl.drawCircleV(win_pos, 9, rl.Color.green);
         }
         return false;
     }
 
-    pub fn check_inside1(gst: *GST) select.CheckInsideResult {
-        for (gst.tbuild.list.items) |*b| {
-            if (b.inBuilding(gst, rl.getMousePosition())) {
-                gst.play.selected_build = b.*;
+    pub fn check_inside1(ctx: *Context) select.CheckInsideResult {
+        for (ctx.tbuild.list.items) |*b| {
+            if (b.inBuilding(ctx, rl.getMousePosition())) {
+                ctx.play.selected_build = b.*;
                 return .in_someone;
             }
         }
         return .not_in_any_rect;
     }
 
-    pub fn check_still_inside1(gst: *GST) bool {
-        const b = &gst.play.selected_build;
-        return b.inBuilding(gst, rl.getMousePosition());
+    pub fn check_still_inside1(ctx: *Context) bool {
+        const b = &ctx.play.selected_build;
+        return b.inBuilding(ctx, rl.getMousePosition());
     }
 
     //select position
 
-    pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
-        gst.play.view.mouse_wheel(gst.hdw);
-        gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, -1);
+    pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
+        ctx.play.view.mouse_wheel(ctx.hdw);
+        ctx.play.view.drag_view(ctx.screen_width);
+        draw_cells(&ctx.play.view, ctx, -1);
 
         if (rl.isKeyPressed(rl.KeyboardKey.r)) {
-            gst.play.selected_build.rotate();
+            ctx.play.selected_build.rotate();
             return true;
         }
 
         switch (sst) {
             .hover => {
-                const b = &gst.play.selected_build;
+                const b = &ctx.play.selected_build;
                 b.draw_with_win_pos_and_view(
-                    gst,
+                    ctx,
                     rl.getMousePosition(),
-                    &gst.play.view,
+                    &ctx.play.view,
                     rl.Color.green,
                 );
             },
             .inside => {
-                const b = &gst.play.selected_build;
+                const b = &ctx.play.selected_build;
                 b.draw_with_win_pos_and_view(
-                    gst,
+                    ctx,
                     rl.getMousePosition(),
-                    &gst.play.view,
+                    &ctx.play.view,
                     rl.Color.green,
                 );
             },
@@ -131,9 +131,9 @@ pub const Place = union(enum) {
         return false;
     }
 
-    pub fn check_inside(gst: *GST) select.CheckInsideResult {
-        const b = &gst.play.selected_build;
-        const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
+    pub fn check_inside(ctx: *Context) select.CheckInsideResult {
+        const b = &ctx.play.selected_build;
+        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
         const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
         const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
         const w: i32 = @intFromFloat(b.width);
@@ -141,33 +141,33 @@ pub const Place = union(enum) {
 
         if (x < 0 or
             y < 0 or
-            x + w > gst.map.maze_config.total_x or
-            y + h > gst.map.maze_config.total_y) return .not_in_any_rect;
+            x + w > ctx.map.maze_config.total_x or
+            y + h > ctx.map.maze_config.total_y) return .not_in_any_rect;
 
         var ty = y;
         while (ty < y + h) : (ty += 1) {
             var tx = x;
             while (tx < x + w) : (tx += 1) {
-                const cell = gst.play.current_map[@intCast(ty)][@intCast(tx)];
+                const cell = ctx.play.current_map[@intCast(ty)][@intCast(tx)];
                 if (cell.tag != .room or cell.building != null) {
-                    b.draw_with_win_pos_and_view(gst, rl.getMousePosition(), &gst.play.view, rl.Color.red);
+                    b.draw_with_win_pos_and_view(ctx, rl.getMousePosition(), &ctx.play.view, rl.Color.red);
                     return .not_in_any_rect;
                 }
             }
         }
 
-        b.draw_with_win_pos_and_view(gst, rl.getMousePosition(), &gst.play.view, rl.Color.green);
-        gst.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
+        b.draw_with_win_pos_and_view(ctx, rl.getMousePosition(), &ctx.play.view, rl.Color.green);
+        ctx.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
         return .in_someone;
     }
 
-    pub fn check_still_inside(gst: *GST) bool {
-        const b = &gst.play.selected_build;
-        const vp = gst.play.view.win_to_view(gst.screen_width, rl.getMousePosition());
+    pub fn check_still_inside(ctx: *Context) bool {
+        const b = &ctx.play.selected_build;
+        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
         const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
         const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
-        return (x == gst.play.selected_cell_id.x and
-            y == gst.play.selected_cell_id.y);
+        return (x == ctx.play.selected_cell_id.x and
+            y == ctx.play.selected_cell_id.y);
     }
 };
 
@@ -182,11 +182,11 @@ pub const Play = union(enum) {
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
 
-    pub fn handler(gst: *GST) @This() {
-        gst.play.view.mouse_wheel(gst.hdw);
-        gst.play.view.drag_view(gst.screen_width);
-        draw_cells(&gst.play.view, gst, 0);
-        for (gst.play.rs.items) |*r| if (r.render(gst, @This(), action_list)) |msg| return msg;
+    pub fn handler(ctx: *Context) @This() {
+        ctx.play.view.mouse_wheel(ctx.hdw);
+        ctx.play.view.drag_view(ctx.screen_width);
+        draw_cells(&ctx.play.view, ctx, 0);
+        for (ctx.play.rs.items) |*r| if (r.render(ctx, @This(), action_list)) |msg| return msg;
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
         if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
@@ -194,12 +194,12 @@ pub const Play = union(enum) {
         return .no_trasition;
     }
 
-    pub fn set_text_id(gst: *GST, tid: textures.TextID) void {
-        gst.play.maze_texture[@intCast(gst.play.current_texture)] = tid;
+    pub fn set_text_id(ctx: *Context, tid: textures.TextID) void {
+        ctx.play.maze_texture[@intCast(ctx.play.current_texture)] = tid;
     }
 
-    pub fn sed_texture(gst: *const GST) textures.TextID {
-        return gst.play.maze_texture[@intCast(gst.play.current_texture)];
+    pub fn sed_texture(ctx: *const Context) textures.TextID {
+        return ctx.play.maze_texture[@intCast(ctx.play.current_texture)];
     }
 
     //
@@ -216,36 +216,36 @@ pub const Play = union(enum) {
         .{ .name = "Exit", .val = .{ .button = toExit } },
     };
 
-    fn toExit(_: *GST) ?@This() {
+    fn toExit(_: *Context) ?@This() {
         return .to_exit;
     }
 
-    fn toEditor(_: *GST) ?@This() {
+    fn toEditor(_: *Context) ?@This() {
         return .to_editor;
     }
-    fn toMenu(gst: *GST) ?@This() {
-        gst.animation.start_time = std.time.milliTimestamp();
+    fn toMenu(ctx: *Context) ?@This() {
+        ctx.animation.start_time = std.time.milliTimestamp();
         return .to_menu;
     }
 
-    fn toBuild(_: *GST) ?@This() {
+    fn toBuild(_: *Context) ?@This() {
         return .to_build;
     }
 
-    fn toPlace(_: *GST) ?@This() {
+    fn toPlace(_: *Context) ?@This() {
         return .to_place;
     }
 
-    fn setMazeTextId(_: *GST) ?@This() {
+    fn setMazeTextId(_: *Context) ?@This() {
         return .set_maze_text_id;
     }
 
-    fn get_curr_text_ref(gst: *GST) *i32 {
-        return &gst.play.current_texture;
+    fn get_curr_text_ref(ctx: *Context) *i32 {
+        return &ctx.play.current_texture;
     }
 
     pub fn animation(
-        gst: *GST,
+        ctx: *Context,
         screen_width: f32,
         screen_height: f32,
         duration: f32,
@@ -255,20 +255,20 @@ pub const Play = union(enum) {
         anim.animation_list_r(
             screen_width,
             screen_height,
-            gst.play.rs.items,
+            ctx.play.rs.items,
             duration,
             total,
             b,
         );
     }
 
-    pub fn access_rs(gst: *GST) *RS {
-        return &gst.play.rs;
+    pub fn access_rs(ctx: *Context) *RS {
+        return &ctx.play.rs;
     }
 };
 
-pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
-    const height = view.width * gst.hdw;
+pub fn draw_cells(view: *const View, ctx: *Context, inc: f32) void {
+    const height = view.width * ctx.hdw;
 
     const min_x: i32 = @intFromFloat(@floor(view.x));
     const max_x: i32 = @intFromFloat(@floor(view.x + view.width));
@@ -282,15 +282,15 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
         while (tx < max_x + 1) : (tx += 1) {
             if (tx < 0 or
                 ty < 0 or
-                tx > (gst.map.maze_config.total_x - 1) or
-                ty > (gst.map.maze_config.total_y - 1)) continue;
+                tx > (ctx.map.maze_config.total_x - 1) or
+                ty > (ctx.map.maze_config.total_y - 1)) continue;
 
-            const val = gst.play.current_map[@intCast(ty)][@intCast(tx)];
-            const win_pos = view.view_to_win(gst.screen_width, .{ .x = @floatFromInt(tx), .y = @floatFromInt(ty) });
-            const scale = 1 * gst.screen_width / view.width;
+            const val = ctx.play.current_map[@intCast(ty)][@intCast(tx)];
+            const win_pos = view.view_to_win(ctx.screen_width, .{ .x = @floatFromInt(tx), .y = @floatFromInt(ty) });
+            const scale = 1 * ctx.screen_width / view.width;
 
             if (val.building == null) {
-                switch (gst.textures.read(gst.play.maze_texture[@intFromEnum(val.tag)])) {
+                switch (ctx.textures.read(ctx.play.maze_texture[@intFromEnum(val.tag)])) {
                     .texture => |texture| {
                         texture.tex2d.drawPro(
                             .{ .x = 0, .y = 0, .width = 256, .height = 256 },
@@ -303,7 +303,7 @@ pub fn draw_cells(view: *const View, gst: *GST, inc: f32) void {
                     else => {},
                 }
             } else {
-                switch (gst.textures.read(val.building.?.text_id)) {
+                switch (ctx.textures.read(val.building.?.text_id)) {
                     .texture => |texture| {
                         texture.tex2d.drawPro(
                             .{ .x = 0, .y = 0, .width = 256, .height = 256 },
@@ -342,7 +342,7 @@ const rl = @import("raylib");
 const rg = @import("raygui");
 const maze = @import("maze");
 
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
 const RS = core.RS;

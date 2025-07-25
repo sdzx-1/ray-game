@@ -6,7 +6,7 @@ const Example = core.Example;
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 
 pub const AnimationData = struct {
@@ -43,19 +43,19 @@ pub fn Animation(
         animation_end: Example(.next, to),
         no_trasition: Example(.next, @This()),
 
-        pub fn handler(gst: *GST) @This() {
+        pub fn handler(ctx: *Context) @This() {
             if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-                gst.log("skip animation");
+                ctx.log("skip animation");
                 return .animation_end;
             }
 
-            const duration: f32 = @floatFromInt(std.time.milliTimestamp() - gst.animation.start_time);
+            const duration: f32 = @floatFromInt(std.time.milliTimestamp() - ctx.animation.start_time);
             var buf: [20]u8 = undefined;
-            gst.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
-            from.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, true);
-            to.animation(gst, gst.screen_width, gst.screen_height, duration, gst.animation.total_time, false);
+            ctx.log_duration(std.fmt.bufPrint(&buf, "duration: {d:.2}", .{duration}) catch "too long!", 10);
+            from.animation(ctx, ctx.screen_width, ctx.screen_height, duration, ctx.animation.total_time, true);
+            to.animation(ctx, ctx.screen_width, ctx.screen_height, duration, ctx.animation.total_time, false);
 
-            if (duration > gst.animation.total_time - 1000 / 60) {
+            if (duration > ctx.animation.total_time - 1000 / 60) {
                 return .animation_end;
             }
             return .no_trasition;

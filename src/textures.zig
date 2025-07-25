@@ -10,7 +10,7 @@ const rg = @import("raygui");
 const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 const getTarget = core.getTarget;
 const View = utils.View;
@@ -66,18 +66,18 @@ pub const TexturesData = struct {
         }
     }
 
-    pub fn render(_: @This(), gst: *GST) void {
+    pub fn render(_: @This(), ctx: *Context) void {
         for (0..Height) |y| {
             for (0..Width) |x| {
-                const val = gst.textures.text_arr[y][x];
-                const win_pos = gst.textures.view.view_to_win(
-                    gst.screen_width,
+                const val = ctx.textures.text_arr[y][x];
+                const win_pos = ctx.textures.view.view_to_win(
+                    ctx.screen_width,
                     .{ .x = @floatFromInt(x), .y = @floatFromInt(y) },
                 );
-                const worh = gst.screen_width / gst.textures.view.width;
+                const worh = ctx.screen_width / ctx.textures.view.width;
 
-                const view = gst.textures.view;
-                const r1: rl.Rectangle = .{ .x = view.x, .y = view.y, .width = view.width, .height = view.width * gst.hdw };
+                const view = ctx.textures.view;
+                const r1: rl.Rectangle = .{ .x = view.x, .y = view.y, .width = view.width, .height = view.width * ctx.hdw };
                 const r2: rl.Rectangle = .{ .x = @floatFromInt(x), .y = @floatFromInt(y), .width = 1, .height = 1 };
                 if (r1.checkCollision(r2)) {
                     switch (val) {
@@ -105,13 +105,13 @@ pub const Textures = union(enum) {
     to_menu: Example(.next, Menu),
     no_trasition: Example(.next, @This()),
 
-    pub fn handler(gst: *GST) @This() {
+    pub fn handler(ctx: *Context) @This() {
         {
-            gst.textures.view.mouse_wheel(gst.hdw);
-            gst.textures.view.drag_view(gst.screen_width);
+            ctx.textures.view.mouse_wheel(ctx.hdw);
+            ctx.textures.view.drag_view(ctx.screen_width);
         }
 
-        gst.textures.render(gst);
+        ctx.textures.render(ctx);
 
         if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
             return .to_menu;
@@ -128,20 +128,20 @@ pub fn SetTexture(target: type) type {
     return union(enum) {
         to_target: Example(.current, target),
 
-        pub fn handler(gst: *GST) @This() {
-            target.set_text_id(gst, gst.sel_texture.text_id);
+        pub fn handler(ctx: *Context) @This() {
+            target.set_text_id(ctx, ctx.sel_texture.text_id);
             return .to_target;
         }
 
-        pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
+        pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
             {
-                gst.textures.view.mouse_wheel(gst.hdw);
-                gst.textures.view.drag_view(gst.screen_width);
+                ctx.textures.view.mouse_wheel(ctx.hdw);
+                ctx.textures.view.drag_view(ctx.screen_width);
             }
-            gst.textures.render(gst);
-            const selected = target.sed_texture(gst);
-            const smp = gst.textures.view.view_to_win(gst.screen_width, .{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
-            const wh: f32 = gst.screen_width / gst.textures.view.width;
+            ctx.textures.render(ctx);
+            const selected = target.sed_texture(ctx);
+            const smp = ctx.textures.view.view_to_win(ctx.screen_width, .{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
+            const wh: f32 = ctx.screen_width / ctx.textures.view.width;
             rl.drawRectangleLinesEx(.{
                 .x = smp.x,
                 .y = smp.y,
@@ -150,7 +150,7 @@ pub fn SetTexture(target: type) type {
             }, 10, rl.Color.green);
             switch (sst) {
                 .hover => {
-                    const val = gst.textures.read(gst.sel_texture.text_id);
+                    const val = ctx.textures.read(ctx.sel_texture.text_id);
                     const name = val.texture.name;
                     const mp = rl.getMousePosition();
                     const mwid = rl.measureText(name, 22);
@@ -167,8 +167,8 @@ pub fn SetTexture(target: type) type {
             return false;
         }
 
-        pub fn check_inside(gst: *GST) select.CheckInsideResult {
-            const view_pos = gst.textures.view.win_to_view(gst.screen_width, rl.getMousePosition());
+        pub fn check_inside(ctx: *Context) select.CheckInsideResult {
+            const view_pos = ctx.textures.view.win_to_view(ctx.screen_width, rl.getMousePosition());
             const x: i32 = @intFromFloat(@floor(view_pos.x));
             const y: i32 = @intFromFloat(@floor(view_pos.y));
 
@@ -176,31 +176,31 @@ pub fn SetTexture(target: type) type {
             const xi: usize = @intCast(x);
             const yi: usize = @intCast(y);
 
-            switch (gst.textures.text_arr[yi][xi]) {
+            switch (ctx.textures.text_arr[yi][xi]) {
                 .blank => return .not_in_any_rect,
                 .text_dir_name => return .not_in_any_rect,
                 .texture => {
-                    gst.sel_texture.text_id = .{ .x = xi, .y = yi };
+                    ctx.sel_texture.text_id = .{ .x = xi, .y = yi };
                     return .in_someone;
                 },
             }
         }
 
-        pub fn check_still_inside(gst: *GST) bool {
-            const view_pos = gst.textures.view.win_to_view(gst.screen_width, rl.getMousePosition());
+        pub fn check_still_inside(ctx: *Context) bool {
+            const view_pos = ctx.textures.view.win_to_view(ctx.screen_width, rl.getMousePosition());
             const x: i32 = @intFromFloat(@floor(view_pos.x));
             const y: i32 = @intFromFloat(@floor(view_pos.y));
 
-            return (x == @as(i32, @intCast(gst.sel_texture.text_id.x)) and
-                y == @as(i32, @intCast(gst.sel_texture.text_id.y)));
+            return (x == @as(i32, @intCast(ctx.sel_texture.text_id.x)) and
+                y == @as(i32, @intCast(ctx.sel_texture.text_id.y)));
         }
     };
 }
 
-pub fn load(gst: *GST) !void {
+pub fn load(ctx: *Context) !void {
     const cwd = std.fs.cwd();
     const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
-    var walker = try res_dir.walk(gst.gpa);
+    var walker = try res_dir.walk(ctx.gpa);
 
     var x: usize = 0;
     var y: usize = 0;
@@ -209,10 +209,10 @@ pub fn load(gst: *GST) !void {
             .file => {
                 const ext = std.fs.path.extension(entry.basename);
                 if (std.mem.eql(u8, ext, ".png")) {
-                    const path = try std.fs.path.joinZ(gst.gpa, &.{ "data/resouces", entry.path });
+                    const path = try std.fs.path.joinZ(ctx.gpa, &.{ "data/resouces", entry.path });
                     const loaded_texture = try rl.loadTexture(path);
-                    gst.textures.text_arr[y][x] = .{ .texture = .{
-                        .name = try gst.gpa.dupeZ(u8, entry.basename),
+                    ctx.textures.text_arr[y][x] = .{ .texture = .{
+                        .name = try ctx.gpa.dupeZ(u8, entry.basename),
                         .tex2d = loaded_texture,
                     } };
                     x += 1;
@@ -225,8 +225,8 @@ pub fn load(gst: *GST) !void {
             else => {
                 x = 1;
                 y += 1;
-                const str = try gst.gpa.dupeZ(u8, entry.basename);
-                gst.textures.text_arr[y][0] = .{ .text_dir_name = str };
+                const str = try ctx.gpa.dupeZ(u8, entry.basename);
+                ctx.textures.text_arr[y][0] = .{ .text_dir_name = str };
             },
         }
     }
