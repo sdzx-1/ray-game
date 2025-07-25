@@ -8,7 +8,7 @@ const Example = core.Example;
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 
 pub const EditorData = struct {
@@ -22,8 +22,8 @@ pub fn Editor(target: type) type {
         to_select: Example(.next, Select(target, Editor(target))),
         no_trasition: Example(.next, @This()),
 
-        pub fn handler(gst: *GST) @This() {
-            for (target.access_rs(gst).items) |*r| {
+        pub fn handler(ctx: *Context) @This() {
+            for (target.access_rs(ctx).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -41,7 +41,7 @@ pub fn Editor(target: type) type {
                 );
             }
 
-            const ptr: *R = &target.access_rs(gst).items[gst.editor.selected_id];
+            const ptr: *R = &target.access_rs(ctx).items[ctx.editor.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
@@ -107,8 +107,8 @@ pub fn Editor(target: type) type {
             return .no_trasition;
         }
 
-        pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
-            for (target.access_rs(gst).items) |*r| {
+        pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
+            for (target.access_rs(ctx).items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
                     @intFromFloat(r.rect.y),
@@ -129,7 +129,7 @@ pub fn Editor(target: type) type {
             switch (sst) {
                 .outside => {},
                 .inside => {
-                    const r = target.access_rs(gst).items[gst.editor.selected_id];
+                    const r = target.access_rs(ctx).items[ctx.editor.selected_id];
                     rl.drawRectangleLines(
                         @intFromFloat(r.rect.x - 1),
                         @intFromFloat(r.rect.y - 1),
@@ -139,14 +139,14 @@ pub fn Editor(target: type) type {
                     );
                 },
                 .hover => {
-                    const ptr: *R = &target.access_rs(gst).items[gst.editor.selected_id];
+                    const ptr: *R = &target.access_rs(ctx).items[ctx.editor.selected_id];
                     if (@hasDecl(target, "action_list") and
                         ptr.enable_action)
                     {
                         const action_list = @field(target, "action_list");
                         const str = action_list[@as(usize, @intCast(ptr.action_id))].name;
 
-                        const str1 = gst.printZ("{s}", .{str});
+                        const str1 = ctx.printZ("{s}", .{str});
                         const tsize = rl.measureText(str1, 32);
 
                         const mp = rl.getMousePosition();
@@ -163,20 +163,20 @@ pub fn Editor(target: type) type {
                     if (rl.isKeyPressed(rl.KeyboardKey.space)) {
                         const mp = rl.getMousePosition();
                         var r: R = .{};
-                        if (gst.editor.copyed_rect) |cr| r = cr;
+                        if (ctx.editor.copyed_rect) |cr| r = cr;
                         r.rect.x = mp.x;
                         r.rect.y = mp.y;
                         const size = rl.measureText(&r.str_buf, 32);
                         r.rect.width = @floatFromInt(size);
-                        target.access_rs(gst).append(gst.gpa, r) catch unreachable;
-                        gst.log("Add button");
+                        target.access_rs(ctx).append(ctx.gpa, r) catch unreachable;
+                        ctx.log("Add button");
                         return true;
                     }
                 },
                 else => {
                     if (rl.isKeyDown(rl.KeyboardKey.d)) {
-                        gst.log("Delete!");
-                        _ = target.access_rs(gst).swapRemove(gst.editor.selected_id);
+                        ctx.log("Delete!");
+                        _ = target.access_rs(ctx).swapRemove(ctx.editor.selected_id);
                         return true;
                     }
                 },
@@ -184,21 +184,21 @@ pub fn Editor(target: type) type {
             return false;
         }
 
-        pub fn check_inside(gst: *GST) select.CheckInsideResult {
-            for (target.access_rs(gst).items, 0..) |*r, i| {
+        pub fn check_inside(ctx: *Context) select.CheckInsideResult {
+            for (target.access_rs(ctx).items, 0..) |*r, i| {
                 if (r.inR(rl.getMousePosition())) {
-                    gst.editor.selected_id = i;
+                    ctx.editor.selected_id = i;
                     return .in_someone;
                 }
             }
             return .not_in_any_rect;
         }
 
-        pub fn check_still_inside(gst: *GST) bool {
-            const r = target.access_rs(gst).items[gst.editor.selected_id];
+        pub fn check_still_inside(ctx: *Context) bool {
+            const r = target.access_rs(ctx).items[ctx.editor.selected_id];
             if (rl.isKeyDown(rl.KeyboardKey.c)) {
-                gst.log("Copy!");
-                gst.editor.copyed_rect = r;
+                ctx.log("Copy!");
+                ctx.editor.copyed_rect = r;
             }
             return r.inR(rl.getMousePosition());
         }

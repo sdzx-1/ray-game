@@ -18,7 +18,7 @@ pub fn Select(
     back: type,
     selected: type,
 ) type {
-    const GST = fsm(.next, ps.Exit).Context;
+    const Context = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
         to_back     : fsm(.next, back),
@@ -26,14 +26,14 @@ pub fn Select(
         no_trasition: fsm(.next, @This()),
         // zig fmt: on
 
-        pub fn handler(gst: *GST) @This() {
-            const render: fn (*GST, SelectStage) bool = selected.select_render;
-            _ = render(gst, .outside);
-            const res: CheckInsideResult = selected.check_inside(gst);
+        pub fn handler(ctx: *Context) @This() {
+            const render: fn (*Context, SelectStage) bool = selected.select_render;
+            _ = render(ctx, .outside);
+            const res: CheckInsideResult = selected.check_inside(ctx);
             switch (res) {
                 .not_in_any_rect => {},
                 .in_someone => {
-                    gst.select.no_move_duartion = std.time.milliTimestamp();
+                    ctx.select.no_move_duartion = std.time.milliTimestamp();
                     return .to_inside;
                 },
             }
@@ -66,7 +66,7 @@ pub fn Inside(
     back: type,
     selected: type,
 ) type {
-    const GST = fsm(.next, ps.Exit).Context;
+    const Context = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
         to_back     : fsm(.next, back),
@@ -76,15 +76,15 @@ pub fn Inside(
         no_trasition: fsm(.next, @This()),
         // zig fmt: on
 
-        pub fn handler(gst: *GST) @This() {
-            const render: fn (*GST, SelectStage) bool = selected.select_render;
-            if (render(gst, .inside)) return .to_outside;
-            const res: bool = selected.check_still_inside(gst);
+        pub fn handler(ctx: *Context) @This() {
+            const render: fn (*Context, SelectStage) bool = selected.select_render;
+            if (render(ctx, .inside)) return .to_outside;
+            const res: bool = selected.check_still_inside(ctx);
             if (!res) return .to_outside;
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
-            if (mouse_moved()) gst.select.no_move_duartion = std.time.milliTimestamp();
-            const deta = std.time.milliTimestamp() - gst.select.no_move_duartion;
+            if (mouse_moved()) ctx.select.no_move_duartion = std.time.milliTimestamp();
+            const deta = std.time.milliTimestamp() - ctx.select.no_move_duartion;
             if (deta > 400) return .to_hover;
             return .no_trasition;
         }
@@ -96,7 +96,7 @@ pub fn Hover(
     back: type,
     selected: type,
 ) type {
-    const GST = fsm(.next, ps.Exit).Context;
+    const Context = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
         to_back     : fsm(.next, back),
@@ -106,12 +106,12 @@ pub fn Hover(
         no_trasition: fsm(.next, @This()),
         // zig fmt: on
 
-        pub fn handler(gst: *GST) @This() {
-            const render: fn (*GST, SelectStage) bool = selected.select_render;
-            if (render(gst, .hover)) return .to_outside;
+        pub fn handler(ctx: *Context) @This() {
+            const render: fn (*Context, SelectStage) bool = selected.select_render;
+            if (render(ctx, .hover)) return .to_outside;
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
             if (mouse_moved()) {
-                gst.select.no_move_duartion = std.time.milliTimestamp();
+                ctx.select.no_move_duartion = std.time.milliTimestamp();
                 return .to_inside;
             }
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;

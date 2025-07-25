@@ -87,16 +87,16 @@ ToPlay: Wit(.{ Example.select, Example.play, .{ Example.select, Example.play, Ex
 pub const xST = union(enum) {
     X: Wit(.{ Example.select, Example.play, .{ Example.select, Example.x, Example.place } }),
 
-    pub fn conthandler(gst: *GST) ContR {
-        switch (genMsg(gst)) {
+    pub fn conthandler(ctx: *Context) ContR {
+        switch (genMsg(ctx)) {
             .X => |wit| {
                 return .{ .Curr = wit.conthandler() };
             },
         }
     }
 
-    pub fn genMsg(gst: *GST) @This() {
-        _ = gst;
+    pub fn genMsg(ctx: *Context) @This() {
+        _ = ctx;
         return .X;
     }
 };
@@ -123,8 +123,8 @@ pub fn xST(back: SDZX, target: SDZX) type {
     return union(enum) {
         X: WitRow(SDZX.C(.select, &.{ back, SDZX.C(.select, &.{ SDZX.C(.x, &.{ back, target }), target }) })),
 
-        pub fn conthandler(gst: *GST) ContR {
-            switch (genMsg(gst)) {
+        pub fn conthandler(ctx: *Context) ContR {
+            switch (genMsg(ctx)) {
                 .X => |wit| {
                     return .{ .Curr = wit.conthandler() };
                 },

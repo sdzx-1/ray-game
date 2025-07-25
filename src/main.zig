@@ -32,7 +32,7 @@ pub fn main() anyerror!void {
     const text_arr = try gpa.create(textures.TextArr);
     textures.arr_set_blank(text_arr);
 
-    var gst = core.GST{
+    var ctx = core.Context{
         .gpa = gpa,
         .random = rand,
         .play = .{ .current_map = current_map },
@@ -40,9 +40,9 @@ pub fn main() anyerror!void {
         .textures = .{ .text_arr = text_arr },
     };
 
-    try utils.loadData(gpa, &gst);
+    try utils.loadData(gpa, &ctx);
 
-    rl.initWindow(@as(i32, @intFromFloat(gst.screen_width)), @as(i32, @intFromFloat(gst.screen_height)), "ray-game");
+    rl.initWindow(@as(i32, @intFromFloat(ctx.screen_width)), @as(i32, @intFromFloat(ctx.screen_height)), "ray-game");
     defer rl.closeWindow(); // Close window and OpenGL context
 
     rl.setWindowState(.{ .window_resizable = true });
@@ -54,11 +54,11 @@ pub fn main() anyerror!void {
         rl.clearBackground(.white);
         rl.drawText("Loading textures...", 100, 100, 50, rl.Color.black);
         rl.endDrawing();
-        try textures.load(&gst);
+        try textures.load(&ctx);
     }
 
-    defer gst.textures.deinit();
-    errdefer gst.textures.deinit();
+    defer ctx.textures.deinit();
+    errdefer ctx.textures.deinit();
 
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
@@ -70,18 +70,18 @@ pub fn main() anyerror!void {
         rl.beginDrawing();
         defer rl.endDrawing();
         if (rl.isWindowResized()) {
-            gst.screen_width = @floatFromInt(rl.getScreenWidth());
-            gst.screen_height = @floatFromInt(rl.getScreenHeight());
-            gst.hdw = gst.screen_height / gst.screen_width;
+            ctx.screen_width = @floatFromInt(rl.getScreenWidth());
+            ctx.screen_height = @floatFromInt(rl.getScreenHeight());
+            ctx.hdw = ctx.screen_height / ctx.screen_width;
         }
 
         rl.clearBackground(.white);
 
-        curr_id = Runner.runHandler(id, &gst);
+        curr_id = Runner.runHandler(id, &ctx);
 
-        gst.render_log();
+        ctx.render_log();
         rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
     }
 
-    utils.saveData(&gst);
+    utils.saveData(&ctx);
 }

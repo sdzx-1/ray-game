@@ -42,22 +42,22 @@ pub const R = struct {
         return false;
     }
 
-    pub fn render(r: *@This(), gst: *GST, cst: type, action_list: []const Action(cst)) ?cst {
+    pub fn render(r: *@This(), ctx: *Context, cst: type, action_list: []const Action(cst)) ?cst {
         if (r.enable_action) {
             rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
             const action_ptr = &action_list[@intCast(r.action_id)];
             switch (action_ptr.val) {
-                .button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(gst)) |val| return val,
+                .button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(ctx)) |val| return val,
                 .slider => |val| {
                     var buf: [30]u8 = undefined;
                     var buf1: [30]u8 = undefined;
                     const minVal = std.fmt.bufPrintZ(&buf, "{d:.1}", .{val.min}) catch unreachable;
                     const maxVal = std.fmt.bufPrintZ(&buf1, "{d:.1}", .{val.max}) catch unreachable;
-                    const ref = val.fun(gst);
+                    const ref = val.fun(ctx);
                     _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
                 },
                 .dropdown_box => |val| {
-                    const ref = val.fun(gst);
+                    const ref = val.fun(ctx);
                     if (rg.dropdownBox(r.rect, val.text, ref, r.dropdown_box) == 1) {
                         r.dropdown_box = !r.dropdown_box;
                     }
@@ -74,7 +74,7 @@ pub const R = struct {
 
 pub const RS = std.ArrayListUnmanaged(R);
 
-pub const GST = struct {
+pub const Context = struct {
     gpa: std.mem.Allocator,
     screen_width: f32 = 1000,
     screen_height: f32 = 800,
@@ -144,9 +144,9 @@ pub const GST = struct {
 
 pub fn ActionVal(cst: type) type {
     return union(enum) {
-        button: *const fn (*GST) ?cst,
-        slider: struct { fun: *const fn (*GST) *f32, min: f32, max: f32 },
-        dropdown_box: struct { fun: *const fn (*GST) *i32, text: [:0]const u8 },
+        button: *const fn (*Context) ?cst,
+        slider: struct { fun: *const fn (*Context) *f32, min: f32, max: f32 },
+        dropdown_box: struct { fun: *const fn (*Context) *i32, text: [:0]const u8 },
     };
 }
 
@@ -157,11 +157,11 @@ pub fn Action(cst: type) type {
     };
 }
 
-fn enter_fn(gst: *GST, state: type) void {
-    gst.log_im(gst.printZ("{s}", .{@typeName(state)}));
+fn enter_fn(ctx: *Context, state: type) void {
+    ctx.log_im(ctx.printZ("{s}", .{@typeName(state)}));
 }
 pub fn Example(method: ps.Method, state: type) type {
-    return ps.FSM("Example", .suspendable, GST, enter_fn, method, state);
+    return ps.FSM("Example", .suspendable, Context, enter_fn, method, state);
 }
 
 pub fn Select(back: type, selected: type) type {

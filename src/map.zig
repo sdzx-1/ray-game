@@ -29,14 +29,14 @@ pub const Map = union(enum) {
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
-    pub fn handler(gst: *GST) @This() {
+    pub fn handler(ctx: *Context) @This() {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
-            _ = gen_maze(gst);
+            _ = gen_maze(ctx);
         }
 
-        if (gst.map.maze) |m| {
+        if (ctx.map.maze) |m| {
             for (0..m.totalYSize) |y| {
                 for (0..m.totalXSize) |x| {
                     const idx = Maze.Index.from_uszie_xy(x, y);
@@ -47,7 +47,7 @@ pub const Map = union(enum) {
                         .connPoint => rl.Color.orange,
                         else => rl.Color.white,
                     };
-                    const ptr = &gst.map.maze_config;
+                    const ptr = &ctx.map.maze_config;
                     const width: i32 = @intFromFloat(ptr.width);
                     const tx: i32 = @intFromFloat(ptr.x);
                     const ty: i32 = @intFromFloat(ptr.y);
@@ -58,80 +58,80 @@ pub const Map = union(enum) {
             }
         }
 
-        for (gst.map.rs.items) |*r| {
-            if (r.render(gst, @This(), action_list)) |msg| {
+        for (ctx.map.rs.items) |*r| {
+            if (r.render(ctx, @This(), action_list)) |msg| {
                 return msg;
             }
         }
         return .no_trasition;
     }
 
-    fn toEditor(_: *GST) ?@This() {
+    fn toEditor(_: *Context) ?@This() {
         return .to_editor;
     }
 
-    fn toMenu(gst: *GST) ?@This() {
-        gst.animation.start_time = std.time.milliTimestamp();
+    fn toMenu(ctx: *Context) ?@This() {
+        ctx.animation.start_time = std.time.milliTimestamp();
         return .to_menu;
     }
 
-    fn toPlay(gst: *GST) ?@This() {
-        gst.animation.start_time = std.time.milliTimestamp();
-        if (gst.map.maze == null) {
+    fn toPlay(ctx: *Context) ?@This() {
+        ctx.animation.start_time = std.time.milliTimestamp();
+        if (ctx.map.maze == null) {
             generate_maze(
-                gst.gpa,
-                &gst.map.maze,
-                gst.map.maze_config.total_x,
-                gst.map.maze_config.total_y,
-                gst.map.maze_config.room_min_width,
-                gst.map.maze_config.room_max_width,
-                gst.random.int(u64),
-                gst.map.maze_config.probability,
+                ctx.gpa,
+                &ctx.map.maze,
+                ctx.map.maze_config.total_x,
+                ctx.map.maze_config.total_y,
+                ctx.map.maze_config.room_min_width,
+                ctx.map.maze_config.room_max_width,
+                ctx.random.int(u64),
+                ctx.map.maze_config.probability,
             );
         }
-        const m = gst.map.maze.?;
+        const m = ctx.map.maze.?;
 
         for (0..m.totalYSize) |y| {
             for (0..m.totalXSize) |x| {
                 const idx = Maze.Index.from_uszie_xy(x, y);
                 const val = m.readBoard(idx);
-                gst.play.current_map[y][x] = .{ .tag = val, .building = null };
+                ctx.play.current_map[y][x] = .{ .tag = val, .building = null };
             }
         }
 
-        const sx = @as(f32, @floatFromInt(gst.map.maze_config.total_x));
-        const sy = @as(f32, @floatFromInt(gst.map.maze_config.total_y));
-        gst.play.view.width = 50;
-        gst.play.view.center(gst.hdw, sx / 2, sy / 2);
+        const sx = @as(f32, @floatFromInt(ctx.map.maze_config.total_x));
+        const sy = @as(f32, @floatFromInt(ctx.map.maze_config.total_y));
+        ctx.play.view.width = 50;
+        ctx.play.view.center(ctx.hdw, sx / 2, sy / 2);
         return .to_play;
     }
 
-    fn exit(_: *GST) ?@This() {
+    fn exit(_: *Context) ?@This() {
         return .exit1;
     }
 
-    fn gen_maze(gst: *GST) ?@This() {
-        if (!gst.map.generating) {
-            gst.map.generating = !gst.map.generating;
-            if (gst.map.maze) |*m| {
-                m.deinit(gst.gpa);
-                gst.map.maze = null;
+    fn gen_maze(ctx: *Context) ?@This() {
+        if (!ctx.map.generating) {
+            ctx.map.generating = !ctx.map.generating;
+            if (ctx.map.maze) |*m| {
+                m.deinit(ctx.gpa);
+                ctx.map.maze = null;
             }
             _ = std.Thread.spawn(
                 .{},
                 generate_maze,
                 .{
-                    gst.gpa,
-                    &gst.map.maze,
-                    gst.map.maze_config.total_x,
-                    gst.map.maze_config.total_y,
-                    gst.map.maze_config.room_min_width,
-                    gst.map.maze_config.room_max_width,
-                    gst.random.int(u64),
-                    gst.map.maze_config.probability,
+                    ctx.gpa,
+                    &ctx.map.maze,
+                    ctx.map.maze_config.total_x,
+                    ctx.map.maze_config.total_y,
+                    ctx.map.maze_config.room_min_width,
+                    ctx.map.maze_config.room_max_width,
+                    ctx.random.int(u64),
+                    ctx.map.maze_config.probability,
                 },
             ) catch unreachable;
-            gst.map.generating = !gst.map.generating;
+            ctx.map.generating = !ctx.map.generating;
         }
         return null;
     }
@@ -150,24 +150,24 @@ pub const Map = union(enum) {
     };
     // zig fmt: on
 
-    fn mconfig_x(gst: *GST) *f32 {
-        return &gst.map.maze_config.x;
+    fn mconfig_x(ctx: *Context) *f32 {
+        return &ctx.map.maze_config.x;
     }
 
-    fn mconfig_y(gst: *GST) *f32 {
-        return &gst.map.maze_config.y;
+    fn mconfig_y(ctx: *Context) *f32 {
+        return &ctx.map.maze_config.y;
     }
 
-    fn mconfig_width(gst: *GST) *f32 {
-        return &gst.map.maze_config.width;
+    fn mconfig_width(ctx: *Context) *f32 {
+        return &ctx.map.maze_config.width;
     }
 
-    fn mconfig_prob(gst: *GST) *f32 {
-        return &gst.map.maze_config.probability;
+    fn mconfig_prob(ctx: *Context) *f32 {
+        return &ctx.map.maze_config.probability;
     }
 
     pub fn animation(
-        gst: *GST,
+        ctx: *Context,
         screen_width: f32,
         screen_height: f32,
         duration: f32,
@@ -177,15 +177,15 @@ pub const Map = union(enum) {
         anim.animation_list_r(
             screen_width,
             screen_height,
-            gst.map.rs.items,
+            ctx.map.rs.items,
             duration,
             total,
             b,
         );
     }
 
-    pub fn access_rs(gst: *GST) *RS {
-        return &gst.map.rs;
+    pub fn access_rs(ctx: *Context) *RS {
+        return &ctx.map.rs;
     }
 };
 
@@ -226,7 +226,7 @@ const rl = @import("raylib");
 const rg = @import("raygui");
 
 const Example = core.Example;
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
 const RS = core.RS;

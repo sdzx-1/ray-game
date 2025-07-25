@@ -6,18 +6,18 @@ pub const TBuild = union(enum) {
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
-    pub fn handler(gst: *GST) @This() {
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
-        const ptr = &gst.tbuild.list.items[gst.tbuild.selected_id];
-        if (ptr.draw_gui(gst)) |msg| return msg;
+    pub fn handler(ctx: *Context) @This() {
+        for (ctx.tbuild.list.items) |*b| b.draw(ctx);
+        const ptr = &ctx.tbuild.list.items[ctx.tbuild.selected_id];
+        if (ptr.draw_gui(ctx)) |msg| return msg;
 
         {
-            gst.tbuild.view.mouse_wheel(gst.hdw);
-            gst.tbuild.view.drag_view(gst.screen_width);
+            ctx.tbuild.view.mouse_wheel(ctx.hdw);
+            ctx.tbuild.view.drag_view(ctx.screen_width);
         }
 
         if (rl.isMouseButtonDown(rl.MouseButton.left)) {
-            const deta = gst.tbuild.view.dwin_to_dview(gst.screen_width, rl.getMouseDelta());
+            const deta = ctx.tbuild.view.dwin_to_dview(ctx.screen_width, rl.getMouseDelta());
             ptr.x += deta.x;
             ptr.y += deta.y;
         }
@@ -45,27 +45,27 @@ pub const TBuild = union(enum) {
         return .no_trasition;
     }
 
-    pub fn set_text_id(gst: *GST, tid: textures.TextID) void {
-        gst.tbuild.list.items[gst.tbuild.selected_id].text_id = tid;
+    pub fn set_text_id(ctx: *Context, tid: textures.TextID) void {
+        ctx.tbuild.list.items[ctx.tbuild.selected_id].text_id = tid;
     }
 
-    pub fn sed_texture(gst: *const GST) textures.TextID {
-        return gst.tbuild.list.items[gst.tbuild.selected_id].text_id;
+    pub fn sed_texture(ctx: *const Context) textures.TextID {
+        return ctx.tbuild.list.items[ctx.tbuild.selected_id].text_id;
     }
 
     //select
-    pub fn select_render(gst: *GST, sst: select.SelectStage) bool {
+    pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
         {
-            gst.tbuild.view.mouse_wheel(gst.hdw);
-            gst.tbuild.view.drag_view(gst.screen_width);
+            ctx.tbuild.view.mouse_wheel(ctx.hdw);
+            ctx.tbuild.view.drag_view(ctx.screen_width);
         }
-        for (gst.tbuild.list.items) |*b| b.draw(gst);
+        for (ctx.tbuild.list.items) |*b| b.draw(ctx);
 
         switch (sst) {
             .outside => {},
             else => {
                 if (rl.isKeyPressed(rl.KeyboardKey.d)) {
-                    _ = gst.tbuild.list.swapRemove(gst.tbuild.selected_id);
+                    _ = ctx.tbuild.list.swapRemove(ctx.tbuild.selected_id);
                     return true;
                 }
             },
@@ -74,18 +74,18 @@ pub const TBuild = union(enum) {
         return false;
     }
 
-    pub fn check_inside(gst: *GST) select.CheckInsideResult {
-        for (gst.tbuild.list.items, 0..) |*b, i| {
-            if (b.inBuilding(gst, rl.getMousePosition())) {
-                gst.tbuild.selected_id = i;
+    pub fn check_inside(ctx: *Context) select.CheckInsideResult {
+        for (ctx.tbuild.list.items, 0..) |*b, i| {
+            if (b.inBuilding(ctx, rl.getMousePosition())) {
+                ctx.tbuild.selected_id = i;
                 return .in_someone;
             }
         }
 
-        const mp = gst.tbuild.view.win_to_view(gst.screen_width, rl.getMousePosition());
+        const mp = ctx.tbuild.view.win_to_view(ctx.screen_width, rl.getMousePosition());
         if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-            gst.tbuild.list.append(
-                gst.gpa,
+            ctx.tbuild.list.append(
+                ctx.gpa,
                 .{ .x = mp.x, .y = mp.y, .width = 1, .height = 1, .color = rl.Color.white },
             ) catch unreachable;
         }
@@ -93,9 +93,9 @@ pub const TBuild = union(enum) {
         return .not_in_any_rect;
     }
 
-    pub fn check_still_inside(gst: *GST) bool {
-        const b = gst.tbuild.list.items[gst.tbuild.selected_id];
-        return b.inBuilding(gst, rl.getMousePosition());
+    pub fn check_still_inside(ctx: *Context) bool {
+        const b = ctx.tbuild.list.items[ctx.tbuild.selected_id];
+        return b.inBuilding(ctx, rl.getMousePosition());
     }
 };
 
@@ -120,8 +120,8 @@ pub const Building = struct {
         self.height = t;
     }
 
-    pub fn inBuilding(self: *const Building, gst: *const GST, win_pos: rl.Vector2) bool {
-        const view_pos = gst.tbuild.view.win_to_view(gst.screen_width, win_pos);
+    pub fn inBuilding(self: *const Building, ctx: *const Context, win_pos: rl.Vector2) bool {
+        const view_pos = ctx.tbuild.view.win_to_view(ctx.screen_width, win_pos);
         if (view_pos.x > self.x and
             view_pos.x < self.x + self.width and
             view_pos.y > self.y and
@@ -129,36 +129,36 @@ pub const Building = struct {
         return false;
     }
 
-    pub fn draw(self: *Building, gst: *GST) void {
-        const win_pos = gst.tbuild.view.view_to_win(
-            gst.screen_width,
+    pub fn draw(self: *Building, ctx: *Context) void {
+        const win_pos = ctx.tbuild.view.view_to_win(
+            ctx.screen_width,
             .{ .x = self.x, .y = self.y },
         );
-        self.draw_with_pos(gst, win_pos, null);
+        self.draw_with_pos(ctx, win_pos, null);
     }
 
     pub fn draw_with_pos(
         self: *Building,
-        gst: *GST,
+        ctx: *Context,
         win_pos: rl.Vector2,
         color: ?rl.Color,
     ) void {
         self.draw_with_win_pos_and_view(
-            gst,
+            ctx,
             win_pos,
-            &gst.tbuild.view,
+            &ctx.tbuild.view,
             color,
         );
     }
 
     pub fn draw_with_win_pos_and_view(
         self: *Building,
-        gst: *GST,
+        ctx: *Context,
         win_pos: rl.Vector2,
         view: *const View,
         color: ?rl.Color,
     ) void {
-        const r = gst.screen_width / view.width;
+        const r = ctx.screen_width / view.width;
         const x: i32 = @intFromFloat(win_pos.x - r * self.width / 2);
         const y: i32 = @intFromFloat(win_pos.y - r * self.height / 2);
         const w: i32 = @intFromFloat(r * self.width);
@@ -166,7 +166,7 @@ pub const Building = struct {
         if (color) |col| rl.drawRectangle(x, y, w, h, col) else {
             for (0..@intFromFloat(self.height)) |dy| {
                 for (0..@intFromFloat(self.width)) |dx| {
-                    switch (gst.textures.read(self.text_id)) {
+                    switch (ctx.textures.read(self.text_id)) {
                         .texture => |texture| {
                             texture.tex2d.drawPro(
                                 .{ .x = 0, .y = 0, .width = 256, .height = 256 },
@@ -188,9 +188,9 @@ pub const Building = struct {
         }
     }
 
-    pub fn draw_gui(self: *Building, gst: *GST) ?TBuild {
-        const win_pos = gst.tbuild.view.view_to_win(gst.screen_width, .{ .x = self.x, .y = self.y });
-        const r = gst.screen_width / gst.tbuild.view.width;
+    pub fn draw_gui(self: *Building, ctx: *Context) ?TBuild {
+        const win_pos = ctx.tbuild.view.view_to_win(ctx.screen_width, .{ .x = self.x, .y = self.y });
+        const r = ctx.screen_width / ctx.tbuild.view.width;
         var rect: rl.Rectangle = .{ .x = win_pos.x, .y = win_pos.y, .width = 250, .height = 30 };
         _ = rg.textBox(rect, &self.name, 30, false);
         rect.y -= 33;
@@ -223,6 +223,6 @@ const Play = @import("play.zig").Play;
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const GST = core.GST;
+const Context = core.Context;
 const R = core.R;
 const View = utils.View;

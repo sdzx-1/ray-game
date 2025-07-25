@@ -3,7 +3,7 @@ const R = core.R;
 const core = @import("core.zig");
 const tbuild = @import("tbuild.zig");
 const map = @import("map.zig");
-const GST = core.GST;
+const Context = core.Context;
 const rl = @import("raylib");
 const textures = @import("textures.zig");
 
@@ -57,38 +57,38 @@ pub const SaveData = struct {
     }
 };
 
-pub fn saveData(gst: *GST) void {
+pub fn saveData(ctx: *Context) void {
     const save_data: SaveData = .{
-        .menu = gst.menu.rs.items,
-        .map = gst.map.rs.items,
-        .play = gst.play.rs.items,
-        .tbuild = gst.tbuild.list.items,
-        .maze_config = gst.map.maze_config,
-        .screen_width = gst.screen_width,
-        .screen_height = gst.screen_height,
-        .hdw = gst.hdw,
-        .tbuild_view = gst.tbuild.view,
-        .maze_texture = gst.play.maze_texture,
+        // zig fmt: off
+        .menu          = ctx.menu.rs.items,
+        .map           = ctx.map.rs.items,
+        .play          = ctx.play.rs.items,
+        .tbuild        = ctx.tbuild.list.items,
+        .maze_config   = ctx.map.maze_config,
+        .screen_width  = ctx.screen_width,
+        .screen_height = ctx.screen_height,
+        .hdw           = ctx.hdw,
+        .tbuild_view   = ctx.tbuild.view,
+        .maze_texture  = ctx.play.maze_texture,
+        // zig fmt: on
     };
     save_data.save();
-    gst.log("save");
+    ctx.log("save");
 }
 
-pub fn loadData(gpa: std.mem.Allocator, gst: *GST) !void {
+pub fn loadData(gpa: std.mem.Allocator, ctx: *Context) !void {
     const save_data = SaveData.load(gpa);
-    try gst.menu.rs.appendSlice(gpa, save_data.menu);
-    try gst.map.rs.appendSlice(gpa, save_data.map);
-    try gst.play.rs.appendSlice(gpa, save_data.play);
-    try gst.tbuild.list.appendSlice(gpa, save_data.tbuild);
-    gst.map.maze_config = save_data.maze_config;
-    gst.screen_width = save_data.screen_width;
-    gst.screen_height = save_data.screen_height;
-    gst.hdw = save_data.hdw;
-    gst.tbuild.view = save_data.tbuild_view;
-
-    gst.play.maze_texture = save_data.maze_texture;
-
-    gst.log("load_data");
+    try ctx.menu.rs.appendSlice(gpa, save_data.menu);
+    try ctx.map.rs.appendSlice(gpa, save_data.map);
+    try ctx.play.rs.appendSlice(gpa, save_data.play);
+    try ctx.tbuild.list.appendSlice(gpa, save_data.tbuild);
+    ctx.map.maze_config = save_data.maze_config;
+    ctx.screen_width = save_data.screen_width;
+    ctx.screen_height = save_data.screen_height;
+    ctx.hdw = save_data.hdw;
+    ctx.tbuild.view = save_data.tbuild_view;
+    ctx.play.maze_texture = save_data.maze_texture;
+    ctx.log("load_data");
 }
 
 pub const View = struct {
