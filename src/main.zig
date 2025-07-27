@@ -63,7 +63,7 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
-    const Runner = ps.Runner(120, true, EnterFsmState);
+    const Runner = ps.Runner(true, EnterFsmState);
     var curr_id: ?Runner.StateId = Runner.idFromState(Menu);
 
     while (curr_id) |id| {
