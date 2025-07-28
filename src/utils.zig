@@ -1,8 +1,10 @@
 const std = @import("std");
-const R = core.R;
+const StateComponents = core.StateComponents;
 const core = @import("core.zig");
 const tbuild = @import("tbuild.zig");
 const map = @import("map.zig");
+const menu = @import("menu.zig");
+const play = @import("play.zig");
 const Context = core.Context;
 const rl = @import("raylib");
 const textures = @import("textures.zig");
@@ -13,9 +15,9 @@ pub const SaveData = struct {
     screen_width: f32 = 1000,
     screen_height: f32 = 800,
     hdw: f32 = 800.0 / 1000.0,
-    menu: []const R = &.{},
-    map: []const R = &.{},
-    play: []const R = &.{},
+    menu: []const StateComponents(menu.Menu).Component = &.{},
+    map: []const StateComponents(map.Map).Component = &.{},
+    play: []const StateComponents(play.Play).Component = &.{},
     tbuild: []const tbuild.Building = &.{},
     tbuild_view: View = .{},
     maze_config: map.MazeConfig = .{},
@@ -46,9 +48,9 @@ pub const SaveData = struct {
             const parsed = std.json.parseFromSlice(@This(), arena, content, .{ .ignore_unknown_fields = true }) catch unreachable;
 
             var val = parsed.value;
-            val.menu = gpa.dupe(R, val.menu) catch unreachable;
-            val.play = gpa.dupe(R, val.play) catch unreachable;
-            val.map = gpa.dupe(R, val.map) catch unreachable;
+            val.menu = gpa.dupe(StateComponents(menu.Menu).Component, val.menu) catch unreachable;
+            val.play = gpa.dupe(StateComponents(play.Play).Component, val.play) catch unreachable;
+            val.map = gpa.dupe(StateComponents(map.Map).Component, val.map) catch unreachable;
             val.tbuild = gpa.dupe(tbuild.Building, val.tbuild) catch unreachable;
             return val;
         } else |_| {
@@ -60,9 +62,9 @@ pub const SaveData = struct {
 pub fn saveData(ctx: *Context) void {
     const save_data: SaveData = .{
         // zig fmt: off
-        .menu          = ctx.menu.rs.items,
-        .map           = ctx.map.rs.items,
-        .play          = ctx.play.rs.items,
+        .menu          = ctx.menu.rs.array_r.items,
+        .map           = ctx.map.rs.array_r.items,
+        .play          = ctx.play.rs.array_r.items,
         .tbuild        = ctx.tbuild.list.items,
         .maze_config   = ctx.map.maze_config,
         .screen_width  = ctx.screen_width,
@@ -78,9 +80,9 @@ pub fn saveData(ctx: *Context) void {
 
 pub fn loadData(gpa: std.mem.Allocator, ctx: *Context) !void {
     const save_data = SaveData.load(gpa);
-    try ctx.menu.rs.appendSlice(gpa, save_data.menu);
-    try ctx.map.rs.appendSlice(gpa, save_data.map);
-    try ctx.play.rs.appendSlice(gpa, save_data.play);
+    try ctx.menu.rs.array_r.appendSlice(gpa, save_data.menu);
+    try ctx.map.rs.array_r.appendSlice(gpa, save_data.map);
+    try ctx.play.rs.array_r.appendSlice(gpa, save_data.play);
     try ctx.tbuild.list.appendSlice(gpa, save_data.tbuild);
     ctx.map.maze_config = save_data.maze_config;
     ctx.screen_width = save_data.screen_width;

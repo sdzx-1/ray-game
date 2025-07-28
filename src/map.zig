@@ -10,7 +10,7 @@ pub const MazeConfig = struct {
 };
 
 pub const MapData = struct {
-    rs: RS = .empty,
+    rs: StateComponents(Map) = .empty,
     maze: ?Maze = null,
     maze_config: MazeConfig = .{},
     generating: bool = false,
@@ -26,6 +26,8 @@ pub const Map = union(enum) {
     // zig fmt: on
 
     pub fn handler(ctx: *Context) @This() {
+        if (ctx.map.rs.pull()) |msg| return msg;
+
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
 
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
@@ -54,11 +56,7 @@ pub const Map = union(enum) {
             }
         }
 
-        for (ctx.map.rs.items) |*r| {
-            if (r.render(ctx, @This(), action_list)) |msg| {
-                return msg;
-            }
-        }
+        ctx.map.rs.render(ctx);
         return .no_trasition;
     }
 
@@ -160,7 +158,7 @@ pub const Map = union(enum) {
         return &ctx.map.maze_config.probability;
     }
 
-    pub fn access_rs(ctx: *Context) *RS {
+    pub fn access_rs(ctx: *Context) *StateComponents(Map) {
         return &ctx.map.rs;
     }
 };
@@ -203,6 +201,6 @@ const Example = core.Example;
 const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
-const RS = core.RS;
+const StateComponents = core.StateComponents;
 const maze = @import("maze");
 const Maze = maze.Maze;

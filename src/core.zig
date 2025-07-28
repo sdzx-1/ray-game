@@ -19,60 +19,6 @@ pub const Notify = struct {
     current_msg: ?[:0]const u8 = null,
 };
 
-pub const R = struct {
-    rect: rl.Rectangle = .{ .x = 0, .y = 0, .width = 100, .height = 40 },
-    str_buf: [60:0]u8 = blk: {
-        var tmp: [60:0]u8 = @splat(0);
-        @memcpy(tmp[0..5], "empty");
-        break :blk tmp;
-    },
-    color: rl.Color = rl.Color.black,
-    enable_action: bool = false,
-    action_id: i32 = 0,
-    action_select: bool = false,
-    dropdown_box: bool = false,
-
-    pub fn inR(self: *const R, pos: rl.Vector2) bool {
-        const r = self.rect;
-        if (pos.x > r.x and
-            pos.x < r.x + r.width and
-            pos.y > r.y and
-            pos.y < r.y + r.height) return true;
-        return false;
-    }
-
-    pub fn render(r: *@This(), ctx: *Context, cst: type, action_list: []const Action(cst)) ?cst {
-        if (r.enable_action) {
-            rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
-            const action_ptr = &action_list[@intCast(r.action_id)];
-            switch (action_ptr.val) {
-                .button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(ctx)) |val| return val,
-                .slider => |val| {
-                    var buf: [30]u8 = undefined;
-                    var buf1: [30]u8 = undefined;
-                    const minVal = std.fmt.bufPrintZ(&buf, "{d:.1}", .{val.min}) catch unreachable;
-                    const maxVal = std.fmt.bufPrintZ(&buf1, "{d:.1}", .{val.max}) catch unreachable;
-                    const ref = val.fun(ctx);
-                    _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
-                },
-                .dropdown_box => |val| {
-                    const ref = val.fun(ctx);
-                    if (rg.dropdownBox(r.rect, val.text, ref, r.dropdown_box) == 1) {
-                        r.dropdown_box = !r.dropdown_box;
-                    }
-                },
-            }
-            rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
-        } else {
-            _ = rl.drawText(&r.str_buf, @intFromFloat(r.rect.x), @intFromFloat(r.rect.y), 32, r.color);
-        }
-
-        return null;
-    }
-};
-
-pub const RS = std.ArrayListUnmanaged(R);
-
 pub const Context = struct {
     gpa: std.mem.Allocator,
     screen_width: f32 = 1000,
@@ -152,6 +98,84 @@ pub fn Action(cst: type) type {
     return struct {
         name: []const u8,
         val: ActionVal(cst),
+    };
+}
+
+pub fn StateComponents(State: type) type {
+    return struct {
+        array_r: std.ArrayListUnmanaged(Component),
+        msg: ?State,
+
+        const Self = @This();
+
+        pub const empty: Self = .{ .array_r = .empty, .msg = null };
+
+        pub const Component = struct {
+            rect: rl.Rectangle = .{ .x = 0, .y = 0, .width = 100, .height = 40 },
+            str_buf: [60:0]u8 = blk: {
+                var tmp: [60:0]u8 = @splat(0);
+                @memcpy(tmp[0..5], "empty");
+                break :blk tmp;
+            },
+            color: rl.Color = rl.Color.black,
+            enable_action: bool = false,
+            action_id: i32 = 0,
+            action_select: bool = false,
+            dropdown_box: bool = false,
+
+            pub fn inRect(self: *const Component, pos: rl.Vector2) bool {
+                const r = self.rect;
+                if (pos.x > r.x and
+                    pos.x < r.x + r.width and
+                    pos.y > r.y and
+                    pos.y < r.y + r.height) return true;
+                return false;
+            }
+
+            pub fn render(r: *Component, ctx: *Context) ?State {
+                if (r.enable_action) {
+                    rg.setStyle(.button, .{ .control = .text_color_normal }, r.color.toInt());
+                    const action_ptr = &State.action_list[@intCast(r.action_id)];
+                    switch (action_ptr.val) {
+                        .button => |fun| if (rg.button(r.rect, &r.str_buf)) if (fun(ctx)) |val| return val,
+                        .slider => |val| {
+                            var buf: [30]u8 = undefined;
+                            var buf1: [30]u8 = undefined;
+                            const minVal = std.fmt.bufPrintZ(&buf, "{d:.1}", .{val.min}) catch unreachable;
+                            const maxVal = std.fmt.bufPrintZ(&buf1, "{d:.1}", .{val.max}) catch unreachable;
+                            const ref = val.fun(ctx);
+                            _ = rg.slider(r.rect, minVal, maxVal, ref, val.min, val.max);
+                        },
+                        .dropdown_box => |val| {
+                            const ref = val.fun(ctx);
+                            if (rg.dropdownBox(r.rect, val.text, ref, r.dropdown_box) == 1) {
+                                r.dropdown_box = !r.dropdown_box;
+                            }
+                        },
+                    }
+                    rg.setStyle(.button, .{ .control = .text_color_normal }, rl.Color.black.toInt());
+                } else {
+                    _ = rl.drawText(&r.str_buf, @intFromFloat(r.rect.x), @intFromFloat(r.rect.y), 32, r.color);
+                }
+
+                return null;
+            }
+        };
+
+        pub fn pull(self: *Self) ?State {
+            if (self.msg) |m| {
+                self.msg = null;
+                return m;
+            } else return null;
+        }
+
+        pub fn render(self: *Self, ctx: *Context) void {
+            for (self.array_r.items) |*r| {
+                if (self.msg == null) {
+                    self.msg = r.render(ctx);
+                }
+            }
+        }
     };
 }
 

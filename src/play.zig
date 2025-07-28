@@ -1,5 +1,5 @@
 pub const PlayData = struct {
-    rs: RS = .empty,
+    rs: StateComponents(Play) = .empty,
     current_map: *CurrentMap,
     view: View = undefined,
     selected_cell_id: CellID = .{},
@@ -182,7 +182,9 @@ pub const Play = union(enum) {
         ctx.play.view.mouse_wheel(ctx.hdw);
         ctx.play.view.drag_view(ctx.screen_width);
         draw_cells(&ctx.play.view, ctx, 0);
-        for (ctx.play.rs.items) |*r| if (r.render(ctx, @This(), action_list)) |msg| return msg;
+
+        if (ctx.play.rs.pull()) |msg| return msg;
+        ctx.play.rs.render(ctx);
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
         if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
@@ -239,7 +241,7 @@ pub const Play = union(enum) {
         return &ctx.play.current_texture;
     }
 
-    pub fn access_rs(ctx: *Context) *RS {
+    pub fn access_rs(ctx: *Context) *StateComponents(Play) {
         return &ctx.play.rs;
     }
 };
@@ -320,6 +322,6 @@ const maze = @import("maze");
 const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
-const RS = core.RS;
+const StateComponents = core.StateComponents;
 const Maze = maze.Maze;
 const View = utils.View;

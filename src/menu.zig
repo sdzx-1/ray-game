@@ -15,10 +15,10 @@ const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
 const SaveData = utils.SaveData;
-const RS = core.RS;
+const StateComponents = core.StateComponents;
 
 pub const MenuData = struct {
-    rs: RS = .empty,
+    rs: StateComponents(Menu) = .empty,
 };
 pub const Menu = union(enum) {
     // zig fmt: off
@@ -30,8 +30,12 @@ pub const Menu = union(enum) {
     // zig fmt: on
 
     pub fn handler(ctx: *Context) @This() {
+        if (ctx.menu.rs.pull()) |msg| return msg;
+
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        for (ctx.menu.rs.items) |*r| if (r.render(ctx, @This(), action_list)) |msg| return msg;
+
+        ctx.menu.rs.render(ctx);
+
         return .no_trasition;
     }
 
@@ -46,7 +50,7 @@ pub const Menu = union(enum) {
     };
     // zig fmt: on
 
-    pub fn access_rs(ctx: *Context) *RS {
+    pub fn access_rs(ctx: *Context) *StateComponents(Menu) {
         return &ctx.menu.rs;
     }
 
