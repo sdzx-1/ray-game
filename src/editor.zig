@@ -23,29 +23,29 @@ pub fn Editor(target: type) type {
         no_trasition: Example(.next, @This()),
 
         pub fn handler(ctx: *Context) @This() {
-            for (target.access_rs(ctx).array_r.items) |*r| {
-                rl.drawRectangleLines(
-                    @intFromFloat(r.rect.x),
-                    @intFromFloat(r.rect.y),
-                    @intFromFloat(r.rect.width),
-                    @intFromFloat(r.rect.height),
-                    r.color,
-                );
+            const ptr = &target.access_rs(ctx).array_r.items[ctx.editor.selected_id];
+            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .finish;
+            if (rl.isKeyPressed(rl.KeyboardKey.enter) or
+                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .to_select;
 
-                rl.drawText(
-                    &r.str_buf,
-                    @intFromFloat(r.rect.x),
-                    @intFromFloat(r.rect.y),
-                    32,
-                    r.color,
-                );
+            if (rl.isMouseButtonDown(rl.MouseButton.left)) {
+                const v = rl.getMouseDelta();
+                ptr.rect.x += v.x;
+                ptr.rect.y += v.y;
             }
 
+            return .no_trasition;
+        }
+
+        pub fn render(ctx: *Context) void {
+            for (target.access_rs(ctx).array_r.items) |*r| {
+                rl.drawRectangleLines(@intFromFloat(r.rect.x), @intFromFloat(r.rect.y), @intFromFloat(r.rect.width), @intFromFloat(r.rect.height), r.color);
+                rl.drawText(&r.str_buf, @intFromFloat(r.rect.x), @intFromFloat(r.rect.y), 32, r.color);
+            }
             const ptr = &target.access_rs(ctx).array_r.items[ctx.editor.selected_id];
             var rect = ptr.rect;
 
             rect.y += 40;
-
             rg.setStyle(.default, .{ .default = .text_size }, 20);
             _ = rg.textBox(rect, &ptr.str_buf, 20, true);
             rg.setStyle(.default, .{ .default = .text_size }, 30);
@@ -93,21 +93,9 @@ pub fn Editor(target: type) type {
             }
             const size = rl.measureText(&ptr.str_buf, 32);
             ptr.rect.width = @max(32, @as(f32, @floatFromInt(size)));
-
-            if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .finish;
-            if (rl.isKeyPressed(rl.KeyboardKey.enter) or
-                rl.isKeyPressed(rl.KeyboardKey.caps_lock)) return .to_select;
-
-            if (rl.isMouseButtonDown(rl.MouseButton.left)) {
-                const v = rl.getMouseDelta();
-                ptr.rect.x += v.x;
-                ptr.rect.y += v.y;
-            }
-
-            return .no_trasition;
         }
 
-        pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
+        pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
             for (target.access_rs(ctx).array_r.items) |*r| {
                 rl.drawRectangleLines(
                     @intFromFloat(r.rect.x),
@@ -157,7 +145,9 @@ pub fn Editor(target: type) type {
                     }
                 },
             }
+        }
 
+        pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
             switch (sst) {
                 .outside => {
                     if (rl.isKeyPressed(rl.KeyboardKey.space)) {
@@ -170,7 +160,6 @@ pub fn Editor(target: type) type {
                         r.rect.width = @floatFromInt(size);
                         target.access_rs(ctx).array_r.append(ctx.gpa, r) catch unreachable;
                         ctx.log("Add button");
-                        return true;
                     }
                 },
                 else => {

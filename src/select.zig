@@ -27,8 +27,11 @@ pub fn Select(
         // zig fmt: on
 
         pub fn handler(ctx: *Context) @This() {
-            const render: fn (*Context, SelectStage) bool = selected.select_render;
-            _ = render(ctx, .outside);
+            if (@hasDecl(selected, "select_fun")) {
+                const select_fun: fn (*Context, SelectStage) bool = selected.select_fun;
+                _ = select_fun(ctx, .outside);
+            }
+
             const res: CheckInsideResult = selected.check_inside(ctx);
             switch (res) {
                 .not_in_any_rect => {},
@@ -39,6 +42,11 @@ pub fn Select(
             }
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             return .no_trasition;
+        }
+
+        pub fn render(ctx: *Context) void {
+            const render_: fn (*Context, SelectStage) void = selected.select_render;
+            render_(ctx, .outside);
         }
 
         pub const select_render = selected.select_render1;
@@ -77,8 +85,11 @@ pub fn Inside(
         // zig fmt: on
 
         pub fn handler(ctx: *Context) @This() {
-            const render: fn (*Context, SelectStage) bool = selected.select_render;
-            if (render(ctx, .inside)) return .to_outside;
+            if (@hasDecl(selected, "select_fun")) {
+                const select_fun: fn (*Context, SelectStage) bool = selected.select_fun;
+                if (select_fun(ctx, .inside)) return .to_outside;
+            }
+
             const res: bool = selected.check_still_inside(ctx);
             if (!res) return .to_outside;
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
@@ -87,6 +98,11 @@ pub fn Inside(
             const deta = std.time.milliTimestamp() - ctx.select.no_move_duartion;
             if (deta > 400) return .to_hover;
             return .no_trasition;
+        }
+
+        pub fn render(ctx: *Context) void {
+            const render_: fn (*Context, SelectStage) void = selected.select_render;
+            render_(ctx, .inside);
         }
     };
 }
@@ -107,8 +123,11 @@ pub fn Hover(
         // zig fmt: on
 
         pub fn handler(ctx: *Context) @This() {
-            const render: fn (*Context, SelectStage) bool = selected.select_render;
-            if (render(ctx, .hover)) return .to_outside;
+            if (@hasDecl(selected, "select_fun")) {
+                const select_fun: fn (*Context, SelectStage) bool = selected.select_fun;
+                if (select_fun(ctx, .hover)) return .to_outside;
+            }
+
             if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
             if (mouse_moved()) {
                 ctx.select.no_move_duartion = std.time.milliTimestamp();
@@ -116,6 +135,11 @@ pub fn Hover(
             }
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             return .no_trasition;
+        }
+
+        pub fn render(ctx: *Context) void {
+            const render_: fn (*Context, SelectStage) void = selected.select_render;
+            render_(ctx, .hover);
         }
     };
 }

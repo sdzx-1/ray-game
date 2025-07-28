@@ -31,12 +31,12 @@ pub const Menu = union(enum) {
 
     pub fn handler(ctx: *Context) @This() {
         if (ctx.menu.rs.pull()) |msg| return msg;
-
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-
-        ctx.menu.rs.render(ctx);
-
         return .no_trasition;
+    }
+
+    pub fn render(ctx: *Context) void {
+        ctx.menu.rs.render(ctx);
     }
 
     // zig fmt: off

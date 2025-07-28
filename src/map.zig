@@ -27,13 +27,14 @@ pub const Map = union(enum) {
 
     pub fn handler(ctx: *Context) @This() {
         if (ctx.map.rs.pull()) |msg| return msg;
-
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-
         if (rl.isKeyPressed(rl.KeyboardKey.g)) {
             _ = gen_maze(ctx);
         }
+        return .no_trasition;
+    }
 
+    pub fn render(ctx: *Context) void {
         if (ctx.map.maze) |m| {
             for (0..m.totalYSize) |y| {
                 for (0..m.totalXSize) |x| {
@@ -57,7 +58,6 @@ pub const Map = union(enum) {
         }
 
         ctx.map.rs.render(ctx);
-        return .no_trasition;
     }
 
     fn toEditor(_: *Context) ?@This() {
