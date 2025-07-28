@@ -7,7 +7,6 @@ const play = @import("play.zig");
 const menu = @import("menu.zig");
 const tbuild = @import("tbuild.zig");
 const textures = @import("textures.zig");
-const animation = @import("animation.zig");
 const utils = @import("utils.zig");
 
 const rl = @import("raylib");
@@ -86,7 +85,6 @@ pub const Context = struct {
     map: map.MapData = .{},
     play: play.PlayData,
     tbuild: tbuild.TbuildData = .{},
-    animation: animation.AnimationData = .{},
     textures: textures.TexturesData,
     sel_texture: textures.SetTextureData = .{},
 

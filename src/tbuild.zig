@@ -215,7 +215,6 @@ const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
-const Animation = @import("animation.zig").Animation;
 const Map = @import("map.zig").Map;
 const SetTexture = @import("textures.zig").SetTexture;
 const Play = @import("play.zig").Play;

@@ -100,44 +100,6 @@
     },
     {
       "rect": {
-        "x": 4.23e2,
-        "y": 3.32e2,
-        "width": 1.39e2,
-        "height": 4e1
-      },
-      "str_buf": "animation\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
-      "color": {
-        "r": 0,
-        "g": 0,
-        "b": 0,
-        "a": 255
-      },
-      "enable_action": true,
-      "action_id": 5,
-      "action_select": false,
-      "dropdown_box": false
-    },
-    {
-      "rect": {
-        "x": 3.77e2,
-        "y": 2.83e2,
-        "width": 2.46e2,
-        "height": 4e1
-      },
-      "str_buf": "animation speed\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
-      "color": {
-        "r": 178,
-        "g": 196,
-        "b": 75,
-        "a": 255
-      },
-      "enable_action": false,
-      "action_id": 0,
-      "action_select": false,
-      "dropdown_box": false
-    },
-    {
-      "rect": {
         "x": 6.34e2,
         "y": 1.08e2,
         "width": 1.42e2,
@@ -151,7 +113,7 @@
         "a": 255
       },
       "enable_action": true,
-      "action_id": 6,
+      "action_id": 5,
       "action_select": false,
       "dropdown_box": false
     }

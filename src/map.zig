@@ -14,17 +14,13 @@ pub const MapData = struct {
     maze: ?Maze = null,
     maze_config: MazeConfig = .{},
     generating: bool = false,
-
-    pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
-        anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
-    }
 };
 
 pub const Map = union(enum) {
     // zig fmt: off
     exit1       : Example(.next, ps.Exit),
     to_editor   : Example(.next, Select(Map, Editor( Map))),
-    to_menu     : Example(.next, Animation(Map, Menu)),
+    to_menu     : Example(.next, Menu),
     to_play     : Example(.next, Play),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
@@ -70,13 +66,11 @@ pub const Map = union(enum) {
         return .to_editor;
     }
 
-    fn toMenu(ctx: *Context) ?@This() {
-        ctx.animation.start_time = std.time.milliTimestamp();
+    fn toMenu(_: *Context) ?@This() {
         return .to_menu;
     }
 
     fn toPlay(ctx: *Context) ?@This() {
-        ctx.animation.start_time = std.time.milliTimestamp();
         if (ctx.map.maze == null) {
             generate_maze(
                 ctx.gpa,
@@ -166,24 +160,6 @@ pub const Map = union(enum) {
         return &ctx.map.maze_config.probability;
     }
 
-    pub fn animation(
-        ctx: *Context,
-        screen_width: f32,
-        screen_height: f32,
-        duration: f32,
-        total: f32,
-        b: bool,
-    ) void {
-        anim.animation_list_r(
-            screen_width,
-            screen_height,
-            ctx.map.rs.items,
-            duration,
-            total,
-            b,
-        );
-    }
-
     pub fn access_rs(ctx: *Context) *RS {
         return &ctx.map.rs;
     }
@@ -215,10 +191,8 @@ fn generate_maze(
 const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
-const anim = @import("animation.zig");
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
-const Animation = @import("animation.zig").Animation;
 const Menu = @import("menu.zig").Menu;
 const Play = @import("play.zig").Play;
 
