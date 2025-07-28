@@ -80,9 +80,9 @@ pub const Context = struct {
 
         rl.drawRectangleRec(
             .{ .x = 0, .y = 0, .width = @floatFromInt(rl.measureText(&self.im_log_buf, 32)), .height = 32 },
-            rl.Color.black,
+            rl.Color.white,
         );
-        rl.drawText(&self.im_log_buf, 0, 0, 32, rl.Color.white);
+        rl.drawText(&self.im_log_buf, 0, 0, 32, rl.Color.black);
     }
 };
 

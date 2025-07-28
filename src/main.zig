@@ -14,6 +14,7 @@ const Example = core.Example;
 const SaveData = utils.SaveData;
 
 pub const EnterFsmState = Example(.next, Menu);
+const Runner = ps.Runner(true, EnterFsmState);
 
 pub fn main() anyerror!void {
     var gpa_instance = std.heap.DebugAllocator(.{}).init;
@@ -63,25 +64,33 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     rg.setStyle(.default, .{ .default = .text_size }, 30);
 
-    const Runner = ps.Runner(true, EnterFsmState);
-    var curr_id: ?Runner.StateId = Runner.idFromState(Menu);
+    var curr_id: Runner.StateId = Runner.idFromState(Menu);
 
-    while (curr_id) |id| {
-        rl.beginDrawing();
+    while (logic(curr_id, &ctx)) |id| {
+        curr_id = id;
         defer rl.endDrawing();
-        if (rl.isWindowResized()) {
-            ctx.screen_width = @floatFromInt(rl.getScreenWidth());
-            ctx.screen_height = @floatFromInt(rl.getScreenHeight());
-            ctx.hdw = ctx.screen_height / ctx.screen_width;
+        switch (id) {
+            inline else => |tid| {
+                const ty = Runner.StateFromId(tid);
+                if (ty != ps.Exit and @hasDecl(ty, "render")) {
+                    rl.clearBackground(.white);
+                    ty.render(&ctx);
+                    ctx.render_log();
+                    rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
+                }
+            },
         }
-
-        rl.clearBackground(.white);
-
-        curr_id = Runner.runHandler(id, &ctx);
-
-        ctx.render_log();
-        rl.drawCircle(rl.getMouseX(), rl.getMouseY(), 6, rl.Color.red);
     }
 
     utils.saveData(&ctx);
+}
+
+fn logic(id: Runner.StateId, ctx: *core.Context) ?Runner.StateId {
+    rl.beginDrawing();
+    if (rl.isWindowResized()) {
+        ctx.screen_width = @floatFromInt(rl.getScreenWidth());
+        ctx.screen_height = @floatFromInt(rl.getScreenHeight());
+        ctx.hdw = ctx.screen_height / ctx.screen_width;
+    }
+    return Runner.runHandler(id, ctx);
 }

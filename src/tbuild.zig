@@ -7,15 +7,16 @@ pub const TBuild = union(enum) {
     // zig fmt: on
 
     pub fn handler(ctx: *Context) @This() {
-        for (ctx.tbuild.list.items) |*b| b.draw(ctx);
-        const ptr = &ctx.tbuild.list.items[ctx.tbuild.selected_id];
-        if (ptr.draw_gui(ctx)) |msg| return msg;
-
         {
             ctx.tbuild.view.mouse_wheel(ctx.hdw);
             ctx.tbuild.view.drag_view(ctx.screen_width);
         }
+        if (ctx.tbuild.msg) |msg| {
+            ctx.tbuild.msg = null;
+            return msg;
+        }
 
+        const ptr = &ctx.tbuild.list.items[ctx.tbuild.selected_id];
         if (rl.isMouseButtonDown(rl.MouseButton.left)) {
             const deta = ctx.tbuild.view.dwin_to_dview(ctx.screen_width, rl.getMouseDelta());
             ptr.x += deta.x;
@@ -45,6 +46,14 @@ pub const TBuild = union(enum) {
         return .no_trasition;
     }
 
+    pub fn render(ctx: *Context) void {
+        for (ctx.tbuild.list.items) |*b| b.draw(ctx);
+        const ptr = &ctx.tbuild.list.items[ctx.tbuild.selected_id];
+        if (ptr.draw_gui(ctx)) |msg| {
+            if (ctx.tbuild.msg == null) ctx.tbuild.msg = msg;
+        }
+    }
+
     pub fn set_text_id(ctx: *Context, tid: textures.TextID) void {
         ctx.tbuild.list.items[ctx.tbuild.selected_id].text_id = tid;
     }
@@ -54,15 +63,18 @@ pub const TBuild = union(enum) {
     }
 
     //select
-    pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
-        {
-            ctx.tbuild.view.mouse_wheel(ctx.hdw);
-            ctx.tbuild.view.drag_view(ctx.screen_width);
-        }
-        for (ctx.tbuild.list.items) |*b| b.draw(ctx);
 
+    pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
         switch (sst) {
-            .outside => {},
+            .outside => {
+                const mp = ctx.tbuild.view.win_to_view(ctx.screen_width, rl.getMousePosition());
+                if (rl.isKeyPressed(rl.KeyboardKey.space)) {
+                    ctx.tbuild.list.append(
+                        ctx.gpa,
+                        .{ .x = mp.x, .y = mp.y, .width = 1, .height = 1, .color = rl.Color.white },
+                    ) catch unreachable;
+                }
+            },
             else => {
                 if (rl.isKeyPressed(rl.KeyboardKey.d)) {
                     _ = ctx.tbuild.list.swapRemove(ctx.tbuild.selected_id);
@@ -70,8 +82,15 @@ pub const TBuild = union(enum) {
                 }
             },
         }
-
         return false;
+    }
+
+    pub fn select_render(ctx: *Context, _: select.SelectStage) void {
+        {
+            ctx.tbuild.view.mouse_wheel(ctx.hdw);
+            ctx.tbuild.view.drag_view(ctx.screen_width);
+        }
+        for (ctx.tbuild.list.items) |*b| b.draw(ctx);
     }
 
     pub fn check_inside(ctx: *Context) select.CheckInsideResult {
@@ -80,14 +99,6 @@ pub const TBuild = union(enum) {
                 ctx.tbuild.selected_id = i;
                 return .in_someone;
             }
-        }
-
-        const mp = ctx.tbuild.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        if (rl.isKeyPressed(rl.KeyboardKey.space)) {
-            ctx.tbuild.list.append(
-                ctx.gpa,
-                .{ .x = mp.x, .y = mp.y, .width = 1, .height = 1, .color = rl.Color.white },
-            ) catch unreachable;
         }
 
         return .not_in_any_rect;
@@ -103,6 +114,7 @@ pub const TbuildData = struct {
     list: std.ArrayListUnmanaged(Building) = .empty,
     selected_id: usize = 0,
     view: View = .{ .x = 0, .y = 0, .width = 25 },
+    msg: ?TBuild = null,
 };
 
 pub const Building = struct {

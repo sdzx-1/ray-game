@@ -4,6 +4,7 @@ pub const PlayData = struct {
     view: View = undefined,
     selected_cell_id: CellID = .{},
     selected_build: tbuild.Building = undefined,
+    selected_color: rl.Color = undefined,
 
     current_texture: i32 = 0,
     maze_texture: [4]textures.TextID = .{
@@ -57,13 +58,13 @@ pub const Place = union(enum) {
         return .to_play;
     }
 
-    pub fn select_render1(ctx: *Context, sst: select.SelectStage) bool {
+    pub fn select_render1(ctx: *Context, sst: select.SelectStage) void {
         _ = sst;
-        draw_cells(&ctx.play.view, ctx, -1);
         {
             ctx.tbuild.view.mouse_wheel(ctx.hdw);
             ctx.tbuild.view.drag_view(ctx.screen_width);
         }
+        draw_cells(&ctx.play.view, ctx, -1);
         for (ctx.tbuild.list.items) |*b| {
             const win_pos = ctx.tbuild.view.view_to_win(
                 ctx.screen_width,
@@ -72,7 +73,6 @@ pub const Place = union(enum) {
             b.draw(ctx);
             rl.drawCircleV(win_pos, 9, rl.Color.green);
         }
-        return false;
     }
 
     pub fn check_inside1(ctx: *Context) select.CheckInsideResult {
@@ -92,39 +92,31 @@ pub const Place = union(enum) {
 
     //select position
 
-    pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
-        ctx.play.view.mouse_wheel(ctx.hdw);
-        ctx.play.view.drag_view(ctx.screen_width);
-        draw_cells(&ctx.play.view, ctx, -1);
-
+    pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
+        _ = sst;
         if (rl.isKeyPressed(rl.KeyboardKey.r)) {
             ctx.play.selected_build.rotate();
             return true;
         }
-
-        switch (sst) {
-            .hover => {
-                const b = &ctx.play.selected_build;
-                b.draw_with_win_pos_and_view(
-                    ctx,
-                    rl.getMousePosition(),
-                    &ctx.play.view,
-                    rl.Color.green,
-                );
-            },
-            .inside => {
-                const b = &ctx.play.selected_build;
-                b.draw_with_win_pos_and_view(
-                    ctx,
-                    rl.getMousePosition(),
-                    &ctx.play.view,
-                    rl.Color.green,
-                );
-            },
-            else => {},
-        }
-
         return false;
+    }
+
+    pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
+        ctx.play.view.mouse_wheel(ctx.hdw);
+        ctx.play.view.drag_view(ctx.screen_width);
+        draw_cells(&ctx.play.view, ctx, -1);
+
+        const b = &ctx.play.selected_build;
+        b.draw_with_win_pos_and_view(
+            ctx,
+            rl.getMousePosition(),
+            &ctx.play.view,
+            switch (sst) {
+                .outside => ctx.play.selected_color,
+                .inside => rl.Color.green,
+                .hover => rl.Color.yellow,
+            },
+        );
     }
 
     pub fn check_inside(ctx: *Context) select.CheckInsideResult {
@@ -146,13 +138,13 @@ pub const Place = union(enum) {
             while (tx < x + w) : (tx += 1) {
                 const cell = ctx.play.current_map[@intCast(ty)][@intCast(tx)];
                 if (cell.tag != .room or cell.building != null) {
-                    b.draw_with_win_pos_and_view(ctx, rl.getMousePosition(), &ctx.play.view, rl.Color.red);
+                    ctx.play.selected_color = rl.Color.red;
                     return .not_in_any_rect;
                 }
             }
         }
 
-        b.draw_with_win_pos_and_view(ctx, rl.getMousePosition(), &ctx.play.view, rl.Color.green);
+        ctx.play.selected_color = rl.Color.green;
         ctx.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
         return .in_someone;
     }
@@ -181,15 +173,16 @@ pub const Play = union(enum) {
     pub fn handler(ctx: *Context) @This() {
         ctx.play.view.mouse_wheel(ctx.hdw);
         ctx.play.view.drag_view(ctx.screen_width);
-        draw_cells(&ctx.play.view, ctx, 0);
-
         if (ctx.play.rs.pull()) |msg| return msg;
-        ctx.play.rs.render(ctx);
-
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
         if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
         if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
         return .no_trasition;
+    }
+
+    pub fn render(ctx: *Context) void {
+        draw_cells(&ctx.play.view, ctx, 0);
+        ctx.play.rs.render(ctx);
     }
 
     pub fn set_text_id(ctx: *Context, tid: textures.TextID) void {

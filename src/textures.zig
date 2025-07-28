@@ -111,12 +111,14 @@ pub const Textures = union(enum) {
             ctx.textures.view.drag_view(ctx.screen_width);
         }
 
-        ctx.textures.render(ctx);
-
         if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
             return .to_menu;
         }
         return .no_trasition;
+    }
+
+    pub fn render(ctx: *Context) void {
+        ctx.textures.render(ctx);
     }
 };
 
@@ -133,7 +135,7 @@ pub fn SetTexture(target: type) type {
             return .to_target;
         }
 
-        pub fn select_render(ctx: *Context, sst: select.SelectStage) bool {
+        pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
             {
                 ctx.textures.view.mouse_wheel(ctx.hdw);
                 ctx.textures.view.drag_view(ctx.screen_width);
@@ -164,7 +166,6 @@ pub fn SetTexture(target: type) type {
                 },
                 else => {},
             }
-            return false;
         }
 
         pub fn check_inside(ctx: *Context) select.CheckInsideResult {
