@@ -1,5 +1,5 @@
 pub const PlayData = struct {
-    rs: RS = .empty,
+    rs: StateComponents(Play) = .empty,
     current_map: *CurrentMap,
     view: View = undefined,
     selected_cell_id: CellID = .{},
@@ -12,10 +12,6 @@ pub const PlayData = struct {
         .{ .x = 5, .y = 31 },
         .{ .x = 7, .y = 31 },
     },
-
-    pub fn animation(self: *const @This(), screen_width: f32, screen_height: f32, duration: f32, total: f32, b: bool) void {
-        anim.animation_list_r(screen_width, screen_height, self.rs.items, duration, total, b);
-    }
 };
 
 pub const CellID = struct {
@@ -175,7 +171,7 @@ pub const Play = union(enum) {
     // zig fmt: off
     to_exit         : Example(.next, ps.Exit),
     to_editor       : Example(.next, Select(Play, Editor(Play))),
-    to_menu         : Example(.next, Animation(Play, Menu)),
+    to_menu         : Example(.next, Menu),
     to_build        : Example(.next, Select(Play, TBuild)),
     to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
     set_maze_text_id: Example(.next, Select(Play, SetTexture(Play))),
@@ -186,7 +182,9 @@ pub const Play = union(enum) {
         ctx.play.view.mouse_wheel(ctx.hdw);
         ctx.play.view.drag_view(ctx.screen_width);
         draw_cells(&ctx.play.view, ctx, 0);
-        for (ctx.play.rs.items) |*r| if (r.render(ctx, @This(), action_list)) |msg| return msg;
+
+        if (ctx.play.rs.pull()) |msg| return msg;
+        ctx.play.rs.render(ctx);
 
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
         if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
@@ -223,8 +221,7 @@ pub const Play = union(enum) {
     fn toEditor(_: *Context) ?@This() {
         return .to_editor;
     }
-    fn toMenu(ctx: *Context) ?@This() {
-        ctx.animation.start_time = std.time.milliTimestamp();
+    fn toMenu(_: *Context) ?@This() {
         return .to_menu;
     }
 
@@ -244,25 +241,7 @@ pub const Play = union(enum) {
         return &ctx.play.current_texture;
     }
 
-    pub fn animation(
-        ctx: *Context,
-        screen_width: f32,
-        screen_height: f32,
-        duration: f32,
-        total: f32,
-        b: bool,
-    ) void {
-        anim.animation_list_r(
-            screen_width,
-            screen_height,
-            ctx.play.rs.items,
-            duration,
-            total,
-            b,
-        );
-    }
-
-    pub fn access_rs(ctx: *Context) *RS {
+    pub fn access_rs(ctx: *Context) *StateComponents(Play) {
         return &ctx.play.rs;
     }
 };
@@ -323,7 +302,6 @@ pub fn draw_cells(view: *const View, ctx: *Context, inc: f32) void {
 const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
-const anim = @import("animation.zig");
 const select = @import("select.zig");
 const tbuild = @import("tbuild.zig");
 const textures = @import("textures.zig");
@@ -333,7 +311,6 @@ const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
-const Animation = @import("animation.zig").Animation;
 const Map = @import("map.zig").Map;
 const TBuild = @import("tbuild.zig").TBuild;
 const SetTexture = @import("textures.zig").SetTexture;
@@ -345,6 +322,6 @@ const maze = @import("maze");
 const Context = core.Context;
 const R = core.R;
 const Action = core.Action;
-const RS = core.RS;
+const StateComponents = core.StateComponents;
 const Maze = maze.Maze;
 const View = utils.View;
