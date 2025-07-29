@@ -46,6 +46,7 @@ pub fn main() anyerror!void {
     rl.initWindow(@as(i32, @intFromFloat(ctx.screen_width)), @as(i32, @intFromFloat(ctx.screen_height)), "ray-game");
     defer rl.closeWindow(); // Close window and OpenGL context
 
+    rl.setExitKey(.null); // Prevent window from closing when escape key is pressed
     rl.setWindowState(.{ .window_resizable = true });
     rl.hideCursor();
     rl.setTraceLogLevel(.none);
