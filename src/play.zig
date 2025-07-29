@@ -8,10 +8,10 @@ pub const PlayData = struct {
 
     current_texture: i32 = 0,
     maze_texture: [4]textures.TextID = .{
-        .{ .x = 2, .y = 31 },
-        .{ .x = 6, .y = 67 },
-        .{ .x = 5, .y = 31 },
-        .{ .x = 7, .y = 31 },
+        .{ .x = 19, .y = 18 },
+        .{ .x = 18, .y = 27 },
+        .{ .x = 28, .y = 22 },
+        .{ .x = 27, .y = 22 },
     },
 };
 

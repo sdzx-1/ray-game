@@ -18,16 +18,22 @@ const View = utils.View;
 pub const TextureData = struct {
     name: [:0]const u8,
     tex2d: rl.Texture2D,
+
+    pub fn lessThanFn(_: void, lhs: @This(), rhs: @This()) bool {
+        return switch (std.mem.order(u8, lhs.name, rhs.name)) {
+            .lt => true,
+            else => false,
+        };
+    }
 };
 
 pub const Cell = union(enum) {
     texture: TextureData,
     blank: void,
-    text_dir_name: [:0]const u8,
 };
 
-pub const Width = 20;
-pub const Height = 90;
+pub const Width = 30;
+pub const Height = 33;
 
 pub const TextArr = [Height][Width]Cell;
 
@@ -46,7 +52,7 @@ pub fn arr_set_blank(ta: *TextArr) void {
 
 pub const TexturesData = struct {
     text_arr: *TextArr,
-    view: View = .{ .x = 0, .y = 0, .width = 25 },
+    view: View = .{ .x = 0, .y = 0, .width = Width },
 
     pub fn read(self: *const @This(), id: TextID) Cell {
         return self.text_arr[id.y][id.x];
@@ -90,9 +96,6 @@ pub const TexturesData = struct {
                                 0,
                                 rl.Color.white,
                             );
-                        },
-                        .text_dir_name => |name| {
-                            rl.drawText(name, @intFromFloat(win_pos.x), @intFromFloat(win_pos.y), 20, rl.Color.green);
                         },
                     }
                 }
@@ -179,7 +182,6 @@ pub fn SetTexture(target: type) type {
 
             switch (ctx.textures.text_arr[yi][xi]) {
                 .blank => return .not_in_any_rect,
-                .text_dir_name => return .not_in_any_rect,
                 .texture => {
                     ctx.sel_texture.text_id = .{ .x = xi, .y = yi };
                     return .in_someone;
@@ -198,13 +200,15 @@ pub fn SetTexture(target: type) type {
     };
 }
 
+const TextureDataArray = std.ArrayListUnmanaged(TextureData);
+
 pub fn load(ctx: *Context) !void {
     const cwd = std.fs.cwd();
     const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
     var walker = try res_dir.walk(ctx.gpa);
 
-    var x: usize = 0;
-    var y: usize = 0;
+    var text_data_arr: TextureDataArray = .empty;
+    defer text_data_arr.deinit(ctx.gpa);
     while (try walker.next()) |entry| {
         switch (entry.kind) {
             .file => {
@@ -212,24 +216,17 @@ pub fn load(ctx: *Context) !void {
                 if (std.mem.eql(u8, ext, ".png")) {
                     const path = try std.fs.path.joinZ(ctx.gpa, &.{ "data/resouces", entry.path });
                     const loaded_texture = try rl.loadTexture(path);
-                    ctx.textures.text_arr[y][x] = .{ .texture = .{
-                        .name = try ctx.gpa.dupeZ(u8, entry.basename),
-                        .tex2d = loaded_texture,
-                    } };
-                    x += 1;
-                    if (x >= Width) {
-                        y += 1;
-                        x = 0;
-                    }
+                    try text_data_arr.append(ctx.gpa, .{ .name = try ctx.gpa.dupeZ(u8, entry.basename), .tex2d = loaded_texture });
                 }
             },
-            else => {
-                x = 1;
-                y += 1;
-                const str = try ctx.gpa.dupeZ(u8, entry.basename);
-                ctx.textures.text_arr[y][0] = .{ .text_dir_name = str };
-            },
+            else => {},
         }
     }
-    std.debug.print("y: {d}, x: {d}\n", .{ y, x });
+    std.sort.insertion(TextureData, text_data_arr.items, {}, TextureData.lessThanFn);
+
+    for (text_data_arr.items, 0..) |data, i| {
+        const y: usize = @intCast(i / Width);
+        const x: usize = @intCast(@mod(i, Width));
+        ctx.textures.text_arr[y][x] = .{ .texture = data };
+    }
 }

@@ -124,7 +124,7 @@ pub const Building = struct {
     width: f32,
     height: f32,
     color: rl.Color = .white,
-    text_id: textures.TextID = .{ .x = 8, .y = 8 },
+    text_id: textures.TextID = .{ .x = 0, .y = 0 },
 
     pub fn rotate(self: *@This()) void {
         const t = self.width;
