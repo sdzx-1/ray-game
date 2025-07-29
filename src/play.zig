@@ -122,8 +122,8 @@ pub const Place = union(enum) {
     pub fn check_inside(ctx: *Context) select.CheckInsideResult {
         const b = &ctx.play.selected_build;
         const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
-        const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
+        const x: i32 = @intFromFloat(@round(vp.x - b.width / 2));
+        const y: i32 = @intFromFloat(@round(vp.y - b.height / 2));
         const w: i32 = @intFromFloat(b.width);
         const h: i32 = @intFromFloat(b.height);
 
@@ -152,8 +152,8 @@ pub const Place = union(enum) {
     pub fn check_still_inside(ctx: *Context) bool {
         const b = &ctx.play.selected_build;
         const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
-        const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
+        const x: i32 = @intFromFloat(@round(vp.x - b.width / 2));
+        const y: i32 = @intFromFloat(@round(vp.y - b.height / 2));
         return (x == ctx.play.selected_cell_id.x and
             y == ctx.play.selected_cell_id.y);
     }
