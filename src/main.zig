@@ -86,6 +86,8 @@ pub fn main() anyerror!void {
 }
 
 fn logic(id: Runner.StateId, ctx: *core.Context) ?Runner.StateId {
+    if (rl.windowShouldClose()) return null;
+
     rl.beginDrawing();
     if (rl.isWindowResized()) {
         ctx.screen_width = @floatFromInt(rl.getScreenWidth());
