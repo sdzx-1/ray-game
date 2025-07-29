@@ -171,8 +171,8 @@ pub fn StateComponents(State: type) type {
 
         pub fn render(self: *Self, ctx: *Context) void {
             for (self.array_r.items) |*r| {
-                if (self.msg == null) {
-                    self.msg = r.render(ctx);
+                if (r.render(ctx)) |msg| {
+                    self.msg = msg;
                 }
             }
         }
