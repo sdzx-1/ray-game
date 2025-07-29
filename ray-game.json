@@ -146,8 +146,24 @@
       "id": 35
     },
     {
-      "name": "textures.Textures",
+      "name": "select.Select((function 'Example'),{11},{39})",
       "id": 36
+    },
+    {
+      "name": "select.Inside((function 'Example'),{11},{39})",
+      "id": 37
+    },
+    {
+      "name": "select.Hover((function 'Example'),{11},{39})",
+      "id": 38
+    },
+    {
+      "name": "play.Delete",
+      "id": 39
+    },
+    {
+      "name": "textures.Textures",
+      "id": 40
     }
   ],
   "edges": [
@@ -171,7 +187,7 @@
     },
     {
       "from": 0,
-      "to": 36,
+      "to": 40,
       "color": "blue",
       "label": "to_textures"
     },
@@ -438,6 +454,12 @@
       "to": 32,
       "color": "blue",
       "label": "set_maze_text_id"
+    },
+    {
+      "from": 11,
+      "to": 36,
+      "color": "blue",
+      "label": "to_delete"
     },
     {
       "from": 11,
@@ -981,13 +1003,97 @@
     },
     {
       "from": 36,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 36,
+      "to": 37,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 36,
+      "to": 36,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 37,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 37,
+      "to": 36,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 37,
+      "to": 38,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 37,
+      "to": 39,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 37,
+      "to": 37,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 38,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 38,
+      "to": 36,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 38,
+      "to": 37,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 38,
+      "to": 39,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 38,
+      "to": 38,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 39,
+      "to": 36,
+      "color": "black",
+      "label": "to_delete"
+    },
+    {
+      "from": 40,
       "to": 0,
       "color": "blue",
       "label": "to_menu"
     },
     {
-      "from": 36,
-      "to": 36,
+      "from": 40,
+      "to": 40,
       "color": "blue",
       "label": "no_trasition"
     }

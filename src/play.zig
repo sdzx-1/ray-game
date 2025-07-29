@@ -159,6 +159,51 @@ pub const Place = union(enum) {
     }
 };
 
+pub const Delete = union(enum) {
+    to_delete: Example(.current, Select(Play, Delete)),
+
+    pub fn handler(ctx: *Context) @This() {
+        const id = ctx.play.selected_cell_id;
+        ctx.play.current_map[id.y][id.x].building = null;
+        return .to_delete;
+    }
+
+    pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
+        _ = sst;
+        ctx.play.view.mouse_wheel(ctx.hdw);
+        ctx.play.view.drag_view(ctx.screen_width);
+        draw_cells(&ctx.play.view, ctx, -1);
+    }
+
+    pub fn check_inside(ctx: *Context) select.CheckInsideResult {
+        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
+        const x: i32 = @intFromFloat(@floor(vp.x));
+        const y: i32 = @intFromFloat(@floor(vp.y));
+
+        if (x < 0 or
+            y < 0 or
+            x >= ctx.map.maze_config.total_x or
+            y >= ctx.map.maze_config.total_y) return .not_in_any_rect;
+
+        const cell = ctx.play.current_map[@intCast(y)][@intCast(x)];
+        if (cell.building != null) {
+            ctx.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
+            return .in_someone;
+        }
+
+        return .not_in_any_rect;
+    }
+
+    pub fn check_still_inside(ctx: *Context) bool {
+        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
+        const x: i32 = @intFromFloat(@floor(vp.x));
+        const y: i32 = @intFromFloat(@floor(vp.y));
+
+        return (x == ctx.play.selected_cell_id.x and
+            y == ctx.play.selected_cell_id.y);
+    }
+};
+
 pub const Play = union(enum) {
     // zig fmt: off
     to_exit         : Example(.next, ps.Exit),
@@ -167,6 +212,7 @@ pub const Play = union(enum) {
     to_build        : Example(.next, Select(Play, TBuild)),
     to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
     set_maze_text_id: Example(.next, Select(Play, SetTexture(Play))),
+    to_delete       : Example(.next, Select(Play, Delete)),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
 
@@ -177,6 +223,7 @@ pub const Play = union(enum) {
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
         if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
         if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
+        if (rl.isKeyPressed(rl.KeyboardKey.d)) return .to_delete;
         return .no_trasition;
     }
 
@@ -205,7 +252,12 @@ pub const Play = union(enum) {
         .{ .name = "Build", .val = .{ .button = toBuild } },
         .{ .name = "Place", .val = .{ .button = toPlace } },
         .{ .name = "Exit", .val = .{ .button = toExit } },
+        .{ .name = "Delete", .val = .{ .button = toDelete } },
     };
+
+    fn toDelete(_: *Context) ?@This() {
+        return .to_delete;
+    }
 
     fn toExit(_: *Context) ?@This() {
         return .to_exit;

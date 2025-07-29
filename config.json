@@ -500,6 +500,25 @@
       "action_id": 6,
       "action_select": false,
       "dropdown_box": false
+    },
+    {
+      "rect": {
+        "x": 1.698e3,
+        "y": 1.64e2,
+        "width": 9.8e1,
+        "height": 4e1
+      },
+      "str_buf": "delete\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000",
+      "color": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 255
+      },
+      "enable_action": true,
+      "action_id": 7,
+      "action_select": false,
+      "dropdown_box": false
     }
   ],
   "tbuild": [
