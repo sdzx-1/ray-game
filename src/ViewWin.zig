@@ -39,6 +39,18 @@ pub fn viewpos_to_winpos(self: *const Self, pos: Viewport.Pos) Winport.Pos {
     return self.winport.pos.add(dwpos);
 }
 
+pub fn viewpos_from_vector2(self: *const Self, vec2: rl.Vector2) Viewport.Pos {
+    return self.winpos_to_viewpos(Winport.Pos.fromVector2(vec2));
+}
+
+pub fn winport_intersect_rect(self: *const @This(), rect: rl.Rectangle) ?rl.Rectangle {
+    return self.winport.intersect_rect(self.hw_ratio, rect);
+}
+
+pub fn viewport_intersect_rect(self: *const @This(), rect: rl.Rectangle) ?rl.Rectangle {
+    return self.viewport.intersect_rect(self.hw_ratio, rect);
+}
+
 pub fn mouse_drag_winport(self: *Self) void {
     if (rl.isMouseButtonDown(rl.MouseButton.middle) or
         (rl.isKeyDown(rl.KeyboardKey.left_alt)))
@@ -119,6 +131,34 @@ pub fn Port(name: []const u8) type {
             self.pos.x -= dw / 2;
             self.pos.y -= (dw * hw_ratio) / 2;
             self.width += dw;
+        }
+
+        pub fn in_x_area(self: *const @This(), x: f32) bool {
+            return (x >= self.pos.x and x <= self.pos.x + self.width);
+        }
+
+        pub fn in_y_area(self: *const @This(), hw_ratio: f32, y: f32) bool {
+            return (y >= self.pos.y and y <= self.pos.y + self.width * hw_ratio);
+        }
+
+        pub fn intersect_rect(self: *const @This(), hw_ratio: f32, rect: rl.Rectangle) ?rl.Rectangle {
+            const left_top_x = @max(self.pos.x, rect.x);
+            const left_top_y = @max(self.pos.y, rect.y);
+
+            const right_bottom_x = @min(self.pos.x + self.width, rect.x + rect.width);
+            const right_bottom_y = @min(self.pos.y + self.width * hw_ratio, rect.y + rect.height);
+
+            if (self.in_x_area(left_top_x) and self.in_y_area(hw_ratio, left_top_y) and
+                self.in_x_area(right_bottom_x) and self.in_y_area(hw_ratio, right_bottom_y))
+            {
+                return .{
+                    .x = left_top_x,
+                    .y = left_top_y,
+                    .width = right_bottom_x - left_top_x,
+                    .height = right_bottom_y - left_top_y,
+                };
+            }
+            return null;
         }
     };
 }

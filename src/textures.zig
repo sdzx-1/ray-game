@@ -14,6 +14,7 @@ const Context = core.Context;
 const R = core.R;
 const getTarget = core.getTarget;
 const View = utils.View;
+const ViewWin = @import("ViewWin.zig");
 
 pub const TextureData = struct {
     name: [:0]const u8,
@@ -52,7 +53,11 @@ pub fn arr_set_blank(ta: *TextArr) void {
 
 pub const TexturesData = struct {
     text_arr: *TextArr,
-    view: View = .{ .x = 0, .y = 0, .width = Width },
+    vw: ViewWin = .{
+        .hw_ratio = 1,
+        .winport = .{},
+        .viewport = .{ .pos = .{ .x = 0, .y = 0 }, .width = @floatFromInt(Width) },
+    },
 
     pub fn read(self: *const @This(), id: TextID) Cell {
         return self.text_arr[id.y][id.x];
@@ -72,26 +77,37 @@ pub const TexturesData = struct {
         }
     }
 
-    pub fn render(_: @This(), ctx: *Context) void {
-        for (0..Height) |y| {
-            for (0..Width) |x| {
-                const val = ctx.textures.text_arr[y][x];
-                const win_pos = ctx.textures.view.view_to_win(
-                    ctx.screen_width,
-                    .{ .x = @floatFromInt(x), .y = @floatFromInt(y) },
-                );
-                const worh = ctx.screen_width / ctx.textures.view.width;
+    pub fn render(self: @This(), ctx: *Context) void {
+        if (self.vw.viewport_intersect_rect(.{
+            .x = 0,
+            .y = 0,
+            .width = @as(f32, @floatFromInt(Width)),
+            .height = @as(f32, @floatFromInt(Height)),
+        })) |rect| {
+            const start_x: usize = @intFromFloat(@floor(rect.x));
+            const start_y: usize = @intFromFloat(@floor(rect.y));
+            const end_x: usize = @intFromFloat(@floor(rect.x + rect.width - 0.01));
+            const end_y: usize = @intFromFloat(@floor(rect.y + rect.height - 0.01));
 
-                const view = ctx.textures.view;
-                const r1: rl.Rectangle = .{ .x = view.x, .y = view.y, .width = view.width, .height = view.width * ctx.hdw };
-                const r2: rl.Rectangle = .{ .x = @floatFromInt(x), .y = @floatFromInt(y), .width = 1, .height = 1 };
-                if (r1.checkCollision(r2)) {
+            rl.beginScissorMode(
+                @intFromFloat(self.vw.winport.pos.x),
+                @intFromFloat(self.vw.winport.pos.y),
+                @intFromFloat(self.vw.winport.width),
+                @intFromFloat(self.vw.winport.width * self.vw.hw_ratio),
+            );
+            defer rl.endScissorMode();
+
+            for (start_y..end_y + 1) |y| {
+                for (start_x..end_x + 1) |x| {
+                    const val = ctx.textures.text_arr[y][x];
                     switch (val) {
                         .blank => {},
                         .texture => |text| {
+                            const win_pos1 = self.vw.viewpos_to_winpos(.{ .x = @floatFromInt(x), .y = @floatFromInt(y) });
+                            const dw = self.vw.winport.width / self.vw.viewport.width;
                             text.tex2d.drawPro(
                                 .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                                .{ .x = win_pos.x, .y = win_pos.y, .width = worh, .height = worh },
+                                .{ .x = win_pos1.x, .y = win_pos1.y, .width = dw, .height = dw },
                                 .{ .x = 0, .y = 0 },
                                 0,
                                 rl.Color.white,
@@ -110,8 +126,10 @@ pub const Textures = union(enum) {
 
     pub fn handler(ctx: *Context) @This() {
         {
-            ctx.textures.view.mouse_wheel(ctx.hdw);
-            ctx.textures.view.drag_view(ctx.screen_width);
+            ctx.textures.vw.hw_ratio = ctx.hdw;
+            ctx.textures.vw.winport = .{ .width = ctx.screen_width, .pos = .{ .x = 0, .y = 0 } };
+            const dr = rl.getMouseWheelMove() * 1.4;
+            ctx.textures.vw.viewport.pos.y -= dr;
         }
 
         if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
@@ -138,15 +156,21 @@ pub fn SetTexture(target: type) type {
             return .to_target;
         }
 
+        pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
+            _ = sst;
+            ctx.textures.vw.hw_ratio = ctx.hdw;
+            ctx.textures.vw.winport = .{ .width = ctx.screen_width, .pos = .{ .x = 0, .y = 0 } };
+            const dr = rl.getMouseWheelMove() * 1.4;
+            ctx.textures.vw.viewport.pos.y -= dr;
+            return false;
+        }
+
         pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
-            {
-                ctx.textures.view.mouse_wheel(ctx.hdw);
-                ctx.textures.view.drag_view(ctx.screen_width);
-            }
             ctx.textures.render(ctx);
             const selected = target.sed_texture(ctx);
-            const smp = ctx.textures.view.view_to_win(ctx.screen_width, .{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
-            const wh: f32 = ctx.screen_width / ctx.textures.view.width;
+
+            const smp = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
+            const wh: f32 = ctx.textures.vw.winport.width / ctx.textures.vw.viewport.width;
             rl.drawRectangleLinesEx(.{
                 .x = smp.x,
                 .y = smp.y,
@@ -163,7 +187,7 @@ pub fn SetTexture(target: type) type {
                         name,
                         @as(i32, @intFromFloat(mp.x)) - @divTrunc(mwid, 2),
                         @as(i32, @intFromFloat(mp.y)) - 40,
-                        22,
+                        32,
                         rl.Color.green,
                     );
                 },
@@ -172,7 +196,7 @@ pub fn SetTexture(target: type) type {
         }
 
         pub fn check_inside(ctx: *Context) select.CheckInsideResult {
-            const view_pos = ctx.textures.view.win_to_view(ctx.screen_width, rl.getMousePosition());
+            const view_pos = ctx.textures.vw.viewpos_from_vector2(rl.getMousePosition());
             const x: i32 = @intFromFloat(@floor(view_pos.x));
             const y: i32 = @intFromFloat(@floor(view_pos.y));
 
@@ -190,7 +214,7 @@ pub fn SetTexture(target: type) type {
         }
 
         pub fn check_still_inside(ctx: *Context) bool {
-            const view_pos = ctx.textures.view.win_to_view(ctx.screen_width, rl.getMousePosition());
+            const view_pos = ctx.textures.vw.viewpos_from_vector2(rl.getMousePosition());
             const x: i32 = @intFromFloat(@floor(view_pos.x));
             const y: i32 = @intFromFloat(@floor(view_pos.y));
 
