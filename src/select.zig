@@ -49,6 +49,12 @@ pub fn Select(
             render_(ctx, .outside);
         }
 
+        pub const init_fun = selected.init_fun1;
+        pub const init_fun1 = selected.init_fun2;
+        pub const init_fun2 = selected.init_fun3;
+        pub const init_fun3 = selected.init_fun4;
+        pub const init_fun4 = selected.init_fun5;
+
         pub const select_fun = selected.select_fun1;
         pub const select_fun1 = selected.select_fun2;
         pub const select_fun2 = selected.select_fun3;

@@ -176,6 +176,17 @@ pub fn Select(back: type, selected: type) type {
     return select.Select(Example, back, selected);
 }
 
+pub fn Init(State: type) type {
+    return union(enum) {
+        init_state: Example(.current, State),
+
+        pub fn handler(ctx: *Context) @This() {
+            State.init_fun(ctx);
+            return .to_view;
+        }
+    };
+}
+
 const std = @import("std");
 const ps = @import("polystate");
 const select = @import("select.zig");
