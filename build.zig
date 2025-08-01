@@ -5,6 +5,7 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
 
     const optimize = b.standardOptimizeOption(.{});
+    const no_bin = b.option(bool, "no_bin", "no bin") orelse false;
 
     // zig fmt: off
     const polystate  = b.dependency("polystate",  .{.target = target, .optimize = optimize}).module("root");
@@ -36,26 +37,31 @@ pub fn build(b: *std.Build) void {
     const install_mmd_file = addInstallGraphFile(b, "ray-game", exe_mod, .mermaid, polystate, target, .{ .custom = "graphs" });
     const install_json_file = addInstallGraphFile(b, "ray-game", exe_mod, .json, polystate, target, .{ .custom = "../" });
 
-    b.getInstallStep().dependOn(&install_dot_file.step);
-    b.getInstallStep().dependOn(&install_mmd_file.step);
-    b.getInstallStep().dependOn(&install_json_file.step);
-
     const exe = b.addExecutable(.{
         .name = "ray_game",
         .root_module = exe_mod,
     });
 
-    exe.linkLibrary(raylib_dep.artifact("raylib"));
-    b.installArtifact(exe);
+    if (no_bin) {
+        exe.linkLibrary(raylib_dep.artifact("raylib"));
+        b.getInstallStep().dependOn(&exe.step);
+    } else {
+        b.getInstallStep().dependOn(&install_dot_file.step);
+        b.getInstallStep().dependOn(&install_mmd_file.step);
+        b.getInstallStep().dependOn(&install_json_file.step);
 
-    const run_cmd = b.addRunArtifact(exe);
+        exe.linkLibrary(raylib_dep.artifact("raylib"));
+        b.installArtifact(exe);
 
-    run_cmd.step.dependOn(b.getInstallStep());
+        const run_cmd = b.addRunArtifact(exe);
 
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
+        run_cmd.step.dependOn(b.getInstallStep());
+
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+
+        const run_step = b.step("run", "Run the app");
+        run_step.dependOn(&run_cmd.step);
     }
-
-    const run_step = b.step("run", "Run the app");
-    run_step.dependOn(&run_cmd.step);
 }

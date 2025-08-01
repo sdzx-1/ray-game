@@ -1,16 +1,3 @@
-const std = @import("std");
-const ps = @import("polystate");
-const core = @import("core.zig");
-const select = @import("select.zig");
-const Select = core.Select;
-const Example = core.Example;
-
-const rl = @import("raylib");
-const rg = @import("raygui");
-
-const Context = core.Context;
-const StateComponents = core.StateComponents;
-
 pub const EditorData = struct {
     // copyed_rect: ?R = null,
     selected_id: usize = 0,
@@ -193,3 +180,16 @@ pub fn Editor(target: type) type {
         }
     };
 }
+
+const std = @import("std");
+const ps = @import("polystate");
+const core = @import("core.zig");
+const select = @import("select.zig");
+const Select = core.Select;
+const Example = core.Example;
+
+const rl = @import("raylib");
+const rg = @import("raygui");
+
+const Context = core.Context;
+const StateComponents = core.StateComponents;

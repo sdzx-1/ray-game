@@ -58,12 +58,15 @@ pub const Place = union(enum) {
         return .to_play;
     }
 
+    pub fn select_fun1(ctx: *Context, sst: select.SelectStage) bool {
+        _ = sst;
+        ctx.tbuild.view.mouse_wheel(ctx.hdw);
+        ctx.tbuild.view.drag_view(ctx.screen_width);
+        return false;
+    }
+
     pub fn select_render1(ctx: *Context, sst: select.SelectStage) void {
         _ = sst;
-        {
-            ctx.tbuild.view.mouse_wheel(ctx.hdw);
-            ctx.tbuild.view.drag_view(ctx.screen_width);
-        }
         draw_cells(&ctx.play.view, ctx, -1);
         for (ctx.tbuild.list.items) |*b| {
             const win_pos = ctx.tbuild.view.view_to_win(
@@ -211,7 +214,7 @@ pub const Play = union(enum) {
     to_menu         : Example(.next, Menu),
     to_build        : Example(.next, Select(Play, TBuild)),
     to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
-    set_maze_text_id: Example(.next, Select(Play, SetTexture(Play))),
+    set_maze_text_id: Example(.next, Init(Select(Play, SetTexture(true, Play)))),
     to_delete       : Example(.next, Select(Play, Delete)),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
@@ -236,7 +239,7 @@ pub const Play = union(enum) {
         ctx.play.maze_texture[@intCast(ctx.play.current_texture)] = tid;
     }
 
-    pub fn sed_texture(ctx: *const Context) textures.TextID {
+    pub fn get_text_id(ctx: *const Context) textures.TextID {
         return ctx.play.maze_texture[@intCast(ctx.play.current_texture)];
     }
 
@@ -355,6 +358,7 @@ const utils = @import("utils.zig");
 const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
+const Init = core.Init;
 const Editor = @import("editor.zig").Editor;
 const Map = @import("map.zig").Map;
 const TBuild = @import("tbuild.zig").TBuild;
@@ -365,7 +369,6 @@ const rg = @import("raygui");
 const maze = @import("maze");
 
 const Context = core.Context;
-const R = core.R;
 const Action = core.Action;
 const StateComponents = core.StateComponents;
 const Maze = maze.Maze;

@@ -199,7 +199,6 @@ const rg = @import("raygui");
 
 const Example = core.Example;
 const Context = core.Context;
-const R = core.R;
 const Action = core.Action;
 const StateComponents = core.StateComponents;
 const maze = @import("maze");

@@ -1,14 +1,3 @@
-const std = @import("std");
-const StateComponents = core.StateComponents;
-const core = @import("core.zig");
-const tbuild = @import("tbuild.zig");
-const map = @import("map.zig");
-const menu = @import("menu.zig");
-const play = @import("play.zig");
-const Context = core.Context;
-const rl = @import("raylib");
-const textures = @import("textures.zig");
-
 const save_path = "config.json";
 
 pub const SaveData = struct {
@@ -141,3 +130,14 @@ pub const View = struct {
         }
     }
 };
+
+const std = @import("std");
+const StateComponents = core.StateComponents;
+const core = @import("core.zig");
+const tbuild = @import("tbuild.zig");
+const map = @import("map.zig");
+const menu = @import("menu.zig");
+const play = @import("play.zig");
+const Context = core.Context;
+const rl = @import("raylib");
+const textures = @import("textures.zig");
