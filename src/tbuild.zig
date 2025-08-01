@@ -2,7 +2,7 @@ pub const TBuild = union(enum) {
     // zig fmt: off
     to_play     : Example(.next, Play),
     to_select   : Example(.next, Select(Play, TBuild)),
-    set_text_Id : Example(.next, Select(TBuild, SelectTexture(true, TBuild))),
+    set_text_Id : Example(.next, Select(TBuild, SetTexture(true, TBuild))),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
@@ -228,7 +228,7 @@ const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Map = @import("map.zig").Map;
-const SelectTexture = @import("textures.zig").SetTexture;
+const SetTexture = @import("textures.zig").SetTexture;
 const Play = @import("play.zig").Play;
 
 const rl = @import("raylib");
