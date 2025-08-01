@@ -84,7 +84,7 @@ pub const TexturesData = struct {
                             const dw = self.vw.wv_ratio();
                             text.tex2d.drawPro(
                                 .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                                .{ .x = win_pos1.x, .y = win_pos1.y, .width = dw, .height = dw },
+                                .{ .x = win_pos1.x + 1, .y = win_pos1.y + 1, .width = dw - 1, .height = dw - 1 },
                                 .{ .x = 0, .y = 0 },
                                 0,
                                 rl.Color.white,
@@ -147,6 +147,16 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
                     .width = wh,
                     .height = wh,
                 }, 10, rl.Color.green);
+            }
+
+            switch (sst) {
+                .outside => {},
+                else => {
+                    const id = ctx.sel_texture.text_id;
+                    const wpos = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(id.x), .y = @floatFromInt(id.y) });
+                    const dw = ctx.textures.vw.wv_ratio();
+                    rl.drawRectangleLinesEx(.{ .x = wpos.x, .y = wpos.y, .width = dw + 1, .height = dw + 1 }, 2, rl.Color.red);
+                },
             }
             switch (sst) {
                 .hover => {
