@@ -58,12 +58,15 @@ pub const Place = union(enum) {
         return .to_play;
     }
 
+    pub fn select_fun1(ctx: *Context, sst: select.SelectStage) bool {
+        _ = sst;
+        ctx.tbuild.view.mouse_wheel(ctx.hdw);
+        ctx.tbuild.view.drag_view(ctx.screen_width);
+        return false;
+    }
+
     pub fn select_render1(ctx: *Context, sst: select.SelectStage) void {
         _ = sst;
-        {
-            ctx.tbuild.view.mouse_wheel(ctx.hdw);
-            ctx.tbuild.view.drag_view(ctx.screen_width);
-        }
         draw_cells(&ctx.play.view, ctx, -1);
         for (ctx.tbuild.list.items) |*b| {
             const win_pos = ctx.tbuild.view.view_to_win(

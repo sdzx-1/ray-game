@@ -28,8 +28,8 @@ pub fn Select(
 
         pub fn handler(ctx: *Context) @This() {
             if (@hasDecl(selected, "select_fun")) {
-                const select_fun: fn (*Context, SelectStage) bool = selected.select_fun;
-                _ = select_fun(ctx, .outside);
+                const fun: fn (*Context, SelectStage) bool = selected.select_fun;
+                _ = fun(ctx, .outside);
             }
 
             const res: CheckInsideResult = selected.check_inside(ctx);
