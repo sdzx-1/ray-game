@@ -81,7 +81,7 @@ pub const TexturesData = struct {
                         .blank => {},
                         .texture => |text| {
                             const win_pos1 = self.vw.viewpos_to_winpos(.{ .x = @floatFromInt(x), .y = @floatFromInt(y) });
-                            const dw = self.vw.winport.width / self.vw.viewport.width;
+                            const dw = self.vw.wv_ratio();
                             text.tex2d.drawPro(
                                 .{ .x = 0, .y = 0, .width = 256, .height = 256 },
                                 .{ .x = win_pos1.x, .y = win_pos1.y, .width = dw, .height = dw },
@@ -140,7 +140,7 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
                 const selected = target.get_text_id(ctx);
 
                 const smp = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
-                const wh: f32 = ctx.textures.vw.winport.width / ctx.textures.vw.viewport.width;
+                const wh: f32 = ctx.textures.vw.wv_ratio();
                 rl.drawRectangleLinesEx(.{
                     .x = smp.x,
                     .y = smp.y,

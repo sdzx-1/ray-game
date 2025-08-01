@@ -92,6 +92,18 @@ pub fn winport_beginScissorMode(self: *Self) void {
     );
 }
 
+pub fn winport_get_height(self: *const Self) f32 {
+    return self.winport.get_height(self.hw_ratio);
+}
+
+pub fn viewport_get_height(self: *const Self) f32 {
+    return self.viewport.get_height(self.hw_ratio);
+}
+
+pub fn wv_ratio(self: *const Self) f32 {
+    return self.winport.width / self.viewport.width;
+}
+
 pub fn Port(name: []const u8) type {
     return struct {
         pos: Pos = .{ .x = 0, .y = 0 },
@@ -120,6 +132,10 @@ pub fn Port(name: []const u8) type {
         };
 
         pub const Name = name;
+
+        pub fn get_height(self: *const @This(), hw_ratio: f32) f32 {
+            return self.width * hw_ratio;
+        }
 
         pub fn in_port(self: *const @This(), pos: Pos, hw_ratio: f32) bool {
             if (pos.x > self.pos.x and
