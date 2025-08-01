@@ -80,6 +80,15 @@ pub fn mouse_wheel_zoom_viewport(self: *Self) void {
     self.viewport.zoom_port_with_center_unchage(self.hw_ratio, dr);
 }
 
+pub fn winport_beginScissorMode(self: *Self) void {
+    rl.beginScissorMode(
+        @intFromFloat(self.winport.pos.x),
+        @intFromFloat(self.winport.pos.y),
+        @intFromFloat(self.winport.width),
+        @intFromFloat(self.winport.width * self.hw_ratio),
+    );
+}
+
 pub fn Port(name: []const u8) type {
     return struct {
         pos: Pos = .{ .x = 0, .y = 0 },

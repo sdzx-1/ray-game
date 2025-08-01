@@ -89,12 +89,7 @@ pub const TexturesData = struct {
             const end_x: usize = @intFromFloat(@floor(rect.x + rect.width - 0.01));
             const end_y: usize = @intFromFloat(@floor(rect.y + rect.height - 0.01));
 
-            rl.beginScissorMode(
-                @intFromFloat(self.vw.winport.pos.x),
-                @intFromFloat(self.vw.winport.pos.y),
-                @intFromFloat(self.vw.winport.width),
-                @intFromFloat(self.vw.winport.width * self.vw.hw_ratio),
-            );
+            ctx.textures.vw.winport_beginScissorMode();
             defer rl.endScissorMode();
 
             for (start_y..end_y + 1) |y| {
@@ -161,7 +156,10 @@ pub fn SetTexture(target: type) type {
             ctx.textures.vw.hw_ratio = ctx.hdw;
             ctx.textures.vw.winport = .{ .width = ctx.screen_width, .pos = .{ .x = 0, .y = 0 } };
             const dr = rl.getMouseWheelMove() * 1.4;
-            ctx.textures.vw.viewport.pos.y -= dr;
+            if (dr != 0) {
+                ctx.textures.vw.viewport.pos.y -= dr;
+                return true;
+            }
             return false;
         }
 
@@ -183,13 +181,20 @@ pub fn SetTexture(target: type) type {
                     const name = val.texture.name;
                     const mp = rl.getMousePosition();
                     const mwid = rl.measureText(name, 22);
-                    rl.drawText(
-                        name,
-                        @as(i32, @intFromFloat(mp.x)) - @divTrunc(mwid, 2),
-                        @as(i32, @intFromFloat(mp.y)) - 40,
-                        32,
-                        rl.Color.green,
-                    );
+                    rl.drawText(name, @as(i32, @intFromFloat(mp.x)) - @divTrunc(mwid, 2), @as(i32, @intFromFloat(mp.y)) - 40, 32, rl.Color.green);
+
+                    switch (val) {
+                        .blank => {},
+                        .texture => |text| {
+                            text.tex2d.drawPro(
+                                .{ .x = 0, .y = 0, .width = 256, .height = 256 },
+                                .{ .x = if ((ctx.screen_width - mp.x) < 512) mp.x - 512 else mp.x, .y = mp.y, .width = 512, .height = 512 },
+                                .{ .x = 0, .y = 0 },
+                                0,
+                                rl.Color.white,
+                            );
+                        },
+                    }
                 },
                 else => {},
             }
