@@ -49,6 +49,12 @@ pub fn Select(
             render_(ctx, .outside);
         }
 
+        pub const select_fun = selected.select_fun1;
+        pub const select_fun1 = selected.select_fun2;
+        pub const select_fun2 = selected.select_fun3;
+        pub const select_fun3 = selected.select_fun4;
+        pub const select_fun4 = selected.select_fun5;
+
         pub const select_render = selected.select_render1;
         pub const select_render1 = selected.select_render2;
         pub const select_render2 = selected.select_render3;
