@@ -82,104 +82,112 @@
       "id": 19
     },
     {
-      "name": "select.Select((function 'Example'),{19},{23})",
+      "name": "core.Init({21})",
       "id": 20
     },
     {
-      "name": "select.Inside((function 'Example'),{19},{23})",
+      "name": "select.Select((function 'Example'),{19},{24})",
       "id": 21
     },
     {
-      "name": "select.Hover((function 'Example'),{19},{23})",
+      "name": "select.Inside((function 'Example'),{19},{24})",
       "id": 22
     },
     {
-      "name": "textures.SetTexture(true,{19})",
+      "name": "select.Hover((function 'Example'),{19},{24})",
       "id": 23
     },
     {
-      "name": "select.Select((function 'Example'),{11},{27})",
+      "name": "textures.SetTexture(true,{19})",
       "id": 24
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{27})",
+      "name": "select.Select((function 'Example'),{11},{28})",
       "id": 25
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{27})",
+      "name": "select.Inside((function 'Example'),{11},{28})",
       "id": 26
     },
     {
-      "name": "select.Select((function 'Example'),{28},{31})",
+      "name": "select.Hover((function 'Example'),{11},{28})",
       "id": 27
     },
     {
-      "name": "play.X({11},{31})",
+      "name": "select.Select((function 'Example'),{29},{32})",
       "id": 28
     },
     {
-      "name": "select.Inside((function 'Example'),{28},{31})",
+      "name": "play.X({11},{32})",
       "id": 29
     },
     {
-      "name": "select.Hover((function 'Example'),{28},{31})",
+      "name": "select.Inside((function 'Example'),{29},{32})",
       "id": 30
     },
     {
-      "name": "play.Place",
+      "name": "select.Hover((function 'Example'),{29},{32})",
       "id": 31
     },
     {
-      "name": "select.Select((function 'Example'),{11},{35})",
+      "name": "play.Place",
       "id": 32
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{35})",
+      "name": "core.Init({34})",
       "id": 33
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{35})",
+      "name": "select.Select((function 'Example'),{11},{37})",
       "id": 34
     },
     {
-      "name": "textures.SetTexture(true,{11})",
+      "name": "select.Inside((function 'Example'),{11},{37})",
       "id": 35
     },
     {
-      "name": "select.Select((function 'Example'),{11},{39})",
+      "name": "select.Hover((function 'Example'),{11},{37})",
       "id": 36
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{39})",
+      "name": "textures.SetTexture(true,{11})",
       "id": 37
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{39})",
+      "name": "select.Select((function 'Example'),{11},{41})",
       "id": 38
     },
     {
-      "name": "play.Delete",
+      "name": "select.Inside((function 'Example'),{11},{41})",
       "id": 39
     },
     {
-      "name": "textures.ViewTextures({0})",
+      "name": "select.Hover((function 'Example'),{11},{41})",
       "id": 40
     },
     {
-      "name": "select.Select((function 'Example'),{0},{44})",
+      "name": "play.Delete",
       "id": 41
     },
     {
-      "name": "select.Inside((function 'Example'),{0},{44})",
+      "name": "textures.ViewTextures({0})",
       "id": 42
     },
     {
-      "name": "select.Hover((function 'Example'),{0},{44})",
+      "name": "select.Select((function 'Example'),{0},{46})",
       "id": 43
     },
     {
-      "name": "textures.SetTexture(false,{40})",
+      "name": "select.Inside((function 'Example'),{0},{46})",
       "id": 44
+    },
+    {
+      "name": "select.Hover((function 'Example'),{0},{46})",
+      "id": 45
+    },
+    {
+      "name": "textures.SetTexture(false,{42})",
+      "id": 46
     }
   ],
   "edges": [
@@ -203,7 +211,7 @@
     },
     {
       "from": 0,
-      "to": 40,
+      "to": 42,
       "color": "black",
       "label": "view_textures"
     },
@@ -461,19 +469,19 @@
     },
     {
       "from": 11,
-      "to": 24,
+      "to": 25,
       "color": "blue",
       "label": "to_place"
     },
     {
       "from": 11,
-      "to": 32,
+      "to": 33,
       "color": "blue",
       "label": "set_maze_text_id"
     },
     {
       "from": 11,
-      "to": 36,
+      "to": 38,
       "color": "blue",
       "label": "to_delete"
     },
@@ -683,45 +691,21 @@
     },
     {
       "from": 20,
-      "to": 19,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 20,
       "to": 21,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 20,
-      "to": 20,
-      "color": "blue",
-      "label": "no_trasition"
+      "color": "black",
+      "label": "init_state"
     },
     {
       "from": 21,
       "to": 19,
       "color": "blue",
       "label": "to_back"
-    },
-    {
-      "from": 21,
-      "to": 20,
-      "color": "blue",
-      "label": "to_outside"
     },
     {
       "from": 21,
       "to": 22,
       "color": "blue",
-      "label": "to_hover"
-    },
-    {
-      "from": 21,
-      "to": 23,
-      "color": "blue",
-      "label": "to_selected"
+      "label": "to_inside"
     },
     {
       "from": 21,
@@ -737,19 +721,19 @@
     },
     {
       "from": 22,
-      "to": 20,
+      "to": 21,
       "color": "blue",
       "label": "to_outside"
     },
     {
       "from": 22,
-      "to": 21,
+      "to": 23,
       "color": "blue",
-      "label": "to_inside"
+      "label": "to_hover"
     },
     {
       "from": 22,
-      "to": 23,
+      "to": 24,
       "color": "blue",
       "label": "to_selected"
     },
@@ -762,78 +746,78 @@
     {
       "from": 23,
       "to": 19,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 23,
+      "to": 21,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 23,
+      "to": 22,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 23,
+      "to": 24,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 23,
+      "to": 23,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 24,
+      "to": 19,
       "color": "black",
       "label": "setTexture_to_target"
     },
     {
-      "from": 24,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 24,
-      "to": 25,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 24,
-      "to": 24,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
       "from": 25,
       "to": 11,
       "color": "blue",
       "label": "to_back"
-    },
-    {
-      "from": 25,
-      "to": 24,
-      "color": "blue",
-      "label": "to_outside"
     },
     {
       "from": 25,
       "to": 26,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 25,
+      "to": 25,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 26,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 26,
+      "to": 25,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 26,
+      "to": 27,
       "color": "blue",
       "label": "to_hover"
     },
     {
-      "from": 25,
-      "to": 27,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 25,
-      "to": 25,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
       "from": 26,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 26,
-      "to": 24,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 26,
-      "to": 25,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 26,
-      "to": 27,
+      "to": 28,
       "color": "blue",
       "label": "to_selected"
     },
@@ -842,18 +826,30 @@
       "to": 26,
       "color": "blue",
       "label": "no_trasition"
+    },
+    {
+      "from": 27,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 27,
+      "to": 25,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 27,
+      "to": 26,
+      "color": "blue",
+      "label": "to_inside"
     },
     {
       "from": 27,
       "to": 28,
       "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 27,
-      "to": 29,
-      "color": "blue",
-      "label": "to_inside"
+      "label": "to_selected"
     },
     {
       "from": 27,
@@ -863,61 +859,49 @@
     },
     {
       "from": 28,
-      "to": 24,
-      "color": "black",
-      "label": "XX"
-    },
-    {
-      "from": 29,
-      "to": 28,
+      "to": 29,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 29,
-      "to": 27,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 29,
+      "from": 28,
       "to": 30,
-      "color": "blue",
-      "label": "to_hover"
-    },
-    {
-      "from": 29,
-      "to": 31,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 29,
-      "to": 29,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 30,
-      "to": 28,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 30,
-      "to": 27,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 30,
-      "to": 29,
       "color": "blue",
       "label": "to_inside"
     },
     {
+      "from": 28,
+      "to": 28,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 29,
+      "to": 25,
+      "color": "black",
+      "label": "XX"
+    },
+    {
+      "from": 30,
+      "to": 29,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 30,
+      "to": 28,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
       "from": 30,
       "to": 31,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 30,
+      "to": 32,
       "color": "blue",
       "label": "to_selected"
     },
@@ -929,57 +913,45 @@
     },
     {
       "from": 31,
-      "to": 24,
+      "to": 29,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 31,
+      "to": 28,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 31,
+      "to": 30,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 31,
+      "to": 32,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 31,
+      "to": 31,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 32,
+      "to": 25,
       "color": "black",
       "label": "to_play"
     },
     {
-      "from": 32,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 32,
-      "to": 33,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 32,
-      "to": 32,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 33,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 33,
-      "to": 32,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
       "from": 33,
       "to": 34,
-      "color": "blue",
-      "label": "to_hover"
-    },
-    {
-      "from": 33,
-      "to": 35,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 33,
-      "to": 33,
-      "color": "blue",
-      "label": "no_trasition"
+      "color": "black",
+      "label": "init_state"
     },
     {
       "from": 34,
@@ -989,21 +961,9 @@
     },
     {
       "from": 34,
-      "to": 32,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 34,
-      "to": 33,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 34,
       "to": 35,
       "color": "blue",
-      "label": "to_selected"
+      "label": "to_inside"
     },
     {
       "from": 34,
@@ -1014,56 +974,68 @@
     {
       "from": 35,
       "to": 11,
-      "color": "black",
-      "label": "setTexture_to_target"
-    },
-    {
-      "from": 36,
-      "to": 11,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 36,
-      "to": 37,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 36,
-      "to": 36,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 37,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 37,
-      "to": 36,
+      "from": 35,
+      "to": 34,
       "color": "blue",
       "label": "to_outside"
     },
     {
-      "from": 37,
-      "to": 38,
+      "from": 35,
+      "to": 36,
       "color": "blue",
       "label": "to_hover"
     },
     {
-      "from": 37,
-      "to": 39,
+      "from": 35,
+      "to": 37,
       "color": "blue",
       "label": "to_selected"
     },
     {
-      "from": 37,
-      "to": 37,
+      "from": 35,
+      "to": 35,
       "color": "blue",
       "label": "no_trasition"
+    },
+    {
+      "from": 36,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 36,
+      "to": 34,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 36,
+      "to": 35,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 36,
+      "to": 37,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 36,
+      "to": 36,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 37,
+      "to": 11,
+      "color": "black",
+      "label": "setTexture_to_target"
     },
     {
       "from": 38,
@@ -1073,21 +1045,9 @@
     },
     {
       "from": 38,
-      "to": 36,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 38,
-      "to": 37,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 38,
       "to": 39,
       "color": "blue",
-      "label": "to_selected"
+      "label": "to_inside"
     },
     {
       "from": 38,
@@ -1097,63 +1057,75 @@
     },
     {
       "from": 39,
-      "to": 36,
-      "color": "black",
-      "label": "to_delete"
-    },
-    {
-      "from": 40,
-      "to": 41,
-      "color": "black",
-      "label": "to_view"
-    },
-    {
-      "from": 41,
-      "to": 0,
+      "to": 11,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 41,
-      "to": 42,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 41,
-      "to": 41,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 42,
-      "to": 0,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 42,
-      "to": 41,
+      "from": 39,
+      "to": 38,
       "color": "blue",
       "label": "to_outside"
     },
     {
-      "from": 42,
-      "to": 43,
+      "from": 39,
+      "to": 40,
       "color": "blue",
       "label": "to_hover"
     },
     {
-      "from": 42,
-      "to": 44,
+      "from": 39,
+      "to": 41,
       "color": "blue",
       "label": "to_selected"
     },
     {
-      "from": 42,
-      "to": 42,
+      "from": 39,
+      "to": 39,
       "color": "blue",
       "label": "no_trasition"
+    },
+    {
+      "from": 40,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 40,
+      "to": 38,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 40,
+      "to": 39,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 40,
+      "to": 41,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 40,
+      "to": 40,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 41,
+      "to": 38,
+      "color": "black",
+      "label": "to_delete"
+    },
+    {
+      "from": 42,
+      "to": 43,
+      "color": "black",
+      "label": "to_view"
     },
     {
       "from": 43,
@@ -1163,21 +1135,9 @@
     },
     {
       "from": 43,
-      "to": 41,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 43,
-      "to": 42,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 43,
       "to": 44,
       "color": "blue",
-      "label": "to_selected"
+      "label": "to_inside"
     },
     {
       "from": 43,
@@ -1187,7 +1147,67 @@
     },
     {
       "from": 44,
-      "to": 40,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 44,
+      "to": 43,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 44,
+      "to": 45,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 44,
+      "to": 46,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 44,
+      "to": 44,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 45,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 45,
+      "to": 43,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 45,
+      "to": 44,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 45,
+      "to": 46,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 45,
+      "to": 45,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 46,
+      "to": 42,
       "color": "black",
       "label": "setTexture_to_target"
     }

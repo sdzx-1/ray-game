@@ -182,7 +182,7 @@ pub fn Init(State: type) type {
 
         pub fn handler(ctx: *Context) @This() {
             State.init_fun(ctx);
-            return .to_view;
+            return .init_state;
         }
     };
 }

@@ -214,7 +214,7 @@ pub const Play = union(enum) {
     to_menu         : Example(.next, Menu),
     to_build        : Example(.next, Select(Play, TBuild)),
     to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
-    set_maze_text_id: Example(.next, Select(Play, SetTexture(true, Play))),
+    set_maze_text_id: Example(.next, Init(Select(Play, SetTexture(true, Play)))),
     to_delete       : Example(.next, Select(Play, Delete)),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
@@ -358,6 +358,7 @@ const utils = @import("utils.zig");
 const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
+const Init = core.Init;
 const Editor = @import("editor.zig").Editor;
 const Map = @import("map.zig").Map;
 const TBuild = @import("tbuild.zig").TBuild;
