@@ -94,7 +94,7 @@
       "id": 22
     },
     {
-      "name": "textures.SetTexture({19})",
+      "name": "textures.SetTexture(true,{19})",
       "id": 23
     },
     {
@@ -142,7 +142,7 @@
       "id": 34
     },
     {
-      "name": "textures.SetTexture({11})",
+      "name": "textures.SetTexture(true,{11})",
       "id": 35
     },
     {
@@ -162,8 +162,24 @@
       "id": 39
     },
     {
-      "name": "textures.Textures",
+      "name": "textures.ViewTextures({0})",
       "id": 40
+    },
+    {
+      "name": "select.Select((function 'Example'),{0},{44})",
+      "id": 41
+    },
+    {
+      "name": "select.Inside((function 'Example'),{0},{44})",
+      "id": 42
+    },
+    {
+      "name": "select.Hover((function 'Example'),{0},{44})",
+      "id": 43
+    },
+    {
+      "name": "textures.SetTexture(false,{40})",
+      "id": 44
     }
   ],
   "edges": [
@@ -188,8 +204,8 @@
     {
       "from": 0,
       "to": 40,
-      "color": "blue",
-      "label": "to_textures"
+      "color": "black",
+      "label": "view_textures"
     },
     {
       "from": 0,
@@ -747,7 +763,7 @@
       "from": 23,
       "to": 19,
       "color": "black",
-      "label": "to_target"
+      "label": "setTexture_to_target"
     },
     {
       "from": 24,
@@ -999,7 +1015,7 @@
       "from": 35,
       "to": 11,
       "color": "black",
-      "label": "to_target"
+      "label": "setTexture_to_target"
     },
     {
       "from": 36,
@@ -1087,15 +1103,93 @@
     },
     {
       "from": 40,
-      "to": 0,
-      "color": "blue",
-      "label": "to_menu"
+      "to": 41,
+      "color": "black",
+      "label": "to_view"
     },
     {
-      "from": 40,
-      "to": 40,
+      "from": 41,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 41,
+      "to": 42,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 41,
+      "to": 41,
       "color": "blue",
       "label": "no_trasition"
+    },
+    {
+      "from": 42,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 42,
+      "to": 41,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 42,
+      "to": 43,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 42,
+      "to": 44,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 42,
+      "to": 42,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 43,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 43,
+      "to": 41,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 43,
+      "to": 42,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 43,
+      "to": 44,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 43,
+      "to": 43,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 44,
+      "to": 40,
+      "color": "black",
+      "label": "setTexture_to_target"
     }
   ]
 }

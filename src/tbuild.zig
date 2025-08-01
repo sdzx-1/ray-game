@@ -2,7 +2,7 @@ pub const TBuild = union(enum) {
     // zig fmt: off
     to_play     : Example(.next, Play),
     to_select   : Example(.next, Select(Play, TBuild)),
-    set_text_Id : Example(.next, Select(TBuild, SetTexture(TBuild))),
+    set_text_Id : Example(.next, Select(TBuild, SelectTexture(true, TBuild))),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
@@ -58,7 +58,7 @@ pub const TBuild = union(enum) {
         ctx.tbuild.list.items[ctx.tbuild.selected_id].text_id = tid;
     }
 
-    pub fn sed_texture(ctx: *const Context) textures.TextID {
+    pub fn get_text_id(ctx: *const Context) textures.TextID {
         return ctx.tbuild.list.items[ctx.tbuild.selected_id].text_id;
     }
 
@@ -228,7 +228,7 @@ const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Map = @import("map.zig").Map;
-const SetTexture = @import("textures.zig").SetTexture;
+const SelectTexture = @import("textures.zig").SetTexture;
 const Play = @import("play.zig").Play;
 
 const rl = @import("raylib");

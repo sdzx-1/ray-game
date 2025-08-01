@@ -1,6 +1,7 @@
 const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
+const Select = core.Select;
 const select = @import("select.zig");
 const utils = @import("utils.zig");
 
@@ -115,44 +116,32 @@ pub const TexturesData = struct {
     }
 };
 
-pub const Textures = union(enum) {
-    to_menu: Example(.next, Menu),
-    no_trasition: Example(.next, @This()),
-
-    pub fn handler(ctx: *Context) @This() {
-        {
-            ctx.textures.vw.hw_ratio = ctx.hdw;
-            ctx.textures.vw.winport = .{ .width = ctx.screen_width, .pos = .{ .x = 0, .y = 0 } };
-            const dr = rl.getMouseWheelMove() * 1.4;
-            ctx.textures.vw.viewport.pos.y -= dr;
-        }
-
-        if (rl.isKeyPressed(rl.KeyboardKey.escape)) {
-            return .to_menu;
-        }
-        return .no_trasition;
-    }
-
-    pub fn render(ctx: *Context) void {
-        ctx.textures.render(ctx);
-    }
-};
-
 pub const SetTextureData = struct {
     text_id: TextID = .{ .x = 0, .y = 0 },
 };
 
-pub fn SetTexture(target: type) type {
+pub fn ViewTextures(Back: type) type {
     return union(enum) {
-        to_target: Example(.current, target),
+        to_view: Example(.current, Select(Back, SetTexture(false, @This()))),
+
+        pub fn handler(_: *Context) @This() {
+            return .to_view;
+        }
+    };
+}
+
+pub fn SetTexture(comptime is_set: bool, target: type) type {
+    return union(enum) {
+        setTexture_to_target: Example(.current, target),
 
         pub fn handler(ctx: *Context) @This() {
-            target.set_text_id(ctx, ctx.sel_texture.text_id);
-            return .to_target;
+            if (is_set) target.set_text_id(ctx, ctx.sel_texture.text_id);
+            return .setTexture_to_target;
         }
 
         pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
             _ = sst;
+
             ctx.textures.vw.hw_ratio = ctx.hdw;
             ctx.textures.vw.winport = .{ .width = ctx.screen_width, .pos = .{ .x = 0, .y = 0 } };
             const dr = rl.getMouseWheelMove() * 1.4;
@@ -165,16 +154,19 @@ pub fn SetTexture(target: type) type {
 
         pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
             ctx.textures.render(ctx);
-            const selected = target.sed_texture(ctx);
 
-            const smp = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
-            const wh: f32 = ctx.textures.vw.winport.width / ctx.textures.vw.viewport.width;
-            rl.drawRectangleLinesEx(.{
-                .x = smp.x,
-                .y = smp.y,
-                .width = wh,
-                .height = wh,
-            }, 10, rl.Color.green);
+            if (is_set) {
+                const selected = target.get_text_id(ctx);
+
+                const smp = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
+                const wh: f32 = ctx.textures.vw.winport.width / ctx.textures.vw.viewport.width;
+                rl.drawRectangleLinesEx(.{
+                    .x = smp.x,
+                    .y = smp.y,
+                    .width = wh,
+                    .height = wh,
+                }, 10, rl.Color.green);
+            }
             switch (sst) {
                 .hover => {
                     const val = ctx.textures.read(ctx.sel_texture.text_id);

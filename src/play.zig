@@ -211,7 +211,7 @@ pub const Play = union(enum) {
     to_menu         : Example(.next, Menu),
     to_build        : Example(.next, Select(Play, TBuild)),
     to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
-    set_maze_text_id: Example(.next, Select(Play, SetTexture(Play))),
+    set_maze_text_id: Example(.next, Select(Play, SetTexture(true, Play))),
     to_delete       : Example(.next, Select(Play, Delete)),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
@@ -236,7 +236,7 @@ pub const Play = union(enum) {
         ctx.play.maze_texture[@intCast(ctx.play.current_texture)] = tid;
     }
 
-    pub fn sed_texture(ctx: *const Context) textures.TextID {
+    pub fn get_text_id(ctx: *const Context) textures.TextID {
         return ctx.play.maze_texture[@intCast(ctx.play.current_texture)];
     }
 

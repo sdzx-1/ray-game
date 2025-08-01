@@ -4,8 +4,8 @@ const core = @import("core.zig");
 const utils = @import("utils.zig");
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
-const Textures = @import("textures.zig").Textures;
 const Map = @import("map.zig").Map;
+const ViewTextures = @import("textures.zig").ViewTextures;
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -25,7 +25,7 @@ pub const Menu = union(enum) {
     exit1       : Example(.next, ps.Exit),
     to_editor   : Example(.next, Select(Menu, Editor(Menu))),
     to_play     : Example(.next, Map),
-    to_textures : Example(.next, Textures),
+    view_textures: Example(.current, ViewTextures(Menu)),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
 
@@ -60,7 +60,7 @@ pub const Menu = union(enum) {
     }
 
     fn toTextures(_: *Context) ?@This() {
-        return .to_textures;
+        return .view_textures;
     }
 
     fn toEditor(_: *Context) ?@This() {
