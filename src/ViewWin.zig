@@ -1,3 +1,6 @@
+const rl = @import("raylib");
+const std = @import("std");
+
 hw_ratio: f32 = 800.0 / 1000.0, //height / width
 viewport: Viewport = .{},
 winport: Winport = .{},
@@ -171,9 +174,6 @@ pub fn Port(name: []const u8) type {
         }
     };
 }
-
-const rl = @import("raylib");
-const std = @import("std");
 
 test "ViewWin" {
     const origin: Self = .{

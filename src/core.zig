@@ -1,17 +1,3 @@
-const std = @import("std");
-const ps = @import("polystate");
-const select = @import("select.zig");
-const editor = @import("editor.zig");
-const map = @import("map.zig");
-const play = @import("play.zig");
-const menu = @import("menu.zig");
-const tbuild = @import("tbuild.zig");
-const textures = @import("textures.zig");
-const utils = @import("utils.zig");
-
-const rl = @import("raylib");
-const rg = @import("raygui");
-
 pub const Notify = struct {
     msg_que: std.ArrayListUnmanaged(struct { msg: [:0]const u8, dur: i64 }) = .empty,
     duration: i64 = 600,
@@ -189,3 +175,16 @@ pub fn Example(method: ps.Method, state: type) type {
 pub fn Select(back: type, selected: type) type {
     return select.Select(Example, back, selected);
 }
+
+const std = @import("std");
+const ps = @import("polystate");
+const select = @import("select.zig");
+const editor = @import("editor.zig");
+const map = @import("map.zig");
+const play = @import("play.zig");
+const menu = @import("menu.zig");
+const tbuild = @import("tbuild.zig");
+const textures = @import("textures.zig");
+
+const rl = @import("raylib");
+const rg = @import("raygui");

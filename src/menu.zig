@@ -1,22 +1,3 @@
-const std = @import("std");
-const ps = @import("polystate");
-const core = @import("core.zig");
-const utils = @import("utils.zig");
-const Select = core.Select;
-const Editor = @import("editor.zig").Editor;
-const Map = @import("map.zig").Map;
-const ViewTextures = @import("textures.zig").ViewTextures;
-
-const rl = @import("raylib");
-const rg = @import("raygui");
-
-const Example = core.Example;
-const Context = core.Context;
-const R = core.R;
-const Action = core.Action;
-const SaveData = utils.SaveData;
-const StateComponents = core.StateComponents;
-
 pub const MenuData = struct {
     rs: StateComponents(Menu) = .empty,
 };
@@ -80,3 +61,21 @@ pub const Menu = union(enum) {
         return null;
     }
 };
+
+const std = @import("std");
+const ps = @import("polystate");
+const core = @import("core.zig");
+const utils = @import("utils.zig");
+const Select = core.Select;
+const Editor = @import("editor.zig").Editor;
+const Map = @import("map.zig").Map;
+const ViewTextures = @import("textures.zig").ViewTextures;
+
+const rl = @import("raylib");
+const rg = @import("raygui");
+
+const Example = core.Example;
+const Context = core.Context;
+const Action = core.Action;
+const SaveData = utils.SaveData;
+const StateComponents = core.StateComponents;

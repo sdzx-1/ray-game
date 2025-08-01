@@ -1,22 +1,3 @@
-const std = @import("std");
-const ps = @import("polystate");
-const core = @import("core.zig");
-const Select = core.Select;
-const select = @import("select.zig");
-const utils = @import("utils.zig");
-
-const rl = @import("raylib");
-const rg = @import("raygui");
-
-const Example = core.Example;
-const Menu = @import("menu.zig").Menu;
-
-const Context = core.Context;
-const R = core.R;
-const getTarget = core.getTarget;
-const View = utils.View;
-const ViewWin = @import("ViewWin.zig");
-
 pub const TextureData = struct {
     name: [:0]const u8,
     tex2d: rl.Texture2D,
@@ -251,3 +232,21 @@ pub fn load(ctx: *Context) !void {
         ctx.textures.text_arr[y][x] = .{ .texture = data };
     }
 }
+
+const std = @import("std");
+const ps = @import("polystate");
+const core = @import("core.zig");
+const Select = core.Select;
+const select = @import("select.zig");
+const utils = @import("utils.zig");
+
+const rl = @import("raylib");
+const rg = @import("raygui");
+
+const Example = core.Example;
+const Menu = @import("menu.zig").Menu;
+
+const Context = core.Context;
+const getTarget = core.getTarget;
+const View = utils.View;
+const ViewWin = @import("ViewWin.zig");

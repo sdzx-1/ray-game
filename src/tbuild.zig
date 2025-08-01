@@ -235,5 +235,4 @@ const rl = @import("raylib");
 const rg = @import("raygui");
 
 const Context = core.Context;
-const R = core.R;
 const View = utils.View;
