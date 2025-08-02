@@ -104,7 +104,7 @@ pub fn Inside(
 
             const res: bool = selected.check_still_inside(ctx);
             if (!res) return .to_outside;
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
+            if (rl.isMouseButtonReleased(rl.MouseButton.left)) return .to_selected;
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
             if (mouse_moved()) ctx.select.no_move_duartion = std.time.milliTimestamp();
             const deta = std.time.milliTimestamp() - ctx.select.no_move_duartion;
@@ -140,7 +140,7 @@ pub fn Hover(
                 if (select_fun(ctx, .hover)) return .to_outside;
             }
 
-            if (rl.isMouseButtonPressed(rl.MouseButton.left)) return .to_selected;
+            if (rl.isMouseButtonReleased(rl.MouseButton.left)) return .to_selected;
             if (mouse_moved()) {
                 ctx.select.no_move_duartion = std.time.milliTimestamp();
                 return .to_inside;
