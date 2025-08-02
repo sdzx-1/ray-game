@@ -109,20 +109,17 @@ pub const Map = union(enum) {
                 m.deinit(ctx.gpa);
                 ctx.map.maze = null;
             }
-            _ = std.Thread.spawn(
-                .{},
-                generate_maze,
-                .{
-                    ctx.gpa,
-                    &ctx.map.maze,
-                    ctx.map.maze_config.total_x,
-                    ctx.map.maze_config.total_y,
-                    ctx.map.maze_config.room_min_width,
-                    ctx.map.maze_config.room_max_width,
-                    ctx.random.int(u64),
-                    ctx.map.maze_config.probability,
-                },
-            ) catch unreachable;
+            generate_maze(
+                ctx.gpa,
+                &ctx.map.maze,
+                ctx.map.maze_config.total_x,
+                ctx.map.maze_config.total_y,
+                ctx.map.maze_config.room_min_width,
+                ctx.map.maze_config.room_max_width,
+                ctx.random.int(u64),
+                ctx.map.maze_config.probability,
+            );
+
             ctx.map.generating = !ctx.map.generating;
         }
         return null;
