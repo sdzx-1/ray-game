@@ -17,8 +17,7 @@ pub const EnterFsmState = Example(.next, Menu);
 const Runner = ps.Runner(true, EnterFsmState);
 
 pub fn main() anyerror!void {
-    var gpa_instance = std.heap.DebugAllocator(.{}).init;
-    const gpa = gpa_instance.allocator();
+    const gpa = std.heap.c_allocator;
 
     var prng = std.Random.DefaultPrng.init(blk: {
         var seed: u64 = undefined;
@@ -48,7 +47,12 @@ pub fn main() anyerror!void {
 
     rl.setExitKey(.null); // Prevent window from closing when escape key is pressed
     rl.setWindowState(.{ .window_resizable = true });
-    rl.hideCursor();
+
+    // hideCursor is buggy when building for emscripten: https://github.com/raysan5/raylib/issues/4940
+    if (@import("builtin").os.tag != .emscripten) {
+        rl.hideCursor();
+    }
+
     rl.setTraceLogLevel(.none);
 
     { //load textures
