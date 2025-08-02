@@ -10,6 +10,7 @@ pub fn build(b: *std.Build) !void {
             if (b.sysroot) |sysroot| sysroot else try b.build_root.join(b.allocator, &.{
                 "emscripten-builder",
                 "zig-out",
+                "emsdk",
                 "upstream",
                 "emscripten",
             });
