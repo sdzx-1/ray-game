@@ -120,7 +120,7 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
             return .setTexture_to_target;
         }
 
-        pub fn init_fun1(ctx: *Context) void {
+        pub fn init_fun(ctx: *Context) void {
             if (is_set) {
                 const selected = target.get_text_id(ctx);
                 ctx.textures.vw.viewport.pos.y = @as(f32, @floatFromInt(selected.y)) - 2;
