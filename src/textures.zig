@@ -45,6 +45,27 @@ pub const TexturesData = struct {
         return self.text_arr[id.y][id.x];
     }
 
+    pub fn render_texture(
+        self: *const @This(),
+        text_id: TextID,
+        rect: rl.Rectangle,
+        color: rl.Color,
+    ) void {
+        switch (self.read(text_id)) {
+            .texture => |texture| {
+                texture.tex2d.drawPro(.{
+                    .x = 0,
+                    .y = 0,
+                    .width = 256,
+                    .height = 256,
+                }, rect, .{ .x = 0, .y = 0 }, 0, color);
+            },
+            else => {
+                rl.drawRectangleRec(rect, rl.Color.red);
+            },
+        }
+    }
+
     pub fn deinit(self: *const @This()) void {
         for (0..Height) |y| {
             for (0..Width) |x| {
@@ -59,7 +80,7 @@ pub const TexturesData = struct {
         }
     }
 
-    pub fn render(self: @This(), ctx: *Context) void {
+    pub fn render(self: @This()) void {
         if (self.vw.viewport_intersect_rect(.{
             .x = 0,
             .y = 0,
@@ -71,28 +92,31 @@ pub const TexturesData = struct {
             const end_x: usize = @intFromFloat(@floor(rect.x + rect.width - 0.01));
             const end_y: usize = @intFromFloat(@floor(rect.y + rect.height - 0.01));
 
-            ctx.textures.vw.winport_beginScissorMode();
+            self.vw.winport_beginScissorMode();
             defer rl.endScissorMode();
 
             for (start_y..end_y + 1) |y| {
                 for (start_x..end_x + 1) |x| {
-                    const val = ctx.textures.text_arr[y][x];
-                    switch (val) {
-                        .blank => {},
-                        .texture => |text| {
-                            const win_pos1 = self.vw.viewpos_to_winpos(.{ .x = @floatFromInt(x), .y = @floatFromInt(y) });
-                            const dw = self.vw.wv_ratio();
-                            text.tex2d.drawPro(
-                                .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                                .{ .x = win_pos1.x + 1, .y = win_pos1.y + 1, .width = dw - 1, .height = dw - 1 },
-                                .{ .x = 0, .y = 0 },
-                                0,
-                                rl.Color.white,
-                            );
-                        },
-                    }
+                    const win_pos1 = self.vw.viewpos_to_winpos(.{
+                        .x = @floatFromInt(x),
+                        .y = @floatFromInt(y),
+                    }).add(.{ .x = 1, .y = 1 });
+                    const dw = self.vw.wv_ratio() - 1;
+                    self.render_texture(
+                        .{ .x = x, .y = y },
+                        .{ .x = win_pos1.x, .y = win_pos1.y, .width = dw, .height = dw },
+                        rl.Color.white,
+                    );
                 }
             }
+
+            const wpos = self.vw.winport.pos;
+            rl.drawRectangleLinesEx(.{
+                .x = wpos.x,
+                .y = wpos.y,
+                .width = self.vw.winport.width,
+                .height = self.vw.winport_get_height(),
+            }, 4, rl.Color.black);
         }
     }
 };
@@ -113,11 +137,11 @@ pub fn ViewTextures(Back: type) type {
 
 pub fn SetTexture(comptime is_set: bool, target: type) type {
     return union(enum) {
-        setTexture_to_target: Example(.current, target),
+        after_set_texture: Example(.current, target),
 
         pub fn handler(ctx: *Context) @This() {
             if (is_set) target.set_text_id(ctx, ctx.sel_texture.text_id);
-            return .setTexture_to_target;
+            return .after_set_texture;
         }
 
         pub fn init_fun(ctx: *Context) void {
@@ -141,7 +165,7 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
         }
 
         pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
-            ctx.textures.render(ctx);
+            ctx.textures.render();
 
             if (is_set) {
                 const selected = target.get_text_id(ctx);
@@ -173,18 +197,12 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
                     const mwid = rl.measureText(name, 22);
                     rl.drawText(name, @as(i32, @intFromFloat(mp.x)) - @divTrunc(mwid, 2), @as(i32, @intFromFloat(mp.y)) - 40, 32, rl.Color.green);
 
-                    switch (val) {
-                        .blank => {},
-                        .texture => |text| {
-                            text.tex2d.drawPro(
-                                .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                                .{ .x = if ((ctx.screen_width - mp.x) < 512) mp.x - 512 else mp.x, .y = mp.y, .width = 512, .height = 512 },
-                                .{ .x = 0, .y = 0 },
-                                0,
-                                rl.Color.white,
-                            );
-                        },
-                    }
+                    const dw = 512;
+                    ctx.textures.render_texture(
+                        ctx.sel_texture.text_id,
+                        .{ .x = if ((ctx.screen_width - mp.x) < dw) mp.x - dw else mp.x, .y = mp.y, .width = dw, .height = dw },
+                        rl.Color.white,
+                    );
                 },
                 else => {},
             }

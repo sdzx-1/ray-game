@@ -176,12 +176,12 @@ pub fn Select(back: type, selected: type) type {
     return select.Select(Example, back, selected);
 }
 
-pub fn Init(State: type) type {
+pub fn Init(Instance: type, State: type) type {
     return union(enum) {
         init_state: Example(.current, State),
 
         pub fn handler(ctx: *Context) @This() {
-            State.init_fun(ctx);
+            Instance.init_fun(ctx);
             return .init_state;
         }
     };

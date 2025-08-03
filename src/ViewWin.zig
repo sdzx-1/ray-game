@@ -67,7 +67,7 @@ pub fn mouse_drag_viewport(self: *Self) void {
     if (rl.isMouseButtonDown(rl.MouseButton.middle) or
         (rl.isKeyDown(rl.KeyboardKey.left_alt)))
     {
-        const deta = rl.getMouseDelta().scale(self.view_drag_ratio);
+        const deta = rl.getMouseDelta().scale(-self.view_drag_ratio);
         const dvpos = self.dwinpos_to_dviewpos(Winport.Pos.fromVector2(deta));
         self.viewport.move_port(dvpos);
     }
@@ -79,11 +79,11 @@ pub fn mouse_wheel_zoom_winport(self: *Self) void {
 }
 
 pub fn mouse_wheel_zoom_viewport(self: *Self) void {
-    const dr = rl.getMouseWheelMove() * self.wheel_zoom_ratio;
+    const dr = rl.getMouseWheelMove() * -self.wheel_zoom_ratio;
     self.viewport.zoom_port_with_center_unchage(self.hw_ratio, dr);
 }
 
-pub fn winport_beginScissorMode(self: *Self) void {
+pub fn winport_beginScissorMode(self: *const Self) void {
     rl.beginScissorMode(
         @intFromFloat(self.winport.pos.x),
         @intFromFloat(self.winport.pos.y),
