@@ -1,7 +1,9 @@
 var FSLibrary = {
     js_syncfs: function () {
         FS.syncfs(false, function (err) {
-            console.error("Sync failed:", err);
+            if (err) {
+                console.error("Sync failed:", err);
+            }
         });
     },
 };

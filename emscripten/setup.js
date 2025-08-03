@@ -6,7 +6,9 @@ Module["preRun"].push(function () {
     FS.mount(IDBFS, {}, "/save-data");
 
     FS.syncfs(true, function (err) {
-        console.error("Failed to load persistent data:", err);
+        if (err) {
+            console.error("Failed to load persistent data:", err);
+        }
         Module.removeRunDependency("idbfs-sync");
     });
 });
