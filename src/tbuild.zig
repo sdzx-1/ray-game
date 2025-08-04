@@ -212,6 +212,7 @@ pub fn SelectBuildInstance(Config: type, Next: type) type {
         pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
             ctx.tbuild.vw.mouse_wheel_zoom_viewport();
             ctx.tbuild.vw.mouse_drag_viewport();
+            ctx.tbuild.vw.mouse_drag_winport();
 
             if (@hasDecl(Config, "select_build_fun")) {
                 const select_fun_: fn (*Context, select.SelectStage) bool = Config.select_build_fun;

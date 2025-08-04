@@ -55,9 +55,7 @@ pub fn viewport_intersect_rect(self: *const @This(), rect: rl.Rectangle) ?rl.Rec
 }
 
 pub fn mouse_drag_winport(self: *Self) void {
-    if (rl.isMouseButtonDown(rl.MouseButton.middle) or
-        (rl.isKeyDown(rl.KeyboardKey.left_alt)))
-    {
+    if ((rl.isKeyDown(rl.KeyboardKey.left_control))) {
         const deta = rl.getMouseDelta();
         self.winport.move_port(Winport.Pos.fromVector2(deta));
     }
