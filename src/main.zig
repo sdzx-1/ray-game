@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 
 const rl = @import("raylib");
 const rg = @import("raygui");
@@ -17,7 +18,16 @@ pub const EnterFsmState = Example(.next, Menu);
 const Runner = ps.Runner(true, EnterFsmState);
 
 pub fn main() anyerror!void {
-    const gpa = std.heap.c_allocator;
+    var gpa_instance = switch (builtin.os.tag) {
+        .emscripten => {},
+        else => std.heap.DebugAllocator(.{}).init,
+    };
+    const gpa = switch (builtin.os.tag) {
+        // c_allocator is the only allocator that works on emscripten:
+        // https://github.com/ziglang/zig/issues/19072
+        .emscripten => std.heap.c_allocator,
+        else => gpa_instance.allocator(),
+    };
 
     var prng = std.Random.DefaultPrng.init(blk: {
         var seed: u64 = undefined;
@@ -49,7 +59,7 @@ pub fn main() anyerror!void {
     rl.setWindowState(.{ .window_resizable = true });
 
     // hideCursor is buggy when building for emscripten: https://github.com/raysan5/raylib/issues/4940
-    if (@import("builtin").os.tag != .emscripten) {
+    if (builtin.os.tag != .emscripten) {
         rl.hideCursor();
     }
 
