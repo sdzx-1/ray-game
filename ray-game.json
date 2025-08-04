@@ -78,116 +78,152 @@
       "id": 18
     },
     {
-      "name": "tbuild.TBuild",
+      "name": "tbuild.SelectBuildInstance({20},{20})",
       "id": 19
     },
     {
-      "name": "core.Init({21})",
+      "name": "tbuild.EditBuild",
       "id": 20
     },
     {
-      "name": "select.Select((function 'Example'),{19},{24})",
+      "name": "core.Init({25},{22})",
       "id": 21
     },
     {
-      "name": "select.Inside((function 'Example'),{19},{24})",
+      "name": "select.Select((function 'Example'),{20},{25})",
       "id": 22
     },
     {
-      "name": "select.Hover((function 'Example'),{19},{24})",
+      "name": "select.Inside((function 'Example'),{20},{25})",
       "id": 23
     },
     {
-      "name": "textures.SetTexture(true,{19})",
+      "name": "select.Hover((function 'Example'),{20},{25})",
       "id": 24
     },
     {
-      "name": "select.Select((function 'Example'),{11},{28})",
+      "name": "textures.SetTexture(true,{20})",
       "id": 25
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{28})",
+      "name": "select.Select((function 'Example'),{11},{29})",
       "id": 26
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{28})",
+      "name": "select.Inside((function 'Example'),{11},{29})",
       "id": 27
     },
     {
-      "name": "select.Select((function 'Example'),{29},{32})",
+      "name": "select.Hover((function 'Example'),{11},{29})",
       "id": 28
     },
     {
-      "name": "play.X({11},{32})",
+      "name": "tbuild.SelectBuildInstance({35},{30})",
       "id": 29
     },
     {
-      "name": "select.Inside((function 'Example'),{29},{32})",
+      "name": "select.Select((function 'Example'),{31},{34})",
       "id": 30
     },
     {
-      "name": "select.Hover((function 'Example'),{29},{32})",
+      "name": "play.BackUpLevel",
       "id": 31
     },
     {
-      "name": "play.Place",
+      "name": "select.Inside((function 'Example'),{31},{34})",
       "id": 32
     },
     {
-      "name": "core.Init({34})",
+      "name": "select.Hover((function 'Example'),{31},{34})",
       "id": 33
     },
     {
-      "name": "select.Select((function 'Example'),{11},{37})",
+      "name": "play.SelectCellInstance({35},{35})",
       "id": 34
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{37})",
+      "name": "play.Place",
       "id": 35
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{37})",
+      "name": "core.Init({40},{37})",
       "id": 36
     },
     {
-      "name": "textures.SetTexture(true,{11})",
+      "name": "select.Select((function 'Example'),{11},{40})",
       "id": 37
     },
     {
-      "name": "select.Select((function 'Example'),{11},{41})",
+      "name": "select.Inside((function 'Example'),{11},{40})",
       "id": 38
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{41})",
+      "name": "select.Hover((function 'Example'),{11},{40})",
       "id": 39
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{41})",
+      "name": "textures.SetTexture(true,{11})",
       "id": 40
     },
     {
-      "name": "play.Delete",
+      "name": "select.Select((function 'Example'),{11},{44})",
       "id": 41
     },
     {
-      "name": "textures.ViewTextures({0})",
+      "name": "select.Inside((function 'Example'),{11},{44})",
       "id": 42
     },
     {
-      "name": "select.Select((function 'Example'),{0},{46})",
+      "name": "select.Hover((function 'Example'),{11},{44})",
       "id": 43
     },
     {
-      "name": "select.Inside((function 'Example'),{0},{46})",
+      "name": "play.SelectCellInstance({45},{45})",
       "id": 44
     },
     {
-      "name": "select.Hover((function 'Example'),{0},{46})",
+      "name": "play.Delete",
       "id": 45
     },
     {
-      "name": "textures.SetTexture(false,{42})",
+      "name": "tbuild.ViewBuilds({0})",
       "id": 46
+    },
+    {
+      "name": "select.Select((function 'Example'),{0},{50})",
+      "id": 47
+    },
+    {
+      "name": "select.Inside((function 'Example'),{0},{50})",
+      "id": 48
+    },
+    {
+      "name": "select.Hover((function 'Example'),{0},{50})",
+      "id": 49
+    },
+    {
+      "name": "tbuild.SelectBuildInstance({46},{46})",
+      "id": 50
+    },
+    {
+      "name": "textures.ViewTextures({0})",
+      "id": 51
+    },
+    {
+      "name": "select.Select((function 'Example'),{0},{55})",
+      "id": 52
+    },
+    {
+      "name": "select.Inside((function 'Example'),{0},{55})",
+      "id": 53
+    },
+    {
+      "name": "select.Hover((function 'Example'),{0},{55})",
+      "id": 54
+    },
+    {
+      "name": "textures.SetTexture(false,{51})",
+      "id": 55
     }
   ],
   "edges": [
@@ -211,7 +247,13 @@
     },
     {
       "from": 0,
-      "to": 42,
+      "to": 46,
+      "color": "blue",
+      "label": "to_build"
+    },
+    {
+      "from": 0,
+      "to": 51,
       "color": "black",
       "label": "view_textures"
     },
@@ -469,19 +511,19 @@
     },
     {
       "from": 11,
-      "to": 25,
+      "to": 26,
       "color": "blue",
       "label": "to_place"
     },
     {
       "from": 11,
-      "to": 33,
+      "to": 36,
       "color": "blue",
       "label": "set_maze_text_id"
     },
     {
       "from": 11,
-      "to": 38,
+      "to": 41,
       "color": "blue",
       "label": "to_delete"
     },
@@ -667,75 +709,51 @@
     },
     {
       "from": 19,
+      "to": 20,
+      "color": "black",
+      "label": "after_select_build"
+    },
+    {
+      "from": 20,
       "to": 11,
       "color": "blue",
       "label": "to_play"
     },
     {
-      "from": 19,
+      "from": 20,
       "to": 16,
       "color": "blue",
       "label": "to_select"
     },
     {
-      "from": 19,
-      "to": 20,
+      "from": 20,
+      "to": 21,
       "color": "blue",
       "label": "set_text_Id"
     },
     {
-      "from": 19,
-      "to": 19,
+      "from": 20,
+      "to": 20,
       "color": "blue",
       "label": "no_trasition"
-    },
-    {
-      "from": 20,
-      "to": 21,
-      "color": "black",
-      "label": "init_state"
-    },
-    {
-      "from": 21,
-      "to": 19,
-      "color": "blue",
-      "label": "to_back"
     },
     {
       "from": 21,
       "to": 22,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 21,
-      "to": 21,
-      "color": "blue",
-      "label": "no_trasition"
+      "color": "black",
+      "label": "init_state"
     },
     {
       "from": 22,
-      "to": 19,
+      "to": 20,
       "color": "blue",
       "label": "to_back"
-    },
-    {
-      "from": 22,
-      "to": 21,
-      "color": "blue",
-      "label": "to_outside"
     },
     {
       "from": 22,
       "to": 23,
       "color": "blue",
-      "label": "to_hover"
-    },
-    {
-      "from": 22,
-      "to": 24,
-      "color": "blue",
-      "label": "to_selected"
+      "label": "to_inside"
     },
     {
       "from": 22,
@@ -745,25 +763,25 @@
     },
     {
       "from": 23,
-      "to": 19,
+      "to": 20,
       "color": "blue",
       "label": "to_back"
     },
     {
       "from": 23,
-      "to": 21,
+      "to": 22,
       "color": "blue",
       "label": "to_outside"
     },
     {
       "from": 23,
-      "to": 22,
+      "to": 24,
       "color": "blue",
-      "label": "to_inside"
+      "label": "to_hover"
     },
     {
       "from": 23,
-      "to": 24,
+      "to": 25,
       "color": "blue",
       "label": "to_selected"
     },
@@ -775,79 +793,79 @@
     },
     {
       "from": 24,
-      "to": 19,
-      "color": "black",
-      "label": "setTexture_to_target"
-    },
-    {
-      "from": 25,
-      "to": 11,
+      "to": 20,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 25,
-      "to": 26,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 25,
-      "to": 25,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 26,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 26,
-      "to": 25,
+      "from": 24,
+      "to": 22,
       "color": "blue",
       "label": "to_outside"
     },
     {
+      "from": 24,
+      "to": 23,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 24,
+      "to": 25,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 24,
+      "to": 24,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 25,
+      "to": 20,
+      "color": "black",
+      "label": "after_set_texture"
+    },
+    {
+      "from": 26,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
       "from": 26,
       "to": 27,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 26,
+      "to": 26,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 27,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 27,
+      "to": 26,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 27,
+      "to": 28,
       "color": "blue",
       "label": "to_hover"
     },
     {
-      "from": 26,
-      "to": 28,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 26,
-      "to": 26,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
       "from": 27,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 27,
-      "to": 25,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 27,
-      "to": 26,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 27,
-      "to": 28,
+      "to": 29,
       "color": "blue",
       "label": "to_selected"
     },
@@ -856,18 +874,30 @@
       "to": 27,
       "color": "blue",
       "label": "no_trasition"
+    },
+    {
+      "from": 28,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 28,
+      "to": 26,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 28,
+      "to": 27,
+      "color": "blue",
+      "label": "to_inside"
     },
     {
       "from": 28,
       "to": 29,
       "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 28,
-      "to": 30,
-      "color": "blue",
-      "label": "to_inside"
+      "label": "to_selected"
     },
     {
       "from": 28,
@@ -877,205 +907,181 @@
     },
     {
       "from": 29,
-      "to": 25,
+      "to": 30,
       "color": "black",
-      "label": "XX"
-    },
-    {
-      "from": 30,
-      "to": 29,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 30,
-      "to": 28,
-      "color": "blue",
-      "label": "to_outside"
+      "label": "after_select_build"
     },
     {
       "from": 30,
       "to": 31,
       "color": "blue",
-      "label": "to_hover"
+      "label": "to_back"
     },
     {
       "from": 30,
       "to": 32,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 30,
-      "to": 30,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 31,
-      "to": 29,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 31,
-      "to": 28,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 31,
-      "to": 30,
       "color": "blue",
       "label": "to_inside"
     },
     {
-      "from": 31,
-      "to": 32,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 31,
-      "to": 31,
+      "from": 30,
+      "to": 30,
       "color": "blue",
       "label": "no_trasition"
     },
     {
-      "from": 32,
-      "to": 25,
+      "from": 31,
+      "to": 26,
       "color": "black",
-      "label": "to_play"
+      "label": "back_up_level"
+    },
+    {
+      "from": 32,
+      "to": 31,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 32,
+      "to": 30,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 32,
+      "to": 33,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 32,
+      "to": 34,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 32,
+      "to": 32,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 33,
+      "to": 31,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 33,
+      "to": 30,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 33,
+      "to": 32,
+      "color": "blue",
+      "label": "to_inside"
     },
     {
       "from": 33,
       "to": 34,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 33,
+      "to": 33,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 34,
+      "to": 35,
+      "color": "black",
+      "label": "after_select_cell"
+    },
+    {
+      "from": 35,
+      "to": 26,
+      "color": "black",
+      "label": "to_play"
+    },
+    {
+      "from": 36,
+      "to": 37,
       "color": "black",
       "label": "init_state"
     },
     {
-      "from": 34,
+      "from": 37,
       "to": 11,
       "color": "blue",
       "label": "to_back"
-    },
-    {
-      "from": 34,
-      "to": 35,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 34,
-      "to": 34,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 35,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 35,
-      "to": 34,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 35,
-      "to": 36,
-      "color": "blue",
-      "label": "to_hover"
-    },
-    {
-      "from": 35,
-      "to": 37,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 35,
-      "to": 35,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 36,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 36,
-      "to": 34,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 36,
-      "to": 35,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 36,
-      "to": 37,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 36,
-      "to": 36,
-      "color": "blue",
-      "label": "no_trasition"
     },
     {
       "from": 37,
-      "to": 11,
-      "color": "black",
-      "label": "setTexture_to_target"
-    },
-    {
-      "from": 38,
-      "to": 11,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 38,
-      "to": 39,
+      "to": 38,
       "color": "blue",
       "label": "to_inside"
     },
     {
-      "from": 38,
-      "to": 38,
+      "from": 37,
+      "to": 37,
       "color": "blue",
       "label": "no_trasition"
     },
     {
-      "from": 39,
+      "from": 38,
       "to": 11,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 39,
-      "to": 38,
+      "from": 38,
+      "to": 37,
       "color": "blue",
       "label": "to_outside"
     },
     {
-      "from": 39,
-      "to": 40,
+      "from": 38,
+      "to": 39,
       "color": "blue",
       "label": "to_hover"
     },
     {
+      "from": 38,
+      "to": 40,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 38,
+      "to": 38,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
       "from": 39,
-      "to": 41,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 39,
+      "to": 37,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 39,
+      "to": 38,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 39,
+      "to": 40,
       "color": "blue",
       "label": "to_selected"
     },
@@ -1088,128 +1094,278 @@
     {
       "from": 40,
       "to": 11,
+      "color": "black",
+      "label": "after_set_texture"
+    },
+    {
+      "from": 41,
+      "to": 11,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 40,
-      "to": 38,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 40,
-      "to": 39,
+      "from": 41,
+      "to": 42,
       "color": "blue",
       "label": "to_inside"
     },
     {
-      "from": 40,
+      "from": 41,
       "to": 41,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 40,
-      "to": 40,
       "color": "blue",
       "label": "no_trasition"
     },
     {
-      "from": 41,
-      "to": 38,
-      "color": "black",
-      "label": "to_delete"
+      "from": 42,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 42,
+      "to": 41,
+      "color": "blue",
+      "label": "to_outside"
     },
     {
       "from": 42,
       "to": 43,
-      "color": "black",
-      "label": "to_view"
-    },
-    {
-      "from": 43,
-      "to": 0,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 43,
-      "to": 44,
-      "color": "blue",
-      "label": "to_inside"
-    },
-    {
-      "from": 43,
-      "to": 43,
-      "color": "blue",
-      "label": "no_trasition"
-    },
-    {
-      "from": 44,
-      "to": 0,
-      "color": "blue",
-      "label": "to_back"
-    },
-    {
-      "from": 44,
-      "to": 43,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 44,
-      "to": 45,
       "color": "blue",
       "label": "to_hover"
     },
     {
-      "from": 44,
-      "to": 46,
+      "from": 42,
+      "to": 44,
       "color": "blue",
       "label": "to_selected"
     },
     {
-      "from": 44,
-      "to": 44,
+      "from": 42,
+      "to": 42,
       "color": "blue",
       "label": "no_trasition"
     },
     {
+      "from": 43,
+      "to": 11,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 43,
+      "to": 41,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 43,
+      "to": 42,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 43,
+      "to": 44,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 43,
+      "to": 43,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 44,
+      "to": 45,
+      "color": "black",
+      "label": "after_select_cell"
+    },
+    {
       "from": 45,
+      "to": 41,
+      "color": "black",
+      "label": "to_delete"
+    },
+    {
+      "from": 46,
+      "to": 47,
+      "color": "black",
+      "label": "after_view_build"
+    },
+    {
+      "from": 47,
       "to": 0,
       "color": "blue",
       "label": "to_back"
     },
     {
-      "from": 45,
-      "to": 43,
-      "color": "blue",
-      "label": "to_outside"
-    },
-    {
-      "from": 45,
-      "to": 44,
+      "from": 47,
+      "to": 48,
       "color": "blue",
       "label": "to_inside"
     },
     {
-      "from": 45,
-      "to": 46,
-      "color": "blue",
-      "label": "to_selected"
-    },
-    {
-      "from": 45,
-      "to": 45,
+      "from": 47,
+      "to": 47,
       "color": "blue",
       "label": "no_trasition"
     },
     {
-      "from": 46,
-      "to": 42,
+      "from": 48,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 48,
+      "to": 47,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 48,
+      "to": 49,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 48,
+      "to": 50,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 48,
+      "to": 48,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 49,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 49,
+      "to": 47,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 49,
+      "to": 48,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 49,
+      "to": 50,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 49,
+      "to": 49,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 50,
+      "to": 46,
       "color": "black",
-      "label": "setTexture_to_target"
+      "label": "after_select_build"
+    },
+    {
+      "from": 51,
+      "to": 52,
+      "color": "black",
+      "label": "to_view"
+    },
+    {
+      "from": 52,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 52,
+      "to": 53,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 52,
+      "to": 52,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 53,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 53,
+      "to": 52,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 53,
+      "to": 54,
+      "color": "blue",
+      "label": "to_hover"
+    },
+    {
+      "from": 53,
+      "to": 55,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 53,
+      "to": 53,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 54,
+      "to": 0,
+      "color": "blue",
+      "label": "to_back"
+    },
+    {
+      "from": 54,
+      "to": 52,
+      "color": "blue",
+      "label": "to_outside"
+    },
+    {
+      "from": 54,
+      "to": 53,
+      "color": "blue",
+      "label": "to_inside"
+    },
+    {
+      "from": 54,
+      "to": 55,
+      "color": "blue",
+      "label": "to_selected"
+    },
+    {
+      "from": 54,
+      "to": 54,
+      "color": "blue",
+      "label": "no_trasition"
+    },
+    {
+      "from": 55,
+      "to": 51,
+      "color": "black",
+      "label": "after_set_texture"
     }
   ]
 }

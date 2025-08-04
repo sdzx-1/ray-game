@@ -1,13 +1,15 @@
 pub const MenuData = struct {
     rs: StateComponents(Menu) = .empty,
 };
+
 pub const Menu = union(enum) {
     // zig fmt: off
-    exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Menu, Editor(Menu))),
-    to_play     : Example(.next, Map),
+    exit1        : Example(.next, ps.Exit),
+    to_editor    : Example(.next, Select(Menu, Editor(Menu))),
+    to_play      : Example(.next, Map),
+    to_build     : Example(.next, ViewBuilds(Menu)),
     view_textures: Example(.current, ViewTextures(Menu)),
-    no_trasition: Example(.next, @This()),
+    no_trasition : Example(.next, @This()),
     // zig fmt: on
 
     pub fn handler(ctx: *Context) @This() {
@@ -22,12 +24,13 @@ pub const Menu = union(enum) {
 
     // zig fmt: off
     pub const action_list: []const (Action(@This())) = &.{
-        .{ .name = "Editor",    .val = .{ .button = toEditor  } },
-        .{ .name = "Exit",      .val = .{ .button = exit      } },
-        .{ .name = "Play",      .val = .{ .button = toPlay    } },
-        .{ .name = "Log hello", .val = .{ .button = log_hello } },
-        .{ .name = "Save data", .val = .{ .button = saveData  } },
-        .{ .name = "View textures",   .val = .{ .button = toTextures    } },
+        .{ .name = "Editor",        .val = .{ .button = toEditor  } },
+        .{ .name = "Exit",          .val = .{ .button = exit      } },
+        .{ .name = "Play",          .val = .{ .button = toPlay    } },
+        .{ .name = "Log hello",     .val = .{ .button = log_hello } },
+        .{ .name = "Save data",     .val = .{ .button = saveData  } },
+        .{ .name = "View textures", .val = .{ .button = toTextures} },
+        .{ .name = "View build",    .val = .{ .button = toBuild   } },
     };
     // zig fmt: on
 
@@ -42,6 +45,10 @@ pub const Menu = union(enum) {
 
     fn toTextures(_: *Context) ?@This() {
         return .view_textures;
+    }
+
+    fn toBuild(_: *Context) ?@This() {
+        return .to_build;
     }
 
     fn toEditor(_: *Context) ?@This() {
@@ -70,6 +77,7 @@ const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
 const Map = @import("map.zig").Map;
 const ViewTextures = @import("textures.zig").ViewTextures;
+const ViewBuilds = @import("tbuild.zig").ViewBuilds;
 
 const rl = @import("raylib");
 const rg = @import("raygui");

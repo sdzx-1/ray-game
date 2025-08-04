@@ -14,8 +14,7 @@ pub const SaveData = struct {
     menu: []const StateComponents(menu.Menu).Component = &.{},
     map: []const StateComponents(map.Map).Component = &.{},
     play: []const StateComponents(play.Play).Component = &.{},
-    tbuild: []const tbuild.Building = &.{},
-    tbuild_view: View = .{},
+    tbuild: []const tbuild.TbuildData.Building = &.{},
     maze_config: map.MazeConfig = .{},
     maze_texture: [4]textures.TextID = .{
         .{ .x = 2, .y = 31 },
@@ -62,7 +61,7 @@ pub fn saveData(ctx: *Context) void {
         .screen_width  = ctx.screen_width,
         .screen_height = ctx.screen_height,
         .hdw           = ctx.hdw,
-        .tbuild_view   = ctx.tbuild.view,
+        // .tbuild_view   = ctx.tbuild.view,
         .maze_texture  = ctx.play.maze_texture,
         // zig fmt: on
     };
@@ -80,59 +79,10 @@ pub fn loadData(gpa: std.mem.Allocator, ctx: *Context) !void {
     ctx.screen_width = save_data.screen_width;
     ctx.screen_height = save_data.screen_height;
     ctx.hdw = save_data.hdw;
-    ctx.tbuild.view = save_data.tbuild_view;
+    // ctx.tbuild.view = save_data.tbuild_view;
     ctx.play.maze_texture = save_data.maze_texture;
     ctx.log("load_data");
 }
-
-pub const View = struct {
-    x: f32 = 0,
-    y: f32 = 0,
-    width: f32 = 50,
-
-    pub fn dwin_to_dview(self: *const View, screen_w: f32, deta_win_pos: rl.Vector2) rl.Vector2 {
-        const r = self.width / screen_w;
-        return .{ .x = deta_win_pos.x * r, .y = deta_win_pos.y * r };
-    }
-
-    pub fn dview_to_dwin(self: *const View, screen_w: f32, deta_view_pos: rl.Vector2) rl.Vector2 {
-        const r = screen_w / self.width;
-        return .{ .x = deta_view_pos.x * r, .y = deta_view_pos.y * r };
-    }
-
-    pub fn win_to_view(self: *const View, screen_w: f32, win_pos: rl.Vector2) rl.Vector2 {
-        const r = self.width / screen_w;
-        return .{ .x = self.x + win_pos.x * r, .y = self.y + win_pos.y * r };
-    }
-
-    pub fn view_to_win(self: *const View, screen_w: f32, view_pos: rl.Vector2) rl.Vector2 {
-        const r = screen_w / self.width;
-        return .{ .x = (view_pos.x - self.x) * r, .y = (view_pos.y - self.y) * r };
-    }
-
-    pub fn center(self: *@This(), hdw: f32, x: f32, y: f32) void {
-        self.x = x - self.width / 2;
-        self.y = y - (self.width * hdw) / 2;
-    }
-
-    pub fn mouse_wheel(self: *View, hdw: f32) void {
-        const mouse_wheel_deta = rl.getMouseWheelMove();
-        const deta = (mouse_wheel_deta * 0.65) * self.width * 0.2;
-        self.x -= deta / 2;
-        self.y -= (deta * hdw) / 2;
-        self.width += deta;
-    }
-
-    pub fn drag_view(self: *View, screen_width: f32) void {
-        if (rl.isMouseButtonDown(rl.MouseButton.middle) or
-            (rl.isKeyDown(rl.KeyboardKey.left_alt)))
-        {
-            const deta = self.dwin_to_dview(screen_width, rl.getMouseDelta());
-            self.x -= deta.x;
-            self.y -= deta.y;
-        }
-    }
-};
 
 const std = @import("std");
 const StateComponents = core.StateComponents;
