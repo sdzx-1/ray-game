@@ -1,35 +1,29 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const addInstallGraphFile = @import("polystate").addInstallGraphFile;
-const emcc = @import("raylib_zig").emcc;
 
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
 
-    if (target.query.os_tag == .emscripten) {
-        const sysroot =
-            if (b.sysroot) |sysroot| sysroot else try b.build_root.join(b.allocator, &.{
-                "emscripten-builder",
-                "zig-out",
-                "emsdk",
-                "upstream",
-                "emscripten",
-            });
+    const emcc_dir: std.Build.LazyPath =
+        if (target.query.os_tag == .emscripten) blk: {
+            if (b.sysroot) |sysroot| {
+                const emcc_path = try std.fs.path.join(b.allocator, &.{ sysroot, "emcc" });
 
-        const emcc_path = try std.fs.path.join(b.allocator, &.{ sysroot, "emcc" });
+                std.fs.accessAbsolute(emcc_path, .{}) catch {
+                    b.default_step.dependOn(&b.addFail("if sysroot is provided, it must point to the emscripten directory containing `emcc`").step);
+                };
 
-        std.fs.accessAbsolute(emcc_path, .{}) catch {
-            b.default_step.dependOn(&b.addFail(
-                \\sysroot must point to the emscripten directory containing `emcc`
-                \\
-                \\You must either:
-                \\1. Use --sysroot <path-to-emscripten>
-                \\2. Run `zig build` in emscripten-builder 
-                \\
-            ).step);
-        };
+                break :blk .{ .cwd_relative = sysroot };
+            }
 
-        b.sysroot = sysroot;
-    }
+            // 'sysroot' isn't actually used in a meaningful way, but some dependencies require it when compiling their build scripts.
+            b.sysroot = "/";
+
+            const emscripten_builder_dep = b.lazyDependency("emscripten_builder", .{}) orelse return;
+
+            break :blk try emscripten_builder_dep.namedLazyPath("emscripten").join(b.allocator, "upstream/emscripten");
+        } else undefined;
 
     const optimize = b.standardOptimizeOption(.{});
     const no_bin = b.option(bool, "no_bin", "no bin") orelse false;
@@ -43,51 +37,57 @@ pub fn build(b: *std.Build) !void {
 
     const raylib_artifact = raylib_dep.artifact("raylib");
 
+    const exe_mod = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{
+            .{ .name = "polystate", .module = polystate },
+            .{ .name = "raylib", .module = raylib_dep.module("raylib") },
+            .{ .name = "raygui", .module = raylib_dep.module("raygui") },
+            .{ .name = "maze", .module = maze_dep.module("maze") },
+        },
+    });
+
+    exe_mod.linkLibrary(raylib_artifact);
+
     if (target.query.os_tag == .emscripten) {
-        const exe_lib = try emcc.compileForEmscripten(b, "ray_game", "src/main.zig", target, optimize);
-        exe_lib.root_module.addImport("polystate", polystate);
-        exe_lib.root_module.addImport("raylib", raylib_dep.module("raylib"));
-        exe_lib.root_module.addImport("raygui", raylib_dep.module("raygui"));
-        exe_lib.root_module.addImport("maze", maze_dep.module("maze"));
-
-        exe_lib.linkLibrary(raylib_artifact);
-        const link_step = try emcc.linkWithEmscripten(b, &.{ exe_lib, raylib_artifact });
-        link_step.addArg("--emrun");
-        link_step.addArg("-sALLOW_MEMORY_GROWTH");
-        link_step.addArg("-sFORCE_FILESYSTEM");
-        link_step.addArg("-lidbfs.js");
-
-        link_step.addArg("--pre-js");
-        link_step.addArg("emscripten/setup.js");
-
-        link_step.addArg("--js-library");
-        link_step.addArg("emscripten/file_sync.js");
-
-        link_step.addArg("--preload-file");
-        link_step.addArg("data/");
-        link_step.addArg("--preload-file");
-        link_step.addArg("config.json");
-
-        b.getInstallStep().dependOn(&link_step.step);
-
-        const run_step = try emcc.emscriptenRunStep(b);
-        run_step.step.dependOn(b.getInstallStep());
-        const run_option = b.step("run", "Run the app");
-
-        run_option.dependOn(&run_step.step);
-    } else {
-        const exe_mod = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-            .imports = &.{
-                .{ .name = "polystate", .module = polystate },
-                .{ .name = "raylib", .module = raylib_dep.module("raylib") },
-                .{ .name = "raygui", .module = raylib_dep.module("raygui") },
-                .{ .name = "maze", .module = maze_dep.module("maze") },
-            },
+        const exe_lib = b.addLibrary(.{
+            .linkage = .static,
+            .name = "ray_game",
+            .root_module = exe_mod,
         });
 
+        const link = try linkWithEmscripten(b, emcc_dir, optimize, &.{ exe_lib, raylib_artifact });
+
+        link.command.addArg("--emrun");
+        link.command.addArg("-sALLOW_MEMORY_GROWTH");
+        link.command.addArg("-sFORCE_FILESYSTEM");
+        link.command.addArg("-lidbfs.js");
+
+        link.command.addArg("--pre-js");
+        link.command.addFileArg(b.path("emscripten/setup.js"));
+
+        link.command.addArg("--js-library");
+        link.command.addFileArg(b.path("emscripten/file_sync.js"));
+
+        link.command.addArg("--preload-file");
+        try addEmscriptenVirtualDirectoryArg(b, link.command, "data");
+
+        link.command.addArg("--preload-file");
+        try addEmscriptenVirtualFileArg(b, link.command, "config.json");
+
+        b.installDirectory(.{
+            .source_dir = link.output_dir,
+            .install_dir = .{ .custom = "htmlout" },
+            .install_subdir = "",
+        });
+
+        const run_cmd = try emscriptenRunStep(b, emcc_dir, try link.output_dir.join(b.allocator, "index.html"));
+        const run_option = b.step("run", "Run the app");
+
+        run_option.dependOn(&run_cmd.step);
+    } else {
         //generate state graph
         const install_dot_file = addInstallGraphFile(b, "ray-game", exe_mod, .graphviz, polystate, target, .{ .custom = "graphs" });
         const install_mmd_file = addInstallGraphFile(b, "ray-game", exe_mod, .mermaid, polystate, target, .{ .custom = "graphs" });
@@ -99,14 +99,12 @@ pub fn build(b: *std.Build) !void {
         });
 
         if (no_bin) {
-            exe.linkLibrary(raylib_artifact);
             b.getInstallStep().dependOn(&exe.step);
         } else {
             b.getInstallStep().dependOn(&install_dot_file.step);
             b.getInstallStep().dependOn(&install_mmd_file.step);
             b.getInstallStep().dependOn(&install_json_file.step);
 
-            exe.linkLibrary(raylib_artifact);
             b.installArtifact(exe);
 
             const run_cmd = b.addRunArtifact(exe);
@@ -127,4 +125,103 @@ pub fn build(b: *std.Build) !void {
         );
         b.default_step.dependOn(&install_content_step.step);
     }
+}
+
+fn addEmscriptenVirtualFileArg(
+    b: *std.Build,
+    run: *std.Build.Step.Run,
+    rel_path: []const u8,
+) !void {
+    try addEmscriptenVirtualPathArg(b, run, rel_path);
+    try run.step.addWatchInput(b.path(rel_path));
+}
+
+fn addEmscriptenVirtualDirectoryArg(
+    b: *std.Build,
+    run: *std.Build.Step.Run,
+    rel_path: []const u8,
+) !void {
+    try addEmscriptenVirtualPathArg(b, run, rel_path);
+    _ = try run.step.addDirectoryWatchInput(b.path(rel_path));
+}
+
+fn addEmscriptenVirtualPathArg(
+    b: *std.Build,
+    run: *std.Build.Step.Run,
+    rel_path: []const u8,
+) !void {
+    run.addArg(
+        try std.fmt.allocPrint(b.allocator, "{s}@{s}", .{
+            try b.build_root.join(b.allocator, &.{rel_path}),
+            rel_path,
+        }),
+    );
+}
+
+const EmccRun = struct {
+    command: *std.Build.Step.Run,
+    output_dir: std.Build.LazyPath,
+};
+
+fn linkWithEmscripten(
+    b: *std.Build,
+    emscripten_dir: std.Build.LazyPath,
+    optimize: std.builtin.OptimizeMode,
+    itemsToLink: []const *std.Build.Step.Compile,
+) !EmccRun {
+    const emccExe = switch (builtin.os.tag) {
+        .windows => "emcc",
+        else => "emcc",
+    };
+
+    const emcc_command = b.addSystemCommand(&.{emccExe});
+    emcc_command.setCwd(emscripten_dir);
+
+    for (itemsToLink) |item| {
+        emcc_command.addFileArg(item.getEmittedBin());
+    }
+
+    emcc_command.addArg("-o");
+
+    const output_file = emcc_command.addOutputFileArg("index.html");
+    var output_dir = output_file;
+    output_dir.generated.up = 1;
+
+    emcc_command.addArg(switch (optimize) {
+        .Debug => "-O0",
+        .ReleaseSafe => "-O3",
+        .ReleaseFast => "-O3",
+        .ReleaseSmall => "-Oz",
+    });
+
+    emcc_command.addArgs(&[_][]const u8{
+        "-sUSE_OFFSET_CONVERTER",
+        "-sFULL-ES3=1",
+        "-sUSE_GLFW=3",
+        "-sASYNCIFY",
+        "-fsanitize=undefined",
+        "--emrun",
+    });
+
+    return .{
+        .command = emcc_command,
+        .output_dir = output_dir,
+    };
+}
+
+fn emscriptenRunStep(
+    b: *std.Build,
+    emscripten_dir: std.Build.LazyPath,
+    run_file: std.Build.LazyPath,
+) !*std.Build.Step.Run {
+    const emrunExe = switch (builtin.os.tag) {
+        .windows => "emrun.bat",
+        else => "emrun",
+    };
+
+    const run_cmd = b.addSystemCommand(&.{emrunExe});
+    run_cmd.setCwd(emscripten_dir);
+    run_cmd.addFileArg(run_file);
+
+    return run_cmd;
 }

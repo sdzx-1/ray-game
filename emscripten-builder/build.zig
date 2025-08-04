@@ -6,29 +6,27 @@ const emsdk_script_file = switch (builtin.os.tag) {
     else => "emsdk",
 };
 
-fn emsdkDependencyInstalled(b: *std.Build, emsdk: *std.Build.Dependency) !bool {
-    const dot_emsc_path = try std.fs.path.join(b.allocator, &.{ emsdk.path("").getPath(b), ".emscripten" });
+fn emsdkInstalled(b: *std.Build, path: []const u8) !bool {
+    const dot_emsc_path = try std.fs.path.join(b.allocator, &.{ path, ".emscripten" });
     const dot_emsc_exists = !std.meta.isError(std.fs.accessAbsolute(dot_emsc_path, .{}));
     return dot_emsc_exists;
 }
 
-pub fn build(b: *std.Build) !void {
+fn emsdkDependencyInstalled(b: *std.Build, emsdk: *std.Build.Dependency) !bool {
+    return try emsdkInstalled(b, emsdk.path("").getPath(b));
+}
+
+fn addEmscriptenInstall(b: *std.Build) !std.Build.LazyPath {
     const emsdk = b.dependency("emsdk", .{});
 
     if (try emsdkDependencyInstalled(b, emsdk)) {
-        if (std.meta.isError(std.fs.accessAbsolute(b.install_path, .{}))) {
-            try std.fs.makeDirAbsolute(b.install_path);
-        }
+        return emsdk.path("");
+    }
 
-        if (std.meta.isError(std.fs.accessAbsolute(b.getInstallPath(.{ .custom = "emsdk" }, ""), .{}))) {
-            try std.fs.symLinkAbsolute(
-                emsdk.path("").getPath(b),
-                b.getInstallPath(.{ .custom = "emsdk" }, ""),
-                .{ .is_directory = true },
-            );
-        }
-
-        return;
+    if (try emsdkInstalled(b, b.getInstallPath(.{ .custom = "emsdk" }, ""))) {
+        return .{
+            .cwd_relative = b.getInstallPath(.{ .custom = "emsdk" }, ""),
+        };
     }
 
     const emsdk_install_dir = b.addInstallDirectory(.{
@@ -42,9 +40,18 @@ pub fn build(b: *std.Build) !void {
     const emsdk_run_install = b.addSystemCommand(&.{ emsdk_script_path, "install", "latest" });
     emsdk_run_install.step.dependOn(&emsdk_install_dir.step);
 
+    emsdk_run_install.addFileInput(.{ .cwd_relative = b.getInstallPath(.{ .custom = "emsdk" }, ".emscripten") });
+
     const emsdk_run_activate = b.addSystemCommand(&.{ emsdk_script_path, "activate", "latest" });
     emsdk_run_activate.step.dependOn(&emsdk_install_dir.step);
     emsdk_run_activate.step.dependOn(&emsdk_run_install.step);
 
-    b.default_step.dependOn(&emsdk_run_activate.step);
+    const gen_file = try b.allocator.create(std.Build.GeneratedFile);
+    gen_file.* = .{ .path = b.getInstallPath(.{ .custom = "emsdk" }, ""), .step = &emsdk_run_activate.step };
+
+    return .{ .generated = .{ .file = gen_file } };
+}
+
+pub fn build(b: *std.Build) !void {
+    b.addNamedLazyPath("emscripten", try addEmscriptenInstall(b));
 }

@@ -48,6 +48,10 @@
             .url = "git+https://github.com/sdzx-1/polystate.git#186174bb3a8b48944950e36d555c01f4ec966505",
             .hash = "polystate-0.0.0-8by0_CRkAQBiRrqSDTNPrUtFyhSXJsMfRXSrLhPTgxMd",
         },
+        .emscripten_builder = .{
+            .path = "emscripten-builder",
+            .lazy = true,
+        },
     },
     .paths = .{
         "build.zig",
