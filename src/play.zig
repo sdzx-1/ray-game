@@ -1,10 +1,10 @@
 pub const PlayData = struct {
     rs: StateComponents(Play) = .empty,
     current_map: *CurrentMap,
-    view: View = undefined,
+    vw: ViewWin = .{ .hw_ratio = 1, .winport = .{}, .viewport = .{} },
     selected_cell_id: CellID = .{},
-    selected_build: tbuild.Building = undefined,
     selected_color: rl.Color = undefined,
+    selected_build: Building = undefined,
 
     current_texture: i32 = 0,
     maze_texture: [4]textures.TextID = .{
@@ -13,6 +13,59 @@ pub const PlayData = struct {
         .{ .x = 28, .y = 22 },
         .{ .x = 27, .y = 22 },
     },
+
+    pub fn render_current_map(self: *const @This(), ctx: *Context, enable_grid: bool) void {
+        if (self.vw.viewport_intersect_rect(.{
+            .x = 0,
+            .y = 0,
+            .width = @as(f32, @floatFromInt(ctx.map.maze_config.total_x)),
+            .height = @as(f32, @floatFromInt(ctx.map.maze_config.total_y)),
+        })) |rect| {
+            const start_x: usize = @intFromFloat(@floor(rect.x));
+            const start_y: usize = @intFromFloat(@floor(rect.y));
+            const end_x: usize = @intFromFloat(@floor(rect.x + rect.width - 0.01));
+            const end_y: usize = @intFromFloat(@floor(rect.y + rect.height - 0.01));
+
+            self.vw.winport_beginScissorMode();
+            defer rl.endScissorMode();
+
+            for (start_y..end_y + 1) |y| {
+                for (start_x..end_x + 1) |x| {
+                    const val = self.current_map[y][x];
+                    const win_pos = self.vw.viewpos_to_winpos(.{ .x = @floatFromInt(x), .y = @floatFromInt(y) });
+                    const dw = self.vw.wv_ratio();
+
+                    ctx.textures.render_texture(
+                        ctx.play.maze_texture[@intFromEnum(val.tag)],
+                        .{ .x = win_pos.x, .y = win_pos.y, .width = dw, .height = dw },
+                        rl.Color.white,
+                    );
+
+                    if (val.building) |build| {
+                        ctx.textures.render_texture(
+                            build.text_id,
+                            .{ .x = win_pos.x, .y = win_pos.y, .width = dw, .height = dw },
+                            build.color,
+                        );
+                    }
+                }
+            }
+
+            if (enable_grid) {
+                for (start_x..end_x + 1) |x| {
+                    const start_pos = self.vw.viewpos_to_winpos(.{ .x = @floatFromInt(x), .y = rect.y });
+                    const end_pos = self.vw.viewpos_to_winpos(.{ .x = @floatFromInt(x), .y = rect.y + rect.height });
+                    rl.drawLineEx(start_pos.toVector2(), end_pos.toVector2(), 2, rl.Color.black);
+                }
+
+                for (start_y..end_y + 1) |y| {
+                    const start_pos = self.vw.viewpos_to_winpos(.{ .x = rect.x, .y = @floatFromInt(y) });
+                    const end_pos = self.vw.viewpos_to_winpos(.{ .x = rect.x + rect.width, .y = @floatFromInt(y) });
+                    rl.drawLineEx(start_pos.toVector2(), end_pos.toVector2(), 2, rl.Color.black);
+                }
+            }
+        }
+    }
 };
 
 pub const CellID = struct {
@@ -22,188 +75,18 @@ pub const CellID = struct {
 
 pub const Cell = struct {
     tag: Maze.Tag,
-    building: ?tbuild.Building,
+    building: ?tbuild.TbuildData.Building,
 };
 
 pub const CurrentMap = [200][200]Cell;
 
-pub fn X(back: type, target: type) type {
-    return union(enum) {
-        XX: Example(.current, Select(back, Select(X(back, target), target))),
+const TwoStageSelect = Select(Play, SelectBuildInstance(Place, Select(BackUpLevel, SelectCellInstance(Place, Place))));
 
-        pub fn handler(_: *Context) @This() {
-            return .XX;
-        }
-    };
-}
+pub const BackUpLevel = union(enum) {
+    back_up_level: Example(.current, TwoStageSelect),
 
-pub const Place = union(enum) {
-    to_play: Example(.current, Select(Play, Select(X(Play, Place), Place))),
-
-    pub fn handler(ctx: *Context) @This() {
-        const b = ctx.play.selected_build;
-        const cell_id = ctx.play.selected_cell_id;
-        const y: i32 = @intCast(cell_id.y);
-        const x: i32 = @intCast(cell_id.x);
-        const w: i32 = @intFromFloat(b.width);
-        const h: i32 = @intFromFloat(b.height);
-        var ty = y;
-        while (ty < y + h) : (ty += 1) {
-            var tx = x;
-            while (tx < x + w) : (tx += 1) {
-                const cell = &ctx.play.current_map[@intCast(ty)][@intCast(tx)];
-                cell.building = b;
-            }
-        }
-        return .to_play;
-    }
-
-    pub fn select_fun1(ctx: *Context, sst: select.SelectStage) bool {
-        _ = sst;
-        ctx.tbuild.view.mouse_wheel(ctx.hdw);
-        ctx.tbuild.view.drag_view(ctx.screen_width);
-        return false;
-    }
-
-    pub fn select_render1(ctx: *Context, sst: select.SelectStage) void {
-        _ = sst;
-        draw_cells(&ctx.play.view, ctx, -1);
-        for (ctx.tbuild.list.items) |*b| {
-            const win_pos = ctx.tbuild.view.view_to_win(
-                ctx.screen_width,
-                .{ .x = b.x, .y = b.y },
-            );
-            b.draw(ctx);
-            rl.drawCircleV(win_pos, 9, rl.Color.green);
-        }
-    }
-
-    pub fn check_inside1(ctx: *Context) select.CheckInsideResult {
-        for (ctx.tbuild.list.items) |*b| {
-            if (b.inBuilding(ctx, rl.getMousePosition())) {
-                ctx.play.selected_build = b.*;
-                return .in_someone;
-            }
-        }
-        return .not_in_any_rect;
-    }
-
-    pub fn check_still_inside1(ctx: *Context) bool {
-        const b = &ctx.play.selected_build;
-        return b.inBuilding(ctx, rl.getMousePosition());
-    }
-
-    //select position
-
-    pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
-        _ = sst;
-        if (rl.isKeyPressed(rl.KeyboardKey.r)) {
-            ctx.play.selected_build.rotate();
-            return true;
-        }
-        return false;
-    }
-
-    pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
-        ctx.play.view.mouse_wheel(ctx.hdw);
-        ctx.play.view.drag_view(ctx.screen_width);
-        draw_cells(&ctx.play.view, ctx, -1);
-
-        const b = &ctx.play.selected_build;
-        b.draw_with_win_pos_and_view(
-            ctx,
-            rl.getMousePosition(),
-            &ctx.play.view,
-            switch (sst) {
-                .outside => ctx.play.selected_color,
-                .inside => rl.Color.green,
-                .hover => rl.Color.yellow,
-            },
-        );
-    }
-
-    pub fn check_inside(ctx: *Context) select.CheckInsideResult {
-        const b = &ctx.play.selected_build;
-        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
-        const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
-        const w: i32 = @intFromFloat(b.width);
-        const h: i32 = @intFromFloat(b.height);
-
-        if (x < 0 or
-            y < 0 or
-            x + w > ctx.map.maze_config.total_x or
-            y + h > ctx.map.maze_config.total_y) return .not_in_any_rect;
-
-        var ty = y;
-        while (ty < y + h) : (ty += 1) {
-            var tx = x;
-            while (tx < x + w) : (tx += 1) {
-                const cell = ctx.play.current_map[@intCast(ty)][@intCast(tx)];
-                if (cell.tag != .room or cell.building != null) {
-                    ctx.play.selected_color = rl.Color.red;
-                    return .not_in_any_rect;
-                }
-            }
-        }
-
-        ctx.play.selected_color = rl.Color.green;
-        ctx.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
-        return .in_someone;
-    }
-
-    pub fn check_still_inside(ctx: *Context) bool {
-        const b = &ctx.play.selected_build;
-        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x - b.width / 2));
-        const y: i32 = @intFromFloat(@floor(vp.y - b.height / 2));
-        return (x == ctx.play.selected_cell_id.x and
-            y == ctx.play.selected_cell_id.y);
-    }
-};
-
-pub const Delete = union(enum) {
-    to_delete: Example(.current, Select(Play, Delete)),
-
-    pub fn handler(ctx: *Context) @This() {
-        const id = ctx.play.selected_cell_id;
-        ctx.play.current_map[id.y][id.x].building = null;
-        return .to_delete;
-    }
-
-    pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
-        _ = sst;
-        ctx.play.view.mouse_wheel(ctx.hdw);
-        ctx.play.view.drag_view(ctx.screen_width);
-        draw_cells(&ctx.play.view, ctx, -1);
-    }
-
-    pub fn check_inside(ctx: *Context) select.CheckInsideResult {
-        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x));
-        const y: i32 = @intFromFloat(@floor(vp.y));
-
-        if (x < 0 or
-            y < 0 or
-            x >= ctx.map.maze_config.total_x or
-            y >= ctx.map.maze_config.total_y) return .not_in_any_rect;
-
-        const cell = ctx.play.current_map[@intCast(y)][@intCast(x)];
-        if (cell.building != null) {
-            ctx.play.selected_cell_id = .{ .x = @intCast(x), .y = @intCast(y) };
-            return .in_someone;
-        }
-
-        return .not_in_any_rect;
-    }
-
-    pub fn check_still_inside(ctx: *Context) bool {
-        const vp = ctx.play.view.win_to_view(ctx.screen_width, rl.getMousePosition());
-        const x: i32 = @intFromFloat(@floor(vp.x));
-        const y: i32 = @intFromFloat(@floor(vp.y));
-
-        return (x == ctx.play.selected_cell_id.x and
-            y == ctx.play.selected_cell_id.y);
+    pub fn handler(_: *Context) @This() {
+        return .back_up_level;
     }
 };
 
@@ -213,25 +96,28 @@ pub const Play = union(enum) {
     to_editor       : Example(.next, Select(Play, Editor(Play))),
     to_menu         : Example(.next, Menu),
     to_build        : Example(.next, Select(Play, TBuild)),
-    to_place        : Example(.next, Select(Play, Select(X(Play, Place), Place))),
-    set_maze_text_id: Example(.next, Init(Select(Play, SetTexture(true, Play)))),
-    to_delete       : Example(.next, Select(Play, Delete)),
+    to_place        : Example(.next, TwoStageSelect),
+    set_maze_text_id: Example(.next, Init(SetPlayTexutre, Select(Play, SetPlayTexutre))),
+    to_delete       : Example(.next, Select(Play, SelectCellInstance(Delete, Delete))),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
 
+    const SetPlayTexutre = SetTexture(true, Play);
+
     pub fn handler(ctx: *Context) @This() {
-        ctx.play.view.mouse_wheel(ctx.hdw);
-        ctx.play.view.drag_view(ctx.screen_width);
+        ctx.play.vw.mouse_drag_viewport();
+        ctx.play.vw.mouse_wheel_zoom_viewport();
+
         if (ctx.play.rs.pull()) |msg| return msg;
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
-        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return toBuild(ctx).?;
+        if (rl.isKeyPressed(rl.KeyboardKey.f)) return toPlace(ctx).?;
         if (rl.isKeyPressed(rl.KeyboardKey.d)) return .to_delete;
         return .no_trasition;
     }
 
     pub fn render(ctx: *Context) void {
-        draw_cells(&ctx.play.view, ctx, 0);
+        ctx.play.render_current_map(ctx, false);
         ctx.play.rs.render(ctx);
     }
 
@@ -273,11 +159,16 @@ pub const Play = union(enum) {
         return .to_menu;
     }
 
-    fn toBuild(_: *Context) ?@This() {
+    fn toBuild(ctx: *Context) ?@This() {
+        ctx.tbuild.vw.winport.width = ctx.screen_width;
+        ctx.tbuild.vw.hw_ratio = ctx.hdw;
         return .to_build;
     }
 
-    fn toPlace(_: *Context) ?@This() {
+    fn toPlace(ctx: *Context) ?@This() {
+        const tmp_width = ctx.screen_width / 2;
+        ctx.tbuild.vw.winport.width = tmp_width;
+        ctx.tbuild.vw.hw_ratio = 0.5;
         return .to_place;
     }
 
@@ -294,59 +185,183 @@ pub const Play = union(enum) {
     }
 };
 
-pub fn draw_cells(view: *const View, ctx: *Context, inc: f32) void {
-    const height = view.width * ctx.hdw;
+pub const Place = union(enum) {
+    to_play: Example(.current, TwoStageSelect),
 
-    const min_x: i32 = @intFromFloat(@floor(view.x));
-    const max_x: i32 = @intFromFloat(@floor(view.x + view.width));
+    pub fn handler(ctx: *Context) @This() {
+        const cell_id = ctx.play.selected_cell_id;
+        const x = cell_id.x;
+        const y = cell_id.y;
 
-    const min_y: i32 = @intFromFloat(@floor(view.y));
-    const max_y: i32 = @intFromFloat(@floor(view.y + height));
+        const b = ctx.play.selected_build;
+        for (y..y + b.height) |iy| {
+            for (x..x + b.width) |ix| {
+                ctx.play.current_map[iy][ix].building = b;
+            }
+        }
+        return .to_play;
+    }
+    pub fn select_build_backend_render(ctx: *Context, _: select.SelectStage) void {
+        ctx.play.render_current_map(ctx, true);
+    }
 
-    var ty = min_y;
-    while (ty < max_y + 1) : (ty += 1) {
-        var tx = min_x;
-        while (tx < max_x + 1) : (tx += 1) {
-            if (tx < 0 or
-                ty < 0 or
-                tx > (ctx.map.maze_config.total_x - 1) or
-                ty > (ctx.map.maze_config.total_y - 1)) continue;
+    pub fn select_build_inside_fun(ctx: *Context) void {
+        ctx.play.selected_build = ctx.tbuild.list.items[ctx.tbuild.selected_id];
+    }
 
-            const val = ctx.play.current_map[@intCast(ty)][@intCast(tx)];
-            const win_pos = view.view_to_win(ctx.screen_width, .{ .x = @floatFromInt(tx), .y = @floatFromInt(ty) });
-            const scale = 1 * ctx.screen_width / view.width;
+    pub fn select_cell_check_inside(ctx: *Context, cid: CellID) bool {
+        const b = ctx.play.selected_build;
 
-            if (val.building == null) {
-                switch (ctx.textures.read(ctx.play.maze_texture[@intFromEnum(val.tag)])) {
-                    .texture => |texture| {
-                        texture.tex2d.drawPro(
-                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
-                            .{ .x = 0, .y = 0 },
-                            0,
-                            rl.Color.white,
-                        );
-                    },
-                    else => {},
-                }
-            } else {
-                switch (ctx.textures.read(val.building.?.text_id)) {
-                    .texture => |texture| {
-                        texture.tex2d.drawPro(
-                            .{ .x = 0, .y = 0, .width = 256, .height = 256 },
-                            .{ .x = win_pos.x, .y = win_pos.y, .width = scale + inc, .height = scale + inc },
-                            .{ .x = 0, .y = 0 },
-                            0,
-                            val.building.?.color,
-                        );
-                    },
-                    else => {},
+        for (0..b.height) |dy| {
+            for (0..b.width) |dx| {
+                const cell = ctx.play.current_map[cid.y + dy][cid.x + dx];
+
+                if (cell.tag != .room or cell.building != null) {
+                    ctx.play.selected_color = rl.Color.red;
+                    return false;
                 }
             }
         }
-    }
-}
 
+        ctx.play.selected_color = rl.Color.green;
+        return true;
+    }
+
+    pub fn select_cell_render(ctx: *Context, sst: select.SelectStage) void {
+        _ = sst;
+        const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
+        const b = ctx.play.selected_build;
+
+        const wpos = ctx.play.vw.viewpos_to_winpos(.{ .x = @floor(vp.x), .y = @floor(vp.y) });
+        const dwpos = ctx.play.vw.dviewpos_to_dwinpos(.{ .x = @floatFromInt(b.width), .y = @floatFromInt(b.height) });
+
+        rl.drawRectangleLinesEx(.{
+            .x = wpos.x,
+            .y = wpos.y,
+            .width = dwpos.x,
+            .height = dwpos.y,
+        }, 8, ctx.play.selected_color);
+    }
+
+    pub fn select_cell_fun(ctx: *Context, sst: select.SelectStage) bool {
+        _ = sst;
+        if (rl.isKeyPressed(rl.KeyboardKey.r)) {
+            ctx.play.selected_build.rotate();
+            return true;
+        }
+        return false;
+    }
+};
+
+pub const Delete = union(enum) {
+    to_delete: Example(.current, Select(Play, SelectCellInstance(Delete, Delete))),
+
+    pub fn handler(ctx: *Context) @This() {
+        const id = ctx.play.selected_cell_id;
+        ctx.play.current_map[id.y][id.x].building = null;
+        return .to_delete;
+    }
+
+    pub fn select_cell_check_inside(ctx: *Context, cid: CellID) bool {
+        const cell = ctx.play.current_map[@intCast(cid.y)][@intCast(cid.x)];
+        return (cell.building != null);
+    }
+
+    //for test!
+    pub fn select_cell_fun(ctx: *Context, sst: select.SelectStage) bool {
+        switch (sst) {
+            .outside => {
+                const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
+                const x: usize = @intFromFloat(@floor(vp.x));
+                const y: usize = @intFromFloat(@floor(vp.y));
+
+                if (rl.isMouseButtonReleased(rl.MouseButton.right)) {
+                    ctx.play.current_map[y][x].building = ctx.tbuild.list.items[0];
+                }
+            },
+            else => {},
+        }
+        return false;
+    }
+
+    pub fn select_cell_render(ctx: *Context, sst: select.SelectStage) void {
+        switch (sst) {
+            .outside => {},
+            else => {
+                const cid = ctx.play.selected_cell_id;
+                const x: f32 = @floatFromInt(cid.x);
+                const y: f32 = @floatFromInt(cid.y);
+                const wpos = ctx.play.vw.viewpos_to_winpos(.{ .x = x, .y = y });
+                const dw = ctx.play.vw.wv_ratio();
+                rl.drawRectangleLinesEx(.{
+                    .x = wpos.x,
+                    .y = wpos.y,
+                    .width = dw,
+                    .height = dw,
+                }, 2, rl.Color.red);
+            },
+        }
+    }
+};
+
+pub fn SelectCellInstance(Config: type, Next: type) type {
+    return union(enum) {
+        after_select_cell: Example(.current, Next),
+
+        pub fn handler(_: *Context) @This() {
+            return .after_select_cell;
+        }
+
+        pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
+            ctx.play.vw.mouse_drag_viewport();
+            ctx.play.vw.mouse_wheel_zoom_viewport();
+
+            if (@hasDecl(Config, "select_cell_fun")) {
+                const select_fun_: fn (*Context, select.SelectStage) bool = Config.select_cell_fun;
+                return select_fun_(ctx, sst);
+            } else {
+                return false;
+            }
+        }
+
+        pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
+            ctx.play.render_current_map(ctx, true);
+
+            if (@hasDecl(Config, "select_cell_render")) {
+                const render_: fn (*Context, select.SelectStage) void = Config.select_cell_render;
+                render_(ctx, sst);
+            }
+        }
+
+        pub fn check_inside(ctx: *Context) select.CheckInsideResult {
+            const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
+            const x: i32 = @intFromFloat(@floor(vp.x));
+            const y: i32 = @intFromFloat(@floor(vp.y));
+
+            if (x < 0 or
+                y < 0 or
+                x >= ctx.map.maze_config.total_x or
+                y >= ctx.map.maze_config.total_y) return .not_in_any_rect;
+
+            const cell_id: CellID = .{ .x = @intCast(x), .y = @intCast(y) };
+            if (Config.select_cell_check_inside(ctx, cell_id)) {
+                ctx.play.selected_cell_id = cell_id;
+                return .in_someone;
+            }
+
+            return .not_in_any_rect;
+        }
+
+        pub fn check_still_inside(ctx: *Context) bool {
+            const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
+            const x: i32 = @intFromFloat(@floor(vp.x));
+            const y: i32 = @intFromFloat(@floor(vp.y));
+
+            return (x == ctx.play.selected_cell_id.x and
+                y == ctx.play.selected_cell_id.y);
+        }
+    };
+}
 const std = @import("std");
 const ps = @import("polystate");
 const core = @import("core.zig");
@@ -362,6 +377,7 @@ const Init = core.Init;
 const Editor = @import("editor.zig").Editor;
 const Map = @import("map.zig").Map;
 const TBuild = @import("tbuild.zig").TBuild;
+const Building = @import("tbuild.zig").TbuildData.Building;
 const SetTexture = @import("textures.zig").SetTexture;
 
 const rl = @import("raylib");
@@ -372,4 +388,5 @@ const Context = core.Context;
 const Action = core.Action;
 const StateComponents = core.StateComponents;
 const Maze = maze.Maze;
-const View = utils.View;
+const ViewWin = @import("ViewWin.zig");
+const SelectBuildInstance = tbuild.SelectBuildInstance;

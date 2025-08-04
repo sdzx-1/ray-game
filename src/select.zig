@@ -48,32 +48,6 @@ pub fn Select(
             const render_: fn (*Context, SelectStage) void = selected.select_render;
             render_(ctx, .outside);
         }
-
-        pub const init_fun = selected.init_fun;
-
-        pub const select_fun = selected.select_fun1;
-        pub const select_fun1 = selected.select_fun2;
-        pub const select_fun2 = selected.select_fun3;
-        pub const select_fun3 = selected.select_fun4;
-        pub const select_fun4 = selected.select_fun5;
-
-        pub const select_render = selected.select_render1;
-        pub const select_render1 = selected.select_render2;
-        pub const select_render2 = selected.select_render3;
-        pub const select_render3 = selected.select_render4;
-        pub const select_render4 = selected.select_render5;
-
-        pub const check_inside = selected.check_inside1;
-        pub const check_inside1 = selected.check_inside2;
-        pub const check_inside2 = selected.check_inside3;
-        pub const check_inside3 = selected.check_inside4;
-        pub const check_inside4 = selected.check_inside5;
-
-        pub const check_still_inside = selected.check_still_inside1;
-        pub const check_still_inside1 = selected.check_still_inside2;
-        pub const check_still_inside2 = selected.check_still_inside3;
-        pub const check_still_inside3 = selected.check_still_inside4;
-        pub const check_still_inside4 = selected.check_still_inside5;
     };
 }
 
