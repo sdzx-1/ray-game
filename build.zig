@@ -174,8 +174,8 @@ fn linkWithEmscripten(
         else => "emcc",
     };
 
-    const emcc_command = b.addSystemCommand(&.{emccExe});
-    emcc_command.setCwd(emscripten_dir);
+    const emcc_command = addSystemCommand(b, &.{});
+    emcc_command.addFileArg(try emscripten_dir.join(b.allocator, emccExe));
 
     for (itemsToLink) |item| {
         emcc_command.addFileArg(item.getEmittedBin());
@@ -219,9 +219,16 @@ fn emscriptenRunStep(
         else => "emrun",
     };
 
-    const run_cmd = b.addSystemCommand(&.{emrunExe});
-    run_cmd.setCwd(emscripten_dir);
+    const run_cmd = addSystemCommand(b, &.{});
+    run_cmd.addFileArg(try emscripten_dir.join(b.allocator, emrunExe));
     run_cmd.addFileArg(run_file);
 
     return run_cmd;
+}
+
+// This is a hack to allow LazyPath for the first arg (normal addSystemCommand requires at least one arg).
+fn addSystemCommand(b: *std.Build, argv: []const []const u8) *std.Build.Step.Run {
+    const run_step = std.Build.Step.Run.create(b, b.fmt("run command", .{}));
+    run_step.addArgs(argv);
+    return run_step;
 }

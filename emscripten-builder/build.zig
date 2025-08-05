@@ -23,7 +23,18 @@ fn addEmscriptenInstall(b: *std.Build) !std.Build.LazyPath {
         return emsdk.path("");
     }
 
-    if (try emsdkInstalled(b, b.getInstallPath(.{ .custom = "emsdk" }, ""))) {
+    if (blk: {
+        break :blk try emsdkInstalled(
+            b,
+            std.fs.realpathAlloc(
+                b.allocator,
+                b.getInstallPath(.{ .custom = "emsdk" }, ""),
+            ) catch |err| switch (err) {
+                error.FileNotFound => break :blk false,
+                else => return err,
+            },
+        );
+    }) {
         return .{
             .cwd_relative = b.getInstallPath(.{ .custom = "emsdk" }, ""),
         };
