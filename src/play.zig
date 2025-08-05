@@ -206,7 +206,9 @@ pub const Place = union(enum) {
     }
 
     pub fn select_build_fun(ctx: *Context, _: select.SelectStage) bool {
-        ctx.play.build_vw.mouse_drag_winport();
+        if (rl.isMouseButtonDown(rl.MouseButton.left)) {
+            ctx.play.build_vw.drag_winport(rl.getMouseDelta());
+        }
 
         return false;
     }
