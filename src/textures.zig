@@ -35,11 +35,7 @@ pub fn arr_set_blank(ta: *TextArr) void {
 
 pub const TexturesData = struct {
     text_arr: *TextArr,
-    vw: ViewWin = .{
-        .hw_ratio = 1,
-        .winport = .{},
-        .viewport = .{ .pos = .{ .x = 0, .y = 0 }, .width = @floatFromInt(Width) },
-    },
+    vw: ViewWin = .{},
 
     pub fn read(self: *const @This(), id: TextID) Cell {
         return self.text_arr[id.y][id.x];
@@ -153,9 +149,6 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
 
         pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
             _ = sst;
-
-            ctx.textures.vw.hw_ratio = ctx.hdw;
-            ctx.textures.vw.winport = .{ .width = ctx.screen_width, .pos = .{ .x = 0, .y = 0 } };
             const dr = rl.getMouseWheelMove() * 1.4;
             if (dr != 0) {
                 ctx.textures.vw.viewport.pos.y -= dr;

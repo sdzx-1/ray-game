@@ -1,7 +1,7 @@
 {
-  "screen_width": 1.936e3,
-  "screen_height": 1.198e3,
-  "hdw": 6.188016533851624e-1,
+  "screen_width": 2.204e3,
+  "screen_height": 1.41e3,
+  "hdw": 6.397458910942078e-1,
   "menu": [
     {
       "rect": {
@@ -892,5 +892,81 @@
       "x": 4,
       "y": 23
     }
-  ]
+  ],
+  "play_vw": {
+    "hw_ratio": 6.397458910942078e-1,
+    "viewport": {
+      "pos": {
+        "x": 4.35e1,
+        "y": 4.35e1
+      },
+      "width": 5e1
+    },
+    "winport": {
+      "pos": {
+        "x": 0e0,
+        "y": 0e0
+      },
+      "width": 2.204e3
+    },
+    "view_drag_ratio": 1e0,
+    "wheel_zoom_ratio": 1.1999999731779099e-1
+  },
+  "play_build_vw": {
+    "hw_ratio": 6.179999709129333e-1,
+    "viewport": {
+      "pos": {
+        "x": 4.523221969604492e1,
+        "y": 5.2828102111816406e1
+      },
+      "width": 2.887222671508789e1
+    },
+    "winport": {
+      "pos": {
+        "x": 7.9e1,
+        "y": 1.22e2
+      },
+      "width": 8e2
+    },
+    "view_drag_ratio": 1e0,
+    "wheel_zoom_ratio": 2.0000000298023224e-1
+  },
+  "tbuild_vw": {
+    "hw_ratio": 6.397458910942078e-1,
+    "viewport": {
+      "pos": {
+        "x": 4.734672546386719e1,
+        "y": 5.350618362426758e1
+      },
+      "width": 2.617898941040039e1
+    },
+    "winport": {
+      "pos": {
+        "x": 0e0,
+        "y": 0e0
+      },
+      "width": 2.204e3
+    },
+    "view_drag_ratio": 1e0,
+    "wheel_zoom_ratio": 2.0000000298023224e-1
+  },
+  "textures_vw": {
+    "hw_ratio": 6.397458910942078e-1,
+    "viewport": {
+      "pos": {
+        "x": 0e0,
+        "y": 3.4000015258789062e0
+      },
+      "width": 3e1
+    },
+    "winport": {
+      "pos": {
+        "x": 0e0,
+        "y": 0e0
+      },
+      "width": 2.204e3
+    },
+    "view_drag_ratio": 1e0,
+    "wheel_zoom_ratio": 6.499999761581421e-1
+  }
 }

@@ -1,12 +1,7 @@
 pub const TbuildData = struct {
     list: std.ArrayListUnmanaged(Building) = .empty,
     selected_id: usize = 0,
-    vw: ViewWin = .{
-        .hw_ratio = 0.618,
-        .winport = .{ .width = 1936, .pos = .{ .x = 0, .y = 0 } },
-        .viewport = .{ .width = 30, .pos = .{ .x = 45, .y = 54 } },
-        .wheel_zoom_ratio = 0.2,
-    },
+    vw: ViewWin = .{},
     msg: ?EditBuild = null,
 
     pub const Building = struct {
@@ -33,22 +28,22 @@ pub const TbuildData = struct {
         }
     };
 
-    pub fn render(self: *const @This(), ctx: *const Context) void {
+    pub fn render(self: *const @This(), ctx: *const Context, vw: *const ViewWin) void {
         const win_rect: rl.Rectangle = .{
-            .x = self.vw.winport.pos.x,
-            .y = self.vw.winport.pos.y,
-            .width = self.vw.winport.width,
-            .height = self.vw.winport_get_height(),
+            .x = vw.winport.pos.x,
+            .y = vw.winport.pos.y,
+            .width = vw.winport.width,
+            .height = vw.winport_get_height(),
         };
         rl.drawRectangleRec(win_rect, rl.Color.white);
 
         for (self.list.items) |build| {
-            const wpos = self.vw.viewpos_to_winpos(.{ .x = build.x, .y = build.y });
+            const wpos = vw.viewpos_to_winpos(.{ .x = build.x, .y = build.y });
 
-            self.vw.winport_beginScissorMode();
+            vw.winport_beginScissorMode();
             defer rl.endScissorMode();
 
-            const dw = self.vw.wv_ratio();
+            const dw = vw.wv_ratio();
             for (0..build.height) |dy| {
                 for (0..build.width) |dx| {
                     ctx.textures.render_texture(
@@ -64,7 +59,7 @@ pub const TbuildData = struct {
                 }
             }
 
-            const dpos = self.vw.dviewpos_to_dwinpos(.{
+            const dpos = vw.dviewpos_to_dwinpos(.{
                 .x = @floatFromInt(build.width),
                 .y = @floatFromInt(build.height),
             });
@@ -76,23 +71,23 @@ pub const TbuildData = struct {
 
         rl.drawRectangleLinesEx(win_rect, 4, rl.Color.black);
     }
-
-    pub fn draw_gui(self: *@This(), build: *Building) ?EditBuild {
-        const win_pos = self.vw.viewpos_to_winpos(.{ .x = build.x, .y = build.y });
-
-        const r = self.vw.wv_ratio();
-        var rect: rl.Rectangle = .{ .x = win_pos.x, .y = win_pos.y, .width = 180, .height = 30 };
-
-        rect.y = win_pos.y + @as(f32, @floatFromInt(build.height)) * r + 3;
-        if (rg.button(rect, "set texture")) return .set_text_Id;
-
-        rect.y += 33;
-        rect.width = 200;
-        rect.height = 300;
-        _ = rg.colorPicker(rect, "picker", &build.color);
-        return null;
-    }
 };
+
+pub fn draw_gui(vw: *const ViewWin, build: *TbuildData.Building) ?EditBuild {
+    const win_pos = vw.viewpos_to_winpos(.{ .x = build.x, .y = build.y });
+
+    const r = vw.wv_ratio();
+    var rect: rl.Rectangle = .{ .x = win_pos.x, .y = win_pos.y, .width = 180, .height = 30 };
+
+    rect.y = win_pos.y + @as(f32, @floatFromInt(build.height)) * r + 3;
+    if (rg.button(rect, "set texture")) return .set_text_Id;
+
+    rect.y += 33;
+    rect.width = 200;
+    rect.height = 300;
+    _ = rg.colorPicker(rect, "picker", &build.color);
+    return null;
+}
 
 pub const TBuild = SelectBuildInstance(EditBuild, EditBuild);
 
@@ -102,6 +97,10 @@ pub fn ViewBuilds(Next: type) type {
 
         pub fn handler(_: *Context) @This() {
             return .after_view_build;
+        }
+
+        pub fn access_vw(ctx: *Context) *ViewWin {
+            return &ctx.tbuild.vw;
         }
     };
 }
@@ -161,11 +160,15 @@ pub const EditBuild = union(enum) {
     }
 
     pub fn render(ctx: *Context) void {
-        ctx.tbuild.render(ctx);
+        ctx.tbuild.render(ctx, &ctx.tbuild.vw);
         const ptr = &ctx.tbuild.list.items[ctx.tbuild.selected_id];
-        if (ctx.tbuild.draw_gui(ptr)) |msg| {
+        if (draw_gui(&ctx.tbuild.vw, ptr)) |msg| {
             if (ctx.tbuild.msg == null) ctx.tbuild.msg = msg;
         }
+    }
+
+    pub fn access_vw(ctx: *Context) *ViewWin {
+        return &ctx.tbuild.vw;
     }
 
     pub fn set_text_id(ctx: *Context, tid: textures.TextID) void {
@@ -210,9 +213,10 @@ pub fn SelectBuildInstance(Config: type, Next: type) type {
         }
 
         pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
-            ctx.tbuild.vw.mouse_wheel_zoom_viewport();
-            ctx.tbuild.vw.mouse_drag_viewport();
-            ctx.tbuild.vw.mouse_drag_winport();
+            const vw: *ViewWin = Config.access_vw(ctx);
+
+            vw.mouse_wheel_zoom_viewport();
+            vw.mouse_drag_viewport();
 
             if (@hasDecl(Config, "select_build_fun")) {
                 const select_fun_: fn (*Context, select.SelectStage) bool = Config.select_build_fun;
@@ -228,7 +232,8 @@ pub fn SelectBuildInstance(Config: type, Next: type) type {
                 render_(ctx, sst);
             }
 
-            ctx.tbuild.render(ctx);
+            const vw: *ViewWin = Config.access_vw(ctx);
+            ctx.tbuild.render(ctx, vw);
 
             switch (sst) {
                 .hover => {
@@ -253,8 +258,10 @@ pub fn SelectBuildInstance(Config: type, Next: type) type {
 
         pub fn check_inside(ctx: *Context) select.CheckInsideResult {
             const wp = ViewWin.Winport.Pos.fromVector2(rl.getMousePosition());
-            const vp = ctx.tbuild.vw.winpos_to_viewpos(wp);
-            if (ctx.tbuild.vw.inViewport(vp)) {
+            const vw: *ViewWin = Config.access_vw(ctx);
+
+            const vp = vw.winpos_to_viewpos(wp);
+            if (vw.inViewport(vp)) {
                 for (ctx.tbuild.list.items, 0..) |*b, i| {
                     if (b.inBuilding(vp)) {
                         ctx.tbuild.selected_id = i;
@@ -269,9 +276,11 @@ pub fn SelectBuildInstance(Config: type, Next: type) type {
         pub fn check_still_inside(ctx: *Context) bool {
             const b = ctx.tbuild.list.items[ctx.tbuild.selected_id];
             const wp = ViewWin.Winport.Pos.fromVector2(rl.getMousePosition());
-            const vp = ctx.tbuild.vw.winpos_to_viewpos(wp);
-            if (ctx.tbuild.vw.inViewport(vp)) {
-                return b.inBuilding(ctx.tbuild.vw.winpos_to_viewpos(wp));
+            const vw: *ViewWin = Config.access_vw(ctx);
+
+            const vp = vw.winpos_to_viewpos(wp);
+            if (vw.inViewport(vp)) {
+                return b.inBuilding(vw.winpos_to_viewpos(wp));
             }
             return false;
         }

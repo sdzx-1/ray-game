@@ -94,20 +94,11 @@ pub const Map = union(enum) {
         const sx = @as(f32, @floatFromInt(ctx.map.maze_config.total_x));
         const sy = @as(f32, @floatFromInt(ctx.map.maze_config.total_y));
 
-        { // init play ViewWin
-            ctx.play.vw.hw_ratio = ctx.hdw;
-
-            ctx.play.vw.winport = .{
-                .width = ctx.screen_width,
-                .pos = .{ .x = 0, .y = 0 },
-            };
-
+        {
             ctx.play.vw.viewport = .{
                 .width = 50,
                 .pos = .{ .x = sx / 2 - 25, .y = sy / 2 - 25 },
             };
-
-            ctx.play.vw.wheel_zoom_ratio = 0.12;
         }
 
         return .to_play;

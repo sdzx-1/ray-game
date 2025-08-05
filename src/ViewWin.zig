@@ -1,6 +1,3 @@
-const rl = @import("raylib");
-const std = @import("std");
-
 hw_ratio: f32 = 800.0 / 1000.0, //height / width
 viewport: Viewport = .{},
 winport: Winport = .{},
@@ -240,3 +237,6 @@ test "ViewWin" {
         origin.viewpos_to_winpos(.{ .x = 10, .y = 10 }),
     );
 }
+
+const rl = @import("raylib");
+const std = @import("std");
