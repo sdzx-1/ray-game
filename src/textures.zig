@@ -240,25 +240,19 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
 const TextureDataArray = std.ArrayListUnmanaged(TextureData);
 
 pub fn load(ctx: *Context) !void {
-    const cwd = std.fs.cwd();
-    const res_dir = try cwd.openDir("data/resouces", .{ .iterate = true });
-    var walker = try res_dir.walk(ctx.gpa);
-
     var text_data_arr: TextureDataArray = .empty;
     defer text_data_arr.deinit(ctx.gpa);
-    while (try walker.next()) |entry| {
-        switch (entry.kind) {
-            .file => {
-                const ext = std.fs.path.extension(entry.basename);
-                if (std.mem.eql(u8, ext, ".png")) {
-                    const path = try std.fs.path.joinZ(ctx.gpa, &.{ "data/resouces", entry.path });
-                    const loaded_texture = try rl.loadTexture(path);
-                    try text_data_arr.append(ctx.gpa, .{ .name = try ctx.gpa.dupeZ(u8, entry.basename), .tex2d = loaded_texture });
-                }
-            },
-            else => {},
-        }
+
+    const file_path_list = rl.loadDirectoryFilesEx("data/resouces", ".png", true);
+
+    const file_paths = file_path_list.paths[0..file_path_list.count];
+
+    for (file_paths) |file_path_null_terminated| {
+        const file_path = std.mem.span(file_path_null_terminated);
+        const loaded_texture = try rl.loadTexture(file_path);
+        try text_data_arr.append(ctx.gpa, .{ .name = try ctx.gpa.dupeZ(u8, std.fs.path.basename(file_path)), .tex2d = loaded_texture });
     }
+
     std.sort.insertion(TextureData, text_data_arr.items, {}, TextureData.lessThanFn);
 
     for (text_data_arr.items, 0..) |data, i| {

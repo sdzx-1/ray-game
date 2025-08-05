@@ -1,4 +1,11 @@
-const save_path = "config.json";
+const initial_save_path = "config.json";
+
+const save_path = switch (@import("builtin").os.tag) {
+    .emscripten => "save-data/" ++ initial_save_path,
+    else => initial_save_path,
+};
+
+extern "env" fn js_syncfs() void;
 
 pub const SaveData = struct {
     screen_width: f32 = 1000,
@@ -16,34 +23,30 @@ pub const SaveData = struct {
         .{ .x = 7, .y = 31 },
     },
 
-    pub fn save(self: *const @This()) void {
-        const cwd = std.fs.cwd();
-        const file = cwd.createFile(save_path, .{}) catch unreachable;
-        const writer = file.writer();
-        std.json.stringify(self.*, .{ .whitespace = .indent_2 }, writer) catch unreachable;
+    pub fn save(self: *const @This(), allocator: std.mem.Allocator) void {
+        const json_string = std.json.stringifyAlloc(allocator, self.*, .{ .whitespace = .indent_2 }) catch return;
+        defer allocator.free(json_string);
+
+        const json_string_z = allocator.dupeZ(u8, json_string) catch return;
+        defer allocator.free(json_string_z);
+
+        _ = rl.saveFileText(save_path, json_string_z);
+
+        switch (@import("builtin").os.tag) {
+            .emscripten => js_syncfs(),
+            else => {},
+        }
     }
 
     pub fn load(gpa: std.mem.Allocator) SaveData {
-        var arena_instance = std.heap.ArenaAllocator.init(gpa);
-        defer arena_instance.deinit();
-        const arena = arena_instance.allocator();
+        const load_path = if (rl.fileExists(save_path)) save_path else if (rl.fileExists(initial_save_path)) initial_save_path else return .{};
 
-        const cwd = std.fs.cwd();
+        const content = rl.loadFileText(load_path);
+        defer rl.unloadFileText(content);
 
-        if (cwd.access(save_path, .{})) |_| {
-            const file = cwd.openFile(save_path, .{}) catch unreachable;
-            const content = file.readToEndAlloc(arena, 5 << 20) catch unreachable;
-            const parsed = std.json.parseFromSlice(@This(), arena, content, .{ .ignore_unknown_fields = true }) catch unreachable;
+        const parsed = std.json.parseFromSlice(@This(), gpa, content, .{ .ignore_unknown_fields = true, .allocate = .alloc_always }) catch return .{};
 
-            var val = parsed.value;
-            val.menu = gpa.dupe(StateComponents(menu.Menu).Component, val.menu) catch unreachable;
-            val.play = gpa.dupe(StateComponents(play.Play).Component, val.play) catch unreachable;
-            val.map = gpa.dupe(StateComponents(map.Map).Component, val.map) catch unreachable;
-            val.tbuild = gpa.dupe(tbuild.TbuildData.Building, val.tbuild) catch unreachable;
-            return val;
-        } else |_| {
-            return .{};
-        }
+        return parsed.value;
     }
 };
 
@@ -62,7 +65,7 @@ pub fn saveData(ctx: *Context) void {
         .maze_texture  = ctx.play.maze_texture,
         // zig fmt: on
     };
-    save_data.save();
+    save_data.save(ctx.gpa);
     ctx.log("save");
 }
 
