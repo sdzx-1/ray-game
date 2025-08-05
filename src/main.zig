@@ -108,6 +108,15 @@ fn logic(id: Runner.StateId, ctx: *core.Context) ?Runner.StateId {
         ctx.screen_width = @floatFromInt(rl.getScreenWidth());
         ctx.screen_height = @floatFromInt(rl.getScreenHeight());
         ctx.hdw = ctx.screen_height / ctx.screen_width;
+        //
+        ctx.play.vw.hw_ratio = ctx.hdw;
+        ctx.play.vw.winport.width = ctx.screen_width;
+        //
+        ctx.tbuild.vw.hw_ratio = ctx.hdw;
+        ctx.tbuild.vw.winport.width = ctx.screen_width;
+        //
+        ctx.textures.vw.hw_ratio = ctx.hdw;
+        ctx.textures.vw.winport.width = ctx.screen_width;
     }
     return Runner.runHandler(id, ctx);
 }

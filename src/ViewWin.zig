@@ -1,6 +1,3 @@
-const rl = @import("raylib");
-const std = @import("std");
-
 hw_ratio: f32 = 800.0 / 1000.0, //height / width
 viewport: Viewport = .{},
 winport: Winport = .{},
@@ -54,11 +51,8 @@ pub fn viewport_intersect_rect(self: *const @This(), rect: rl.Rectangle) ?rl.Rec
     return self.viewport.intersect_rect(self.hw_ratio, rect);
 }
 
-pub fn mouse_drag_winport(self: *Self) void {
-    if ((rl.isKeyDown(rl.KeyboardKey.left_control))) {
-        const deta = rl.getMouseDelta();
-        self.winport.move_port(Winport.Pos.fromVector2(deta));
-    }
+pub fn drag_winport(self: *Self, deta: rl.Vector2) void {
+    self.winport.move_port(Winport.Pos.fromVector2(deta));
 }
 
 pub fn mouse_drag_viewport(self: *Self) void {
@@ -240,3 +234,6 @@ test "ViewWin" {
         origin.viewpos_to_winpos(.{ .x = 10, .y = 10 }),
     );
 }
+
+const rl = @import("raylib");
+const std = @import("std");

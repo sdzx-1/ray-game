@@ -22,6 +22,11 @@ pub const SaveData = struct {
         .{ .x = 5, .y = 31 },
         .{ .x = 7, .y = 31 },
     },
+    //
+    play_vw: ViewWin = .{},
+    play_build_vw: ViewWin = .{},
+    tbuild_vw: ViewWin = .{},
+    textures_vw: ViewWin = .{},
 
     pub fn save(self: *const @This(), allocator: std.mem.Allocator) void {
         const json_string = std.json.stringifyAlloc(allocator, self.*, .{ .whitespace = .indent_2 }) catch return;
@@ -61,8 +66,11 @@ pub fn saveData(ctx: *Context) void {
         .screen_width  = ctx.screen_width,
         .screen_height = ctx.screen_height,
         .hdw           = ctx.hdw,
-        // .tbuild_view   = ctx.tbuild.view,
         .maze_texture  = ctx.play.maze_texture,
+        .play_vw       = ctx.play.vw,
+        .play_build_vw = ctx.play.build_vw,
+        .tbuild_vw     = ctx.tbuild.vw,
+        .textures_vw   = ctx.textures.vw,
         // zig fmt: on
     };
     save_data.save(ctx.gpa);
@@ -79,8 +87,13 @@ pub fn loadData(gpa: std.mem.Allocator, ctx: *Context) !void {
     ctx.screen_width = save_data.screen_width;
     ctx.screen_height = save_data.screen_height;
     ctx.hdw = save_data.hdw;
-    // ctx.tbuild.view = save_data.tbuild_view;
     ctx.play.maze_texture = save_data.maze_texture;
+    //
+    ctx.play.vw = save_data.play_vw;
+    ctx.play.build_vw = save_data.play_build_vw;
+    ctx.tbuild.vw = save_data.tbuild_vw;
+    ctx.textures.vw = save_data.textures_vw;
+
     ctx.log("load_data");
 }
 
@@ -94,3 +107,4 @@ const play = @import("play.zig");
 const Context = core.Context;
 const rl = @import("raylib");
 const textures = @import("textures.zig");
+const ViewWin = @import("ViewWin.zig");

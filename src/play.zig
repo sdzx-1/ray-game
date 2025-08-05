@@ -1,11 +1,11 @@
 pub const PlayData = struct {
     rs: StateComponents(Play) = .empty,
     current_map: *CurrentMap,
-    vw: ViewWin = .{ .hw_ratio = 1, .winport = .{}, .viewport = .{} },
+    vw: ViewWin = .{},
+    build_vw: ViewWin = .{},
     selected_cell_id: CellID = .{},
     selected_color: rl.Color = undefined,
     selected_build: Building = undefined,
-
     current_texture: i32 = 0,
     maze_texture: [4]textures.TextID = .{
         .{ .x = 19, .y = 18 },
@@ -110,8 +110,8 @@ pub const Play = union(enum) {
 
         if (ctx.play.rs.pull()) |msg| return msg;
         if (rl.isKeyPressed(rl.KeyboardKey.space)) return .to_editor;
-        if (rl.isKeyPressed(rl.KeyboardKey.b)) return toBuild(ctx).?;
-        if (rl.isKeyPressed(rl.KeyboardKey.f)) return toPlace(ctx).?;
+        if (rl.isKeyPressed(rl.KeyboardKey.b)) return .to_build;
+        if (rl.isKeyPressed(rl.KeyboardKey.f)) return .to_place;
         if (rl.isKeyPressed(rl.KeyboardKey.d)) return .to_delete;
         return .no_trasition;
     }
@@ -159,16 +159,11 @@ pub const Play = union(enum) {
         return .to_menu;
     }
 
-    fn toBuild(ctx: *Context) ?@This() {
-        ctx.tbuild.vw.winport.width = ctx.screen_width;
-        ctx.tbuild.vw.hw_ratio = ctx.hdw;
+    fn toBuild(_: *Context) ?@This() {
         return .to_build;
     }
 
-    fn toPlace(ctx: *Context) ?@This() {
-        const tmp_width = ctx.screen_width / 2;
-        ctx.tbuild.vw.winport.width = tmp_width;
-        ctx.tbuild.vw.hw_ratio = 0.5;
+    fn toPlace(_: *Context) ?@This() {
         return .to_place;
     }
 
@@ -201,8 +196,21 @@ pub const Place = union(enum) {
         }
         return .to_play;
     }
+
+    pub fn access_vw(ctx: *Context) *ViewWin {
+        return &ctx.play.build_vw;
+    }
+
     pub fn select_build_backend_render(ctx: *Context, _: select.SelectStage) void {
         ctx.play.render_current_map(ctx, true);
+    }
+
+    pub fn select_build_fun(ctx: *Context, _: select.SelectStage) bool {
+        if (rl.isMouseButtonDown(rl.MouseButton.left)) {
+            ctx.play.build_vw.drag_winport(rl.getMouseDelta());
+        }
+
+        return false;
     }
 
     pub fn select_build_inside_fun(ctx: *Context) void {
@@ -265,23 +273,6 @@ pub const Delete = union(enum) {
     pub fn select_cell_check_inside(ctx: *Context, cid: CellID) bool {
         const cell = ctx.play.current_map[@intCast(cid.y)][@intCast(cid.x)];
         return (cell.building != null);
-    }
-
-    //for test!
-    pub fn select_cell_fun(ctx: *Context, sst: select.SelectStage) bool {
-        switch (sst) {
-            .outside => {
-                const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
-                const x: usize = @intFromFloat(@floor(vp.x));
-                const y: usize = @intFromFloat(@floor(vp.y));
-
-                if (rl.isMouseButtonReleased(rl.MouseButton.right)) {
-                    ctx.play.current_map[y][x].building = ctx.tbuild.list.items[0];
-                }
-            },
-            else => {},
-        }
-        return false;
     }
 
     pub fn select_cell_render(ctx: *Context, sst: select.SelectStage) void {
