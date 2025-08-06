@@ -123,28 +123,54 @@ pub const SetTextureData = struct {
 
 pub fn ViewTextures(Back: type) type {
     return union(enum) {
-        to_view: Example(.current, Select(Back, SetTexture(false, @This()))),
+        view_loop: Example(.current, Select(Back, SelectTextureInstance(struct {}, @This()))),
 
         pub fn handler(_: *Context) @This() {
-            return .to_view;
+            return .view_loop;
         }
     };
 }
 
-pub fn SetTexture(comptime is_set: bool, target: type) type {
+pub fn SetTexture(Back: type, Next: type) type {
+    const Tmp = SetTextureInner(Next);
+    return Init(Tmp, Select(Back, SelectTextureInstance(Tmp, Tmp)));
+}
+
+pub fn SetTextureInner(Next: type) type {
     return union(enum) {
-        after_set_texture: Example(.current, target),
+        after_set_texture: Example(.current, Next),
 
         pub fn handler(ctx: *Context) @This() {
-            if (is_set) target.set_text_id(ctx, ctx.sel_texture.text_id);
+            Next.set_text_id(ctx, ctx.sel_texture.text_id);
             return .after_set_texture;
         }
 
         pub fn init_fun(ctx: *Context) void {
-            if (is_set) {
-                const selected = target.get_text_id(ctx);
-                ctx.textures.vw.viewport.pos.y = @as(f32, @floatFromInt(selected.y)) - 2;
-            }
+            const selected = Next.get_text_id(ctx);
+            ctx.textures.vw.viewport.pos.y = @as(f32, @floatFromInt(selected.y)) - 2;
+        }
+
+        pub fn select_texture_render(ctx: *Context, _: select.SelectStage) void {
+            const selected = Next.get_text_id(ctx);
+
+            const smp = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
+            const wh: f32 = ctx.textures.vw.wv_ratio();
+            rl.drawRectangleLinesEx(.{
+                .x = smp.x,
+                .y = smp.y,
+                .width = wh,
+                .height = wh,
+            }, 10, rl.Color.green);
+        }
+    };
+}
+
+pub fn SelectTextureInstance(Config: type, Next: type) type {
+    return union(enum) {
+        after_select_texture: Example(.current, Next),
+
+        pub fn handler(_: *Context) @This() {
+            return .after_select_texture;
         }
 
         pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
@@ -160,17 +186,9 @@ pub fn SetTexture(comptime is_set: bool, target: type) type {
         pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
             ctx.textures.render();
 
-            if (is_set) {
-                const selected = target.get_text_id(ctx);
-
-                const smp = ctx.textures.vw.viewpos_to_winpos(.{ .x = @floatFromInt(selected.x), .y = @floatFromInt(selected.y) });
-                const wh: f32 = ctx.textures.vw.wv_ratio();
-                rl.drawRectangleLinesEx(.{
-                    .x = smp.x,
-                    .y = smp.y,
-                    .width = wh,
-                    .height = wh,
-                }, 10, rl.Color.green);
+            if (@hasDecl(Config, "select_texture_render")) {
+                const render_: fn (*Context, select.SelectStage) void = Config.select_texture_render;
+                render_(ctx, sst);
             }
 
             switch (sst) {
@@ -272,3 +290,4 @@ const Context = core.Context;
 const getTarget = core.getTarget;
 const View = utils.View;
 const ViewWin = @import("ViewWin.zig");
+const Init = core.Init;
