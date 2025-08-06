@@ -80,7 +80,7 @@ pub const Cell = struct {
 
 pub const CurrentMap = [200][200]Cell;
 
-const TwoStageSelect = Select(Play, SelectBuildInstance(Place, Select(BackUpLevel, SelectCellInstance(Place, Place))));
+const TwoStageSelect = Select(Play, SelectBuildInstance(Place, Tmp(Place, Select(BackUpLevel, SelectCellInstance(Place, Place)))));
 
 pub const BackUpLevel = union(enum) {
     back_up_level: Example(.current, TwoStageSelect),
@@ -199,6 +199,25 @@ pub const Place = union(enum) {
         return &ctx.play.build_vw;
     }
 
+    pub fn tmp_fun(ctx: *Context) bool {
+        const vp = ctx.play.build_vw.viewpos_from_vector2(rl.getMousePosition());
+
+        if (ctx.play.build_vw.inViewport(vp)) {
+            return false;
+        }
+        return true;
+    }
+
+    pub fn tmp_render(ctx: *Context) void {
+        ctx.play.render_current_map(ctx, true);
+        ctx.tbuild.render(ctx, &ctx.play.build_vw);
+
+        const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
+        ctx.play.selected_build.x = vp.x;
+        ctx.play.selected_build.y = vp.y;
+        ctx.play.selected_build.render(ctx, &ctx.play.vw);
+    }
+
     pub fn select_build_backend_render(ctx: *Context, _: select.SelectStage) void {
         ctx.play.render_current_map(ctx, true);
     }
@@ -214,9 +233,24 @@ pub const Place = union(enum) {
     pub fn select_build_inside_fun(ctx: *Context) void {
         ctx.play.selected_build = ctx.tbuild.list.items[ctx.tbuild.selected_id];
     }
+    pub fn select_cell_is_back(ctx: *Context) bool {
+        const vp = ctx.play.build_vw.viewpos_from_vector2(rl.getMousePosition());
+
+        if (ctx.play.build_vw.inViewport(vp)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     pub fn select_cell_check_inside(ctx: *Context, cid: CellID) bool {
         const b = ctx.play.selected_build;
+
+        const vp = ctx.play.build_vw.viewpos_from_vector2(rl.getMousePosition());
+
+        if (ctx.play.build_vw.inViewport(vp)) {
+            return false;
+        }
 
         for (0..b.height) |dy| {
             for (0..b.width) |dx| {
@@ -235,6 +269,9 @@ pub const Place = union(enum) {
 
     pub fn select_cell_render(ctx: *Context, sst: select.SelectStage) void {
         _ = sst;
+
+        ctx.tbuild.render(ctx, &ctx.play.build_vw);
+
         const vp = ctx.play.vw.viewpos_from_vector2(rl.getMousePosition());
         const b = ctx.play.selected_build;
 
@@ -301,6 +338,14 @@ pub fn SelectCellInstance(Config: type, Next: type) type {
             return .after_select_cell;
         }
 
+        pub fn select_is_back(ctx: *Context) bool {
+            if (@hasDecl(Config, "select_cell_is_back")) {
+                const fun: fn (*Context) bool = Config.select_cell_is_back;
+                return (fun(ctx));
+            }
+            return false;
+        }
+
         pub fn select_fun(ctx: *Context, sst: select.SelectStage) bool {
             ctx.play.vw.mouse_drag_viewport();
             ctx.play.vw.mouse_wheel_zoom_viewport();
@@ -308,9 +353,9 @@ pub fn SelectCellInstance(Config: type, Next: type) type {
             if (@hasDecl(Config, "select_cell_fun")) {
                 const select_fun_: fn (*Context, select.SelectStage) bool = Config.select_cell_fun;
                 return select_fun_(ctx, sst);
-            } else {
-                return false;
             }
+
+            return false;
         }
 
         pub fn select_render(ctx: *Context, sst: select.SelectStage) void {
@@ -379,3 +424,4 @@ const StateComponents = core.StateComponents;
 const Maze = maze.Maze;
 const ViewWin = @import("ViewWin.zig");
 const SelectBuildInstance = tbuild.SelectBuildInstance;
+const Tmp = core.Tmp;

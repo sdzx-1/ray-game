@@ -41,6 +41,11 @@ pub fn Select(
                 },
             }
             if (rl.isKeyPressed(rl.KeyboardKey.escape)) return .to_back;
+
+            if (@hasDecl(selected, "select_is_back")) {
+                const fun: fn (*Context) bool = selected.select_is_back;
+                if (fun(ctx)) return .to_back;
+            }
             return .no_trasition;
         }
 

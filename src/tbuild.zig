@@ -26,6 +26,26 @@ pub const TbuildData = struct {
                 view_pos.y < self.y + @as(f32, @floatFromInt(self.height))) return true;
             return false;
         }
+
+        pub fn render(self: *const Building, ctx: *const Context, vw: *const ViewWin) void {
+            const wpos = vw.viewpos_to_winpos(.{ .x = self.x, .y = self.y });
+
+            const dw = vw.wv_ratio();
+            for (0..self.height) |dy| {
+                for (0..self.width) |dx| {
+                    ctx.textures.render_texture(
+                        self.text_id,
+                        .{
+                            .x = wpos.x + @as(f32, @floatFromInt(dx)) * dw,
+                            .y = wpos.y + @as(f32, @floatFromInt(dy)) * dw,
+                            .width = dw,
+                            .height = dw,
+                        },
+                        self.color,
+                    );
+                }
+            }
+        }
     };
 
     pub fn render(self: *const @This(), ctx: *const Context, vw: *const ViewWin) void {
@@ -38,27 +58,12 @@ pub const TbuildData = struct {
         rl.drawRectangleRec(win_rect, rl.Color.white);
 
         for (self.list.items) |build| {
-            const wpos = vw.viewpos_to_winpos(.{ .x = build.x, .y = build.y });
-
             vw.winport_beginScissorMode();
             defer rl.endScissorMode();
 
-            const dw = vw.wv_ratio();
-            for (0..build.height) |dy| {
-                for (0..build.width) |dx| {
-                    ctx.textures.render_texture(
-                        build.text_id,
-                        .{
-                            .x = wpos.x + @as(f32, @floatFromInt(dx)) * dw,
-                            .y = wpos.y + @as(f32, @floatFromInt(dy)) * dw,
-                            .width = dw,
-                            .height = dw,
-                        },
-                        build.color,
-                    );
-                }
-            }
+            build.render(ctx, vw);
 
+            const wpos = vw.viewpos_to_winpos(.{ .x = build.x, .y = build.y });
             const dpos = vw.dviewpos_to_dwinpos(.{
                 .x = @floatFromInt(build.width),
                 .y = @floatFromInt(build.height),
