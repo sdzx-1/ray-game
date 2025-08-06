@@ -187,6 +187,22 @@ pub fn Init(Instance: type, State: type) type {
     };
 }
 
+pub fn Tmp(Config: type, Next: type) type {
+    return union(enum) {
+        after_tmp: Example(.current, Next),
+        no_trasition: Example(.next, @This()),
+
+        pub fn handler(ctx: *Context) @This() {
+            if (Config.tmp_fun(ctx)) return .after_tmp;
+            return .no_trasition;
+        }
+
+        pub fn render(ctx: *Context) void {
+            Config.tmp_render(ctx);
+        }
+    };
+}
+
 const std = @import("std");
 const ps = @import("polystate");
 const select = @import("select.zig");
