@@ -109,11 +109,9 @@ pub const EditBuild = union(enum) {
     // zig fmt: off
     to_play     : Example(.next, Play),
     to_select   : Example(.next, Select(Play, TBuild)),
-    set_text_Id : Example(.next, Init(SetEditBuildTexture, Select(EditBuild, SetEditBuildTexture))),
+    set_text_Id : Example(.next, SetTexture(EditBuild, EditBuild) ),
     no_trasition: Example(.next, @This()),
     // zig fmt: on
-
-    const SetEditBuildTexture = SetTexture(true, EditBuild);
 
     pub fn handler(ctx: *Context) @This() {
         ctx.tbuild.vw.mouse_wheel_zoom_viewport();

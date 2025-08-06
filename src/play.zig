@@ -97,12 +97,10 @@ pub const Play = union(enum) {
     to_menu         : Example(.next, Menu),
     to_build        : Example(.next, Select(Play, TBuild)),
     to_place        : Example(.next, TwoStageSelect),
-    set_maze_text_id: Example(.next, Init(SetPlayTexutre, Select(Play, SetPlayTexutre))),
+    set_maze_text_id: Example(.next, SetTexture(Play, Play)),
     to_delete       : Example(.next, Select(Play, SelectCellInstance(Delete, Delete))),
     no_trasition    : Example(.next, @This()),
     // zig fmt: on
-
-    const SetPlayTexutre = SetTexture(true, Play);
 
     pub fn handler(ctx: *Context) @This() {
         ctx.play.vw.mouse_drag_viewport();
