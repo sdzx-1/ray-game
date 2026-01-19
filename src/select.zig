@@ -1,5 +1,6 @@
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const rl = @import("raylib");
 
 pub const CheckInsideResult = enum {
@@ -13,18 +14,23 @@ pub const SelectData = struct {
 
 pub const SelectStage = enum { outside, inside, hover };
 
+pub fn select_info(name: []const u8, Context: type) ps.StateInfo("Example", Context) {
+    return .{ .name = name };
+}
+
 pub fn Select(
-    fsm: fn (ps.Method, type) type,
+    Context: type,
     back: type,
     selected: type,
 ) type {
-    const Context = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
-        to_back     : fsm(.next, back),
-        to_inside   : fsm(.next, Inside(fsm, back, selected)),
-        no_trasition: fsm(.next, @This()),
+        to_back     : Data(.next, void, back),
+        to_inside   : Data(.next, void, Inside(Context, back, selected)),
+        no_trasition: Data(.next, void, @This()),
         // zig fmt: on
+
+        pub const info = select_info("Select", Context);
 
         pub fn handler(ctx: *Context) @This() {
             if (@hasDecl(selected, "select_fun")) {
@@ -52,19 +58,20 @@ pub fn Select(
 }
 
 pub fn Inside(
-    fsm: fn (ps.Method, type) type,
+    Context: type,
     back: type,
     selected: type,
 ) type {
-    const Context = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
-        to_back     : fsm(.next, back),
-        to_outside  : fsm(.next, Select(fsm, back, selected)),
-        to_hover    : fsm(.next, Hover(fsm, back, selected)),
-        to_selected : fsm(.next, selected),
-        no_trasition: fsm(.next, @This()),
+        to_back     : Data(.next, void, back),
+        to_outside  : Data(.next, void, Select(Context, back, selected)),
+        to_hover    : Data(.next, void, Hover(Context, back, selected)),
+        to_selected : Data(.next, void, selected),
+        no_trasition: Data(.next, void, @This()),
         // zig fmt: on
+
+        pub const info = select_info("Inside", Context);
 
         pub fn handler(ctx: *Context) @This() {
             if (@hasDecl(selected, "select_fun")) {
@@ -90,19 +97,20 @@ pub fn Inside(
 }
 
 pub fn Hover(
-    fsm: fn (ps.Method, type) type,
+    Context: type,
     back: type,
     selected: type,
 ) type {
-    const Context = fsm(.next, ps.Exit).Context;
     return union(enum) {
         // zig fmt: off
-        to_back     : fsm(.next, back),
-        to_outside  : fsm(.next, Select(fsm, back, selected)),
-        to_inside   : fsm(.next, Inside(fsm, back, selected)),
-        to_selected : fsm(.next, selected),
-        no_trasition: fsm(.next, @This()),
+        to_back     : Data(.next, void, back),
+        to_outside  : Data(.next, void, Select(Context, back, selected)),
+        to_inside   : Data(.next, void, Inside(Context, back, selected)),
+        to_selected : Data(.next, void, selected),
+        no_trasition: Data(.next, void, @This()),
         // zig fmt: on
+
+        pub const info = select_info("Hover", Context);
 
         pub fn handler(ctx: *Context) @This() {
             if (@hasDecl(selected, "select_fun")) {

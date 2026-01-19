@@ -37,16 +37,16 @@
     // internet connectivity.
     .dependencies = .{
         .raylib_zig = .{
-            .url = "git+https://github.com/Not-Nik/raylib-zig?ref=devel#3bf08a304cfe2baf839705063ff999b8d8bc8c54",
-            .hash = "raylib_zig-5.6.0-dev-KE8REKAqBQAQugfCOjYYVRFOi7iaEJK1EMDcRUq8AOm2",
+            .url = "git+https://github.com/raylib-zig/raylib-zig?ref=devel#7d4761b878f43671024ce197f721827b5355a67e",
+            .hash = "raylib_zig-5.6.0-dev-KE8REGlNBQDR7NML06VBtT7gP3VZNY70E5WohAxzqrNn",
         },
         .maze = .{
-            .url = "git+https://github.com/sdzx-1/maze.git#b926f13f6f281970d687eba87894ec2d682ec125",
-            .hash = "maze-0.0.0-osQoE-V7AAC8BCuP43nQx_JTo36tsU0Afx4AgSPKZzKl",
+            .url = "git+https://github.com/sdzx-1/maze.git#64eb8848599940862f794aeeaf44258c155fc9d7",
+            .hash = "maze-0.0.0-osQoE_98AACp2ERa4nbekjLdFzb6-AlAJ_PqJK1cUauG",
         },
         .polystate = .{
-            .url = "git+https://github.com/sdzx-1/polystate.git#186174bb3a8b48944950e36d555c01f4ec966505",
-            .hash = "polystate-0.0.0-8by0_CRkAQBiRrqSDTNPrUtFyhSXJsMfRXSrLhPTgxMd",
+            .url = "git+https://github.com/sdzx-1/polystate.git#23edf0625087f7d1610ec3c530e4b09c72a3e739",
+            .hash = "polystate-0.0.0-8by0_PpPAQDiDPS5nDJqSUmDJPQzaGdGTZXIkwK7zesC",
         },
         .emscripten_builder = .{
             .path = "emscripten-builder",

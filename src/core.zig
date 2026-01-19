@@ -34,7 +34,7 @@ pub const Context = struct {
     }
 
     pub fn log_duration(self: *@This(), str: []const u8, dur: i64) void {
-        const msg = std.fmt.allocPrintZ(self.gpa, "{s}", .{str}) catch unreachable;
+        const msg = std.fmt.allocPrintSentinel(self.gpa, "{s}", .{str}, 0) catch unreachable;
         self.notify.msg_que.append(
             self.gpa,
             .{ .msg = msg, .dur = dur },
@@ -165,20 +165,23 @@ pub fn StateComponents(State: type) type {
     };
 }
 
-fn enter_fn(ctx: *Context, state: type) void {
+pub fn enter_fn(ctx: *Context, state: type) void {
     ctx.log_im(ctx.printZ("{s}", .{@typeName(state)}));
 }
-pub fn Example(method: ps.Method, state: type) type {
-    return ps.FSM("Example", .suspendable, Context, enter_fn, method, state);
+
+pub fn example_info(name: []const u8) ps.StateInfo("Example", Context) {
+    return .{ .name = name };
 }
 
 pub fn Select(back: type, selected: type) type {
-    return select.Select(Example, back, selected);
+    return select.Select(Context, back, selected);
 }
 
 pub fn Init(Instance: type, State: type) type {
     return union(enum) {
-        init_state: Example(.current, State),
+        init_state: Data(.current, void, State),
+
+        pub const info = example_info("Init");
 
         pub fn handler(ctx: *Context) @This() {
             Instance.init_fun(ctx);
@@ -189,6 +192,7 @@ pub fn Init(Instance: type, State: type) type {
 
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const select = @import("select.zig");
 const editor = @import("editor.zig");
 const map = @import("map.zig");

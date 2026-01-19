@@ -18,12 +18,14 @@ pub const MapData = struct {
 
 pub const Map = union(enum) {
     // zig fmt: off
-    exit1       : Example(.next, ps.Exit),
-    to_editor   : Example(.next, Select(Map, Editor( Map))),
-    to_menu     : Example(.next, Menu),
-    to_play     : Example(.next, Play),
-    no_trasition: Example(.next, @This()),
+    exit1       : Data(.next, void, ps.Exit),
+    to_editor   : Data(.next, void, Select(Map, Editor( Map))),
+    to_menu     : Data(.next, void, Menu),
+    to_play     : Data(.next, void, Play),
+    no_trasition: Data(.next, void, @This()),
     // zig fmt: on
+
+    pub const info = core.example_info("Map");
 
     pub fn handler(ctx: *Context) @This() {
         if (ctx.map.rs.pull()) |msg| return msg;
@@ -191,6 +193,7 @@ fn generate_maze(
 
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const core = @import("core.zig");
 const Select = core.Select;
 const Editor = @import("editor.zig").Editor;
@@ -200,7 +203,6 @@ const Play = @import("play.zig").Play;
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const Example = core.Example;
 const Context = core.Context;
 const Action = core.Action;
 const StateComponents = core.StateComponents;

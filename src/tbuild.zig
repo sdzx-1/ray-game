@@ -93,7 +93,9 @@ pub const TBuild = SelectBuildInstance(EditBuild, EditBuild);
 
 pub fn ViewBuilds(Next: type) type {
     return union(enum) {
-        after_view_build: Example(.current, Select(Next, SelectBuildInstance(@This(), @This()))),
+        after_view_build: Data(.current, void, Select(Next, SelectBuildInstance(@This(), @This()))),
+
+        pub const info = core.example_info("ViewBuilds");
 
         pub fn handler(_: *Context) @This() {
             return .after_view_build;
@@ -107,11 +109,13 @@ pub fn ViewBuilds(Next: type) type {
 
 pub const EditBuild = union(enum) {
     // zig fmt: off
-    to_play     : Example(.next, Play),
-    to_select   : Example(.next, Select(Play, TBuild)),
-    set_text_Id : Example(.next, SetTexture(EditBuild, EditBuild) ),
-    no_trasition: Example(.next, @This()),
+    to_play     : Data(.next,void, Play),
+    to_select   : Data(.next,void, Select(Play, TBuild)),
+    set_text_Id : Data(.next,void, SetTexture(EditBuild, EditBuild) ),
+    no_trasition: Data(.next,void, @This()),
     // zig fmt: on
+
+    pub const info = core.example_info("EditBuild");
 
     pub fn handler(ctx: *Context) @This() {
         ctx.tbuild.vw.mouse_wheel_zoom_viewport();
@@ -203,7 +207,9 @@ pub const EditBuild = union(enum) {
 
 pub fn SelectBuildInstance(Config: type, Next: type) type {
     return union(enum) {
-        after_select_build: Example(.current, Next),
+        after_select_build: Data(.current, void, Next),
+
+        pub const info = core.example_info("SelectBuildInstance");
 
         pub fn handler(ctx: *Context) @This() {
             _ = ctx;
@@ -287,12 +293,12 @@ pub fn SelectBuildInstance(Config: type, Next: type) type {
 
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const core = @import("core.zig");
 const select = @import("select.zig");
 const textures = @import("textures.zig");
 const utils = @import("utils.zig");
 
-const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
 const Init = core.Init;

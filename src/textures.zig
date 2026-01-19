@@ -123,7 +123,9 @@ pub const SetTextureData = struct {
 
 pub fn ViewTextures(Back: type) type {
     return union(enum) {
-        view_loop: Example(.current, Select(Back, SelectTextureInstance(struct {}, @This()))),
+        view_loop: Data(.current, void, Select(Back, SelectTextureInstance(struct {}, @This()))),
+
+        pub const info = core.example_info("ViewTextures");
 
         pub fn handler(_: *Context) @This() {
             return .view_loop;
@@ -138,7 +140,9 @@ pub fn SetTexture(Back: type, Next: type) type {
 
 pub fn SetTextureInner(Next: type) type {
     return union(enum) {
-        after_set_texture: Example(.current, Next),
+        after_set_texture: Data(.current, void, Next),
+
+        pub const info = core.example_info("SetTextureInner");
 
         pub fn handler(ctx: *Context) @This() {
             Next.set_text_id(ctx, ctx.sel_texture.text_id);
@@ -167,7 +171,9 @@ pub fn SetTextureInner(Next: type) type {
 
 pub fn SelectTextureInstance(Config: type, Next: type) type {
     return union(enum) {
-        after_select_texture: Example(.current, Next),
+        after_select_texture: Data(.current, void, Next),
+
+        pub const info = core.example_info("SelectTextureInstance");
 
         pub fn handler(_: *Context) @This() {
             return .after_select_texture;
@@ -275,6 +281,7 @@ pub fn load(ctx: *Context) !void {
 
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const core = @import("core.zig");
 const Select = core.Select;
 const select = @import("select.zig");
@@ -283,7 +290,6 @@ const utils = @import("utils.zig");
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 
 const Context = core.Context;
