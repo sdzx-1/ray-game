@@ -45,8 +45,8 @@
             .hash = "maze-0.0.0-osQoE_98AACp2ERa4nbekjLdFzb6-AlAJ_PqJK1cUauG",
         },
         .polystate = .{
-            .url = "git+https://github.com/sdzx-1/polystate.git#23edf0625087f7d1610ec3c530e4b09c72a3e739",
-            .hash = "polystate-0.0.0-8by0_PpPAQDiDPS5nDJqSUmDJPQzaGdGTZXIkwK7zesC",
+            .url = "git+https://github.com/sdzx-1/polystate.git#393a567037226cb98e7e5f1e0b97de5258a0ebc7",
+            .hash = "polystate-0.0.0-8by0_FVQAQDFrbzcFmhkqe8UfYz-6xdVaAYzWx2Idd0C",
         },
         .emscripten_builder = .{
             .path = "emscripten-builder",

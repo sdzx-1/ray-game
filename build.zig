@@ -91,7 +91,7 @@ pub fn build(b: *std.Build) !void {
         //generate state graph
         const install_dot_file = addInstallGraphFile(b, "ray-game", exe_mod, .graphviz, polystate, target, .{ .custom = "graphs" });
         const install_mmd_file = addInstallGraphFile(b, "ray-game", exe_mod, .mermaid, polystate, target, .{ .custom = "graphs" });
-        // const install_json_file = addInstallGraphFile(b, "ray-game", exe_mod, .json, polystate, target, .{ .custom = "../" });
+        const install_json_file = addInstallGraphFile(b, "ray-game", exe_mod, .json, polystate, target, .{ .custom = "../" });
 
         const exe = b.addExecutable(.{
             .name = "ray_game",
@@ -103,7 +103,7 @@ pub fn build(b: *std.Build) !void {
         } else {
             b.getInstallStep().dependOn(&install_dot_file.step);
             b.getInstallStep().dependOn(&install_mmd_file.step);
-            // b.getInstallStep().dependOn(&install_json_file.step);
+            b.getInstallStep().dependOn(&install_json_file.step);
 
             b.installArtifact(exe);
 
