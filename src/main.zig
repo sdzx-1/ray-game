@@ -11,11 +11,10 @@ const play = @import("play.zig");
 const textures = @import("textures.zig");
 const Menu = @import("menu.zig").Menu;
 
-const Example = core.Example;
 const SaveData = utils.SaveData;
 
-pub const EnterFsmState = Example(.next, Menu);
-const Runner = ps.Runner(true, EnterFsmState);
+pub const EnterFsmState = Menu;
+const Runner = ps.Runner(EnterFsmState);
 
 pub fn main() anyerror!void {
     var gpa_instance = switch (builtin.os.tag) {
@@ -118,5 +117,5 @@ fn logic(id: Runner.StateId, ctx: *core.Context) ?Runner.StateId {
         ctx.textures.vw.hw_ratio = ctx.hdw;
         ctx.textures.vw.winport.width = ctx.screen_width;
     }
-    return Runner.runHandler(id, ctx);
+    return Runner.runHandler(.suspendable, false, core.enter_fn, id, ctx);
 }

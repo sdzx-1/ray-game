@@ -4,13 +4,15 @@ pub const MenuData = struct {
 
 pub const Menu = union(enum) {
     // zig fmt: off
-    exit1        : Example(.next, ps.Exit),
-    to_editor    : Example(.next, Select(Menu, Editor(Menu))),
-    to_play      : Example(.next, Map),
-    to_build     : Example(.next, ViewBuilds(Menu)),
-    view_textures: Example(.current, ViewTextures(Menu)),
-    no_trasition : Example(.next, @This()),
+    exit1        : Data(.next, void, ps.Exit),
+    to_editor    : Data(.next, void, Select(Menu, Editor(Menu))),
+    to_play      : Data(.next, void, Map),
+    to_build     : Data(.next, void, ViewBuilds(Menu)),
+    view_textures: Data(.current, void, ViewTextures(Menu)),
+    no_trasition : Data(.next, void, @This()),
     // zig fmt: on
+
+    pub const info = core.example_info("Menu");
 
     pub fn handler(ctx: *Context) @This() {
         if (ctx.menu.rs.pull()) |msg| return msg;
@@ -71,6 +73,7 @@ pub const Menu = union(enum) {
 
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const core = @import("core.zig");
 const utils = @import("utils.zig");
 const Select = core.Select;
@@ -82,7 +85,6 @@ const ViewBuilds = @import("tbuild.zig").ViewBuilds;
 const rl = @import("raylib");
 const rg = @import("raygui");
 
-const Example = core.Example;
 const Context = core.Context;
 const Action = core.Action;
 const SaveData = utils.SaveData;

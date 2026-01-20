@@ -29,10 +29,16 @@ pub const SaveData = struct {
     textures_vw: ViewWin = .{},
 
     pub fn save(self: *const @This(), allocator: std.mem.Allocator) void {
-        const json_string = std.json.stringifyAlloc(allocator, self.*, .{ .whitespace = .indent_2 }) catch return;
-        defer allocator.free(json_string);
+        var out: std.io.Writer.Allocating = .init(allocator);
+        var write_stream: std.json.Stringify = .{
+            .writer = &out.writer,
+            .options = .{ .whitespace = .indent_2 },
+        };
+        defer out.deinit();
 
-        const json_string_z = allocator.dupeZ(u8, json_string) catch return;
+        write_stream.write(self.*) catch unreachable;
+
+        const json_string_z = allocator.dupeZ(u8, out.written()) catch return;
         defer allocator.free(json_string_z);
 
         _ = rl.saveFileText(save_path, json_string_z);

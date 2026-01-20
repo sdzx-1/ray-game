@@ -2,236 +2,294 @@
   "name": "Example",
   "nodes": [
     {
-      "name": "menu.Menu",
-      "id": 0
+      "name": "Menu",
+      "id": 0,
+      "fsm_name": "Example"
     },
     {
-      "name": "polystate.Exit",
-      "id": 1
+      "name": "Select",
+      "id": 2,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{0},{5})",
-      "id": 2
+      "name": "Inside",
+      "id": 3,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{0},{5})",
-      "id": 3
+      "name": "Hover",
+      "id": 4,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{0},{5})",
-      "id": 4
+      "name": "Editor",
+      "id": 5,
+      "fsm_name": "Example"
     },
     {
-      "name": "editor.Editor({0})",
-      "id": 5
+      "name": "Map",
+      "id": 6,
+      "fsm_name": "Example"
     },
     {
-      "name": "map.Map",
-      "id": 6
+      "name": "Select",
+      "id": 7,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{6},{10})",
-      "id": 7
+      "name": "Inside",
+      "id": 8,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{6},{10})",
-      "id": 8
+      "name": "Hover",
+      "id": 9,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{6},{10})",
-      "id": 9
+      "name": "Editor",
+      "id": 10,
+      "fsm_name": "Example"
     },
     {
-      "name": "editor.Editor({6})",
-      "id": 10
+      "name": "Play",
+      "id": 11,
+      "fsm_name": "Example"
     },
     {
-      "name": "play.Play",
-      "id": 11
+      "name": "Select",
+      "id": 12,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{11},{15})",
-      "id": 12
+      "name": "Inside",
+      "id": 13,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{15})",
-      "id": 13
+      "name": "Hover",
+      "id": 14,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{15})",
-      "id": 14
+      "name": "Editor",
+      "id": 15,
+      "fsm_name": "Example"
     },
     {
-      "name": "editor.Editor({11})",
-      "id": 15
+      "name": "Select",
+      "id": 16,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{11},{19})",
-      "id": 16
+      "name": "Inside",
+      "id": 17,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{19})",
-      "id": 17
+      "name": "Hover",
+      "id": 18,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{19})",
-      "id": 18
+      "name": "SelectBuildInstance",
+      "id": 19,
+      "fsm_name": "Example"
     },
     {
-      "name": "tbuild.SelectBuildInstance({20},{20})",
-      "id": 19
+      "name": "EditBuild",
+      "id": 20,
+      "fsm_name": "Example"
     },
     {
-      "name": "tbuild.EditBuild",
-      "id": 20
+      "name": "Init",
+      "id": 21,
+      "fsm_name": "Example"
     },
     {
-      "name": "core.Init({26},{22})",
-      "id": 21
+      "name": "Select",
+      "id": 22,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{20},{25})",
-      "id": 22
+      "name": "Inside",
+      "id": 23,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{20},{25})",
-      "id": 23
+      "name": "Hover",
+      "id": 24,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{20},{25})",
-      "id": 24
+      "name": "SelectTextureInstance",
+      "id": 25,
+      "fsm_name": "Example"
     },
     {
-      "name": "textures.SelectTextureInstance({26},{26})",
-      "id": 25
+      "name": "SetTextureInner",
+      "id": 26,
+      "fsm_name": "Example"
     },
     {
-      "name": "textures.SetTextureInner({20})",
-      "id": 26
+      "name": "Select",
+      "id": 27,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{11},{30})",
-      "id": 27
+      "name": "Inside",
+      "id": 28,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{30})",
-      "id": 28
+      "name": "Hover",
+      "id": 29,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{30})",
-      "id": 29
+      "name": "SelectBuildInstance",
+      "id": 30,
+      "fsm_name": "Example"
     },
     {
-      "name": "tbuild.SelectBuildInstance({36},{31})",
-      "id": 30
+      "name": "Select",
+      "id": 31,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{32},{35})",
-      "id": 31
+      "name": "BackUpLevel",
+      "id": 32,
+      "fsm_name": "Example"
     },
     {
-      "name": "play.BackUpLevel",
-      "id": 32
+      "name": "Inside",
+      "id": 33,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{32},{35})",
-      "id": 33
+      "name": "Hover",
+      "id": 34,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{32},{35})",
-      "id": 34
+      "name": "SelectCellInstance",
+      "id": 35,
+      "fsm_name": "Example"
     },
     {
-      "name": "play.SelectCellInstance({36},{36})",
-      "id": 35
+      "name": "Place",
+      "id": 36,
+      "fsm_name": "Example"
     },
     {
-      "name": "play.Place",
-      "id": 36
+      "name": "Init",
+      "id": 37,
+      "fsm_name": "Example"
     },
     {
-      "name": "core.Init({42},{38})",
-      "id": 37
+      "name": "Select",
+      "id": 38,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{11},{41})",
-      "id": 38
+      "name": "Inside",
+      "id": 39,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{41})",
-      "id": 39
+      "name": "Hover",
+      "id": 40,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{41})",
-      "id": 40
+      "name": "SelectTextureInstance",
+      "id": 41,
+      "fsm_name": "Example"
     },
     {
-      "name": "textures.SelectTextureInstance({42},{42})",
-      "id": 41
+      "name": "SetTextureInner",
+      "id": 42,
+      "fsm_name": "Example"
     },
     {
-      "name": "textures.SetTextureInner({11})",
-      "id": 42
+      "name": "Select",
+      "id": 43,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{11},{46})",
-      "id": 43
+      "name": "Inside",
+      "id": 44,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{11},{46})",
-      "id": 44
+      "name": "Hover",
+      "id": 45,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{11},{46})",
-      "id": 45
+      "name": "SelectCellInstance",
+      "id": 46,
+      "fsm_name": "Example"
     },
     {
-      "name": "play.SelectCellInstance({47},{47})",
-      "id": 46
+      "name": "Delete",
+      "id": 47,
+      "fsm_name": "Example"
     },
     {
-      "name": "play.Delete",
-      "id": 47
+      "name": "ViewBuilds",
+      "id": 48,
+      "fsm_name": "Example"
     },
     {
-      "name": "tbuild.ViewBuilds({0})",
-      "id": 48
+      "name": "Select",
+      "id": 49,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{0},{52})",
-      "id": 49
+      "name": "Inside",
+      "id": 50,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{0},{52})",
-      "id": 50
+      "name": "Hover",
+      "id": 51,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{0},{52})",
-      "id": 51
+      "name": "SelectBuildInstance",
+      "id": 52,
+      "fsm_name": "Example"
     },
     {
-      "name": "tbuild.SelectBuildInstance({48},{48})",
-      "id": 52
+      "name": "ViewTextures",
+      "id": 53,
+      "fsm_name": "Example"
     },
     {
-      "name": "textures.ViewTextures({0})",
-      "id": 53
+      "name": "Select",
+      "id": 54,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Select((function 'Example'),{0},{57})",
-      "id": 54
+      "name": "Inside",
+      "id": 55,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Inside((function 'Example'),{0},{57})",
-      "id": 55
+      "name": "Hover",
+      "id": 56,
+      "fsm_name": "Example"
     },
     {
-      "name": "select.Hover((function 'Example'),{0},{57})",
-      "id": 56
+      "name": "SelectTextureInstance",
+      "id": 57,
+      "fsm_name": "Example"
     },
     {
-      "name": "textures.SelectTextureInstance({53}__struct_38135,{53})",
-      "id": 57
+      "name": "Exit",
+      "id": 1,
+      "fsm_name": "polystate_exit"
     }
   ],
   "edges": [

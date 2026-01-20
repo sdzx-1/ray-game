@@ -5,9 +5,11 @@ pub const EditorData = struct {
 
 pub fn Editor(target: type) type {
     return union(enum) {
-        finish: Example(.next, target),
-        to_select: Example(.next, Select(target, Editor(target))),
-        no_trasition: Example(.next, @This()),
+        finish: Data(.next, void, target),
+        to_select: Data(.next, void, Select(target, Editor(target))),
+        no_trasition: Data(.next, void, @This()),
+
+        pub const info = core.example_info("Editor");
 
         pub fn handler(ctx: *Context) @This() {
             const ptr = &target.access_rs(ctx).array_r.items[ctx.editor.selected_id];
@@ -183,10 +185,10 @@ pub fn Editor(target: type) type {
 
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const core = @import("core.zig");
 const select = @import("select.zig");
 const Select = core.Select;
-const Example = core.Example;
 
 const rl = @import("raylib");
 const rg = @import("raygui");

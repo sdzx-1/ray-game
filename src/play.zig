@@ -83,7 +83,9 @@ pub const CurrentMap = [200][200]Cell;
 const TwoStageSelect = Select(Play, SelectBuildInstance(Place, Select(BackUpLevel, SelectCellInstance(Place, Place))));
 
 pub const BackUpLevel = union(enum) {
-    back_up_level: Example(.current, TwoStageSelect),
+    back_up_level: Data(.current, void, TwoStageSelect),
+
+    pub const info = core.example_info("BackUpLevel");
 
     pub fn handler(_: *Context) @This() {
         return .back_up_level;
@@ -92,15 +94,17 @@ pub const BackUpLevel = union(enum) {
 
 pub const Play = union(enum) {
     // zig fmt: off
-    to_exit         : Example(.next, ps.Exit),
-    to_editor       : Example(.next, Select(Play, Editor(Play))),
-    to_menu         : Example(.next, Menu),
-    to_build        : Example(.next, Select(Play, TBuild)),
-    to_place        : Example(.next, TwoStageSelect),
-    set_maze_text_id: Example(.next, SetTexture(Play, Play)),
-    to_delete       : Example(.next, Select(Play, SelectCellInstance(Delete, Delete))),
-    no_trasition    : Example(.next, @This()),
+    to_exit         : Data(.next, void,  ps.Exit),
+    to_editor       : Data(.next, void,  Select(Play, Editor(Play))),
+    to_menu         : Data(.next, void,  Menu),
+    to_build        : Data(.next, void,  Select(Play, TBuild)),
+    to_place        : Data(.next, void,  TwoStageSelect),
+    set_maze_text_id: Data(.next, void,  SetTexture(Play, Play)),
+    to_delete       : Data(.next, void,  Select(Play, SelectCellInstance(Delete, Delete))),
+    no_trasition    : Data(.next, void,  @This()),
     // zig fmt: on
+
+    pub const info = core.example_info("Play");
 
     pub fn handler(ctx: *Context) @This() {
         ctx.play.vw.mouse_drag_viewport();
@@ -179,7 +183,9 @@ pub const Play = union(enum) {
 };
 
 pub const Place = union(enum) {
-    to_play: Example(.current, TwoStageSelect),
+    to_play: Data(.current, void, TwoStageSelect),
+
+    pub const info = core.example_info("Place");
 
     pub fn handler(ctx: *Context) @This() {
         const cell_id = ctx.play.selected_cell_id;
@@ -260,7 +266,9 @@ pub const Place = union(enum) {
 };
 
 pub const Delete = union(enum) {
-    to_delete: Example(.current, Select(Play, SelectCellInstance(Delete, Delete))),
+    to_delete: Data(.current, void, Select(Play, SelectCellInstance(Delete, Delete))),
+
+    pub const info = core.example_info("Delete");
 
     pub fn handler(ctx: *Context) @This() {
         const id = ctx.play.selected_cell_id;
@@ -295,7 +303,9 @@ pub const Delete = union(enum) {
 
 pub fn SelectCellInstance(Config: type, Next: type) type {
     return union(enum) {
-        after_select_cell: Example(.current, Next),
+        after_select_cell: Data(.current, void, Next),
+
+        pub const info = core.example_info("SelectCellInstance");
 
         pub fn handler(_: *Context) @This() {
             return .after_select_cell;
@@ -353,13 +363,13 @@ pub fn SelectCellInstance(Config: type, Next: type) type {
 }
 const std = @import("std");
 const ps = @import("polystate");
+const Data = ps.Data;
 const core = @import("core.zig");
 const select = @import("select.zig");
 const tbuild = @import("tbuild.zig");
 const textures = @import("textures.zig");
 const utils = @import("utils.zig");
 
-const Example = core.Example;
 const Menu = @import("menu.zig").Menu;
 const Select = core.Select;
 const Init = core.Init;
